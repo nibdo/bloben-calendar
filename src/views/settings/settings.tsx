@@ -73,7 +73,7 @@ const SettingsBaseView = (props: any ) => {
                         }
                         title={'Account'}
                         link={'account'}
-                        description={'Change password, Delete account'}
+                        description={'Delete account'}
                     />
                     <SettingsItem
                         icon={
@@ -85,25 +85,26 @@ const SettingsBaseView = (props: any ) => {
                         link={'appearance'}
                         description={'Theme'}
                     />
+                    {/*<SettingsItem*/}
+                    {/*    icon={*/}
+                    {/*        <EvaIcons.Folder*/}
+                    {/*            className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}*/}
+                    {/*        />*/}
+                    {/*    }*/}
+                    {/*    title={'Data'}*/}
+                    {/*    description={'Reminder'}*/}
+                    {/*/>*/}
+                    {/*<SettingsItem*/}
+                    {/*    icon={*/}
+                    {/*        <EvaIcons.Email*/}
+                    {/*            className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}*/}
+                    {/*        />*/}
+                    {/*    }*/}
+                    {/*    title={'Contact'}*/}
+                    {/*    description={'Report problems'}*/}
+                    {/*/>*/}
                     <SettingsItem
-                        icon={
-                            <EvaIcons.Folder
-                                className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}
-                            />
-                        }
-                        title={'Data'}
-                        description={'Reminder'}
-                    />
-                    <SettingsItem
-                        icon={
-                            <EvaIcons.Email
-                                className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}
-                            />
-                        }
-                        title={'Contact'}
-                        description={'Report problems'}
-                    />
-                    <SettingsItem
+                        onClick={() => {window.location.assign('https://bloben.com')}}
                         icon={
                             <EvaIcons.Info
                                 className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}

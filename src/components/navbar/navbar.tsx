@@ -3,8 +3,6 @@ import IconButton from '@material-ui/core/IconButton';
 import { ButtonBase, Fab } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import './navbar.scss';
-import MenuIcon from '../icons/menu';
-import SettingsIcon from '../icons/settings';
 import { useHistory } from 'react-router';
 import EvaIcons from 'bloben-common/components/eva-icons';
 import { isCalendarApp } from '../../bloben-package/utils/common';
