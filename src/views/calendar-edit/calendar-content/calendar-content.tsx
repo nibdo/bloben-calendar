@@ -102,11 +102,11 @@ const CalendarContentView = (props: any) => {
             toggleColorModal(true);
           }}
         />
-        <NotificationSettings
-          notifications={reminders}
-          addNotification={addNotification}
-          removeNotification={removeNotification}
-        />
+        {/*<NotificationSettings*/}
+        {/*  notifications={reminders}*/}
+        {/*  addNotification={addNotification}*/}
+        {/*  removeNotification={removeNotification}*/}
+        {/*/>*/}
       </div>
       <ModalSmall
         isOpen={colorModalIsOpen}
