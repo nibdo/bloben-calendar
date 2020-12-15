@@ -11,7 +11,7 @@ import Header from '../../components/header';
 import Bottomsheet from '../../bloben-package/components/bottomsheet';
 import { Route } from 'react-router-dom';
 import Modal from '../../bloben-package/components/modal';
-import {  IconButton } from '@material-ui/core';
+import {Fab, IconButton} from '@material-ui/core';
 import EvaIcons from '../../bloben-common/components/eva-icons';
 import WeekView from '../../components/calendar-view/week-view/week-view';
 import {
@@ -34,6 +34,8 @@ import { selectEvent } from '../../redux/actions';
 import WebAuthn from '../../service/WebAuthn';
 import CalendarDesktopNavigation
   from '../../components/CalendarDesktopNavigation/calendar-desktop-navigation';
+import AddIcon from "@material-ui/icons/Add";
+import Slider from "react-slick";
 
 const CalendarType = (props: any) => {
   const {
@@ -239,6 +241,13 @@ const CalendarView = (props: any) => {
               />
             </Bottomsheet>
           ) : null}
+          {calendarView === 'month' ?
+          <div style={{ position: 'absolute', bottom: isMobile ? 60 : 34, right: isMobile ? 32 : 40, zIndex: 2, }}>
+            <Fab color="primary" aria-label="add" onClick={openNewEvent} style={{ background: '#d84315'}}>
+              <AddIcon />
+            </Fab>
+          </div>
+              : null}
         </div>
       </div>
     </div>

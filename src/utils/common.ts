@@ -11,7 +11,7 @@ import {
     getDay,
     getMonth,
     getUnixTime,
-    getYear
+    getYear, subHours
 } from 'date-fns';
 import EventStateEntity from '../data/entities/state/event.entity';
 import { setCalendars, setEvents } from '../redux/actions';

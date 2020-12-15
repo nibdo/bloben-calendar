@@ -1,13 +1,12 @@
 import React from 'react';
 import './month-view.scss';
 import CalendarHeader from '../../calendar-header/calendar-header';
-import Carousel from '../../carousel/carousel';
 import {
   getDate,
   isSameMonth,
   isToday,
 } from 'date-fns';
-import { ButtonBase } from '@material-ui/core';
+import {ButtonBase, Fab} from '@material-ui/core';
 import {
   useCurrentHeight,
   useCurrentWidth,
@@ -22,6 +21,7 @@ import {
 import { useHistory } from 'react-router';
 import Slider from 'react-slick';
 import { parseCssDark } from '../../../bloben-common/utils/common';
+import AddIcon from "@material-ui/icons/Add";
 
 const Event = (props: any) => {
   const {isDark} = props;
@@ -334,7 +334,7 @@ const MonthViewContainer = (props: any) => {
                 selectedDate={selectedDate}
             />
             <div className={'month_view__container'} style={daysWrapper}>{days1}</div>
-          </div>
+</div>
   );
 };
 

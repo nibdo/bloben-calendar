@@ -35,7 +35,6 @@ const initialFormState: any = {
   reminders: [],
   color: '',
 };
-//newuser@newuser >> select '{"dtend": "1997-09-03T09:00:00", "rrule": {"freq": "WEEKLY", "wkst": "MO", "count": 4, "interval": 1}, "dtstart": "1997-09-02T09:00:00"}'::text::jsonb::rruleset @> '19970902T090000'::timestamp;
 const initialState: any = {
   modalIsOpen: false,
   hasChanged: false,
@@ -204,7 +203,6 @@ const NewEvent = (props: any) => {
     const newEvent: EventStateEntity = new EventStateEntity(form, rRuleState);
     // Encrypt data
     const bodyToSend: EventBodyToSend = await newEvent.formatBodyToSend(cryptoPassword);
-    // TODO need to either calculate events parameters client side, or refresh data from backend
 
     // Get only simple object
     const simpleObj: EventStateEntity = newEvent.getReduxStateObj();

@@ -170,7 +170,9 @@ const EditEvent = (props: any) => {
     if (!newEventTime) {
       return
     }
-    const dateFromNewEvent: Date = calculateNewEventTime(newEventTime);
+    console.log('newEventTime', newEventTime)
+    const dateFromNewEvent: Date = newEventTime.day ? calculateNewEventTime(newEventTime) : addHours(new Date(), 1);
+    console.log('dateFromNewEvent', dateFromNewEvent)
     const dateTill: Date = addHours(dateFromNewEvent, 1);
     setForm('startAt', dateFromNewEvent);
     setForm('endAt', dateTill);
@@ -269,7 +271,6 @@ const EditEvent = (props: any) => {
 
     // Encrypt data
     const bodyToSend: EventBodyToSend = await newEvent.formatBodyToSend(cryptoPassword);
-
 
     // Different handling for new event and edited event
     if (isNewEvent) {
