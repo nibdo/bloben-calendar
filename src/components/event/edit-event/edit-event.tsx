@@ -170,13 +170,10 @@ const EditEvent = (props: any) => {
     if (!newEventTime) {
       return
     }
-    console.log('newEventTime', newEventTime)
     const dateFromNewEvent: Date = newEventTime.day ? calculateNewEventTime(newEventTime) : addHours(new Date(), 1);
-    console.log('dateFromNewEvent', dateFromNewEvent)
     const dateTill: Date = addHours(dateFromNewEvent, 1);
     setForm('startAt', dateFromNewEvent);
     setForm('endAt', dateTill);
-
 
   };
 
