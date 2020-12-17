@@ -1,14 +1,10 @@
 import React, { useState } from 'react';
 import './intro-screen.scss';
 import { useSelector } from 'react-redux';
-import Cal from 'assets/cal.svg';
-import BodyImage from 'bloben-package/assets/1.svg';
-import BgImage from 'bloben-common/assets/bg.svg';
 import TresorImage from 'bloben-common/assets/small.svg';
 
 import Landing from '../../bloben-common/components/Landing';
 import { useHistory } from 'react-router';
-import Logo from '../../bloben-common/components/logo/logo';
 import { createDemoAccount } from '../../bloben-package/utils/authentication/registerAccount';
 import DonateButton from '../../bloben-common/components/donateButton/donateButton';
 import BitcoinButton from '../../bloben-common/components/bitcoinButton/bitcoinButton';
@@ -16,10 +12,10 @@ import BitcoinPopup from '../../bloben-common/components/bitcoinPopup/bitcoinPop
 import CalendarText from '../../bloben-common/texts/calendar';
 import DonateText from '../../bloben-common/texts/donate';
 import CalendarImage from 'bloben-common/assets/calendar.png';
+import DonateButtonPatreon
+    from "../../bloben-common/components/donateButtonPatreon/donateButtonPatreon";
 
 const AboutScreen = () => {
-    const isMobile: any = useSelector((state: any) => state.isMobile);
-
     return  <Landing.FreeLayout id={'about'} >
         <Landing.Subtitle subtitle={'Another calendar app?'} description={'What\'s so' +
         ' special?' +
@@ -62,6 +58,8 @@ const DonateScreen = () => {
             <Landing.ContainerRowPart>
                 <Landing.Container>
                     <DonateButton/>
+                    <Landing.Separator/>
+                    <DonateButtonPatreon/>
                     <Landing.Separator/>
                     <BitcoinButton onClick={handleOpenPopup}/>
                 </Landing.Container>
@@ -110,6 +108,7 @@ const DesktopLayout = (props: any) => {
         <Landing.Separator/>
         <Landing.Separator/>
         <Landing.Separator/>
+        <Landing.FooterExtended/>
         <Landing.Footer />
     </Landing.Wrapper>
 }
