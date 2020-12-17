@@ -27,6 +27,7 @@ import {
 import { calculateNewEventTime, setDefaultReminder } from '../event.utils';
 import { mergeEvent } from '../../../redux/actions';
 import {PgpKeys} from "../../../bloben-package/utils/OpenPgp";
+import {CalendarBodyToSend} from "../../../data/entities/state/calendar.entity";
 
 const initialFormState: any = {
   prevItem: {},
@@ -270,9 +271,9 @@ const EditEvent = (props: any) => {
     const newEvent: EventStateEntity = new EventStateEntity(form, rRuleState);
 
     // Encrypt data
-    const bodyToSend: EventBodyToSend = cryptoPassword
-        ? await newEvent.formatBodyToSend(cryptoPassword)
-        : await newEvent.formatBodyToSendOpenPgp(pgpKeys)
+    const bodyToSend: EventBodyToSend = pgpKeys && pgpKeys.publicKey
+        ? await newEvent.formatBodyToSendOpenPgp(pgpKeys)
+        : await newEvent.formatBodyToSend(cryptoPassword);
 
     // Different handling for new event and edited event
     if (isNewEvent) {

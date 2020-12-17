@@ -51,11 +51,11 @@ const NewCalendar = (props: any) => {
     const newCalendar: CalendarStateEntity = new CalendarStateEntity(state);
 
     // Encrypt data
-    const bodyToSend: CalendarBodyToSend = cryptoPassword
-        ? await newCalendar.formatBodyToSend(cryptoPassword)
-        : await newCalendar.formatBodyToSendPgp(pgpKeys.publicKey);
+    const bodyToSend: CalendarBodyToSend = pgpKeys && pgpKeys.publicKey
+        ? await newCalendar.formatBodyToSendPgp(pgpKeys.publicKey)
+        : await newCalendar.formatBodyToSend(cryptoPassword);
 
-    // Save to redux store
+            // Save to redux store
     dispatch(addCalendar(newCalendar));
 
     // setState('calendars', 'create', enhancedState);
