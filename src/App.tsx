@@ -12,8 +12,6 @@ import { Persistor } from 'redux-persist/es/types';
 import { PersistGate } from 'redux-persist/integration/react';
 import LoadingScreen from './bloben-common/components/loading-screen/loading-screen';
 
-export const APP_VERSION: string = '0.0.2';
-
 const persistConfig = {
     key: 'root',
     storage,
