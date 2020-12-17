@@ -10,6 +10,8 @@ Contact: hello@bloben.com
 - **0.0.3** \
 Added encryption with Open PGP for new accounts
 - **0.0.2** \
+Change license from MIT to GPL
+- **0.0.1** \
 Initial release
 
 
