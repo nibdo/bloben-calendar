@@ -13,7 +13,7 @@ import CalendarText from '../../bloben-common/texts/calendar';
 import DonateText from '../../bloben-common/texts/donate';
 import CalendarImage from 'bloben-common/assets/calendar.png';
 import DonateButtonPatreon
-    from "../../bloben-common/components/donateButtonPatreon/donateButtonPatreon";
+    from '../../bloben-common/components/donateButtonPatreon/donateButtonPatreon';
 
 const AboutScreen = () => {
     return  <Landing.FreeLayout id={'about'} >
