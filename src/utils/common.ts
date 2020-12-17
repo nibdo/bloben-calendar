@@ -268,15 +268,15 @@ export const mapEventsToDates = (events: EventStateEntity[]): any => {
                                                              getUnixTime(a.startAt) - getUnixTime(b.startAt))
 
     for (const event of sortedEvents) {
-        const {startAt} = event;
+            const {startAt} = event;
 
-        const dateKey: string = formatTimestampToDate(startAt);
+            const dateKey: string = formatTimestampToDate(startAt);
 
-        if (result[dateKey] === undefined) {
-            result[formatTimestampToDate(startAt)] = [event];
-        } else {
-            result[formatTimestampToDate(startAt)].push(event);
-        }
+            if (result[dateKey] === undefined) {
+                result[formatTimestampToDate(startAt)] = [event];
+            } else {
+                result[formatTimestampToDate(startAt)].push(event);
+            }
 
     }
 
