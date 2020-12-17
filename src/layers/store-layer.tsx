@@ -22,6 +22,10 @@ import { logger } from '../bloben-package/utils/common';
 import axios from 'axios';
 import GeneralApi from '../bloben-common/api/general.api';
 import { MOBILE_MAX_WIDTH } from '../bloben-common/utils/common';
+import * as openpgp from 'openpgp';
+
+// Init webworker for better openpgp performance outside main thread
+openpgp.initWorker({ path: 'openpgp.worker.js' })
 
 const StoreLayer = (props: any) => {
     const { initPath } = props;
