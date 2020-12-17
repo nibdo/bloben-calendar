@@ -13,6 +13,7 @@ import {
 import { GetEventWebsocketByIdDTO } from '../types/types';
 import { isBefore, parseISO } from 'date-fns';
 import CalendarStateEntity from '../data/entities/state/calendar.entity';
+import OpenPgp, {PgpKeys} from "../bloben-package/utils/OpenPgp";
 
 // Message constants
 const WEBSOCKET_EVENT_MESSAGE: WebsocketMessageType = 'event'
@@ -240,16 +241,26 @@ const WebsocketHandler = {
 
         const store: any = reduxStore.getState();
         const cryptoPassword: string = store.cryptoPassword;
+        const password: string = store.password;
+        const pgpKeys: PgpKeys = store.pgpKeys;
         const stateClone: any = cloneDeep(store.calendars);
 
         const {data} = objParsed;
 
         for (const item of data) {
             const {id} = item;
-            const decryptedData: any = await Crypto.decrypt(
-                item.data,
-                cryptoPassword
-            );
+
+            let decryptedData: any;
+
+            if (cryptoPassword) {
+                decryptedData = await Crypto.decrypt(
+                    item.data,
+                    cryptoPassword
+                );
+            } else {
+                decryptedData = await OpenPgp.decrypt(pgpKeys.publicKey, pgpKeys.privateKey, password, item.data);
+                decryptedData = JSON.parse(decryptedData);
+            }
 
             delete item.data;
 

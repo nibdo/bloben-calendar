@@ -6,6 +6,7 @@ import {
     formatTimestampToDate, parseDateToString,
     parseToDate
 } from '../../../components/calendar-view/calendar-common';
+import OpenPgp, {PgpKeys} from "../../../bloben-package/utils/OpenPgp";
 
 export type EventsStateType = 'events';
 export const EVENTS_STATE: string = 'events';
@@ -277,21 +278,42 @@ export default class EventStateEntity {
   public encryptEvent = async (password: string): Promise<string> =>
     Crypto.encrypt(this.getEventPropsForEncryption(), password)
 
-  public formatBodyToSend = async (password: string): Promise<EventBodyToSend> =>
-      (
+  public formatBodyToSend = async (password: string): Promise<EventBodyToSend> => {
+      return   (
           {
-            id: this.id,
-            calendarId: this.calendarId,
-            data: await this.encryptEvent(password),
-            startAt: parseDateToString(this.startAt),
-            endAt: parseDateToString(this.endAt),
-            createdAt: parseDateToString(this.createdAt),
-            updatedAt: parseDateToString(this.updatedAt),
-            isRepeated: this.isRepeated,
-            rRule: this.rRule,
-            reminders: this.reminders,
+              id: this.id,
+              calendarId: this.calendarId,
+              data: await this.encryptEvent(password),
+              startAt: parseDateToString(this.startAt),
+              endAt: parseDateToString(this.endAt),
+              createdAt: parseDateToString(this.createdAt),
+              updatedAt: parseDateToString(this.updatedAt),
+              isRepeated: this.isRepeated,
+              rRule: this.rRule,
+              reminders: this.reminders,
           }
       )
+  }
+
+  public formatBodyToSendOpenPgp = async (pgpKeys: PgpKeys): Promise<EventBodyToSend> => {
+        const data: any = await OpenPgp.encrypt(pgpKeys.publicKey, this.getEventPropsForEncryption());
+
+        return   (
+            {
+                id: this.id,
+                calendarId: this.calendarId,
+                data,
+                startAt: parseDateToString(this.startAt),
+                endAt: parseDateToString(this.endAt),
+                createdAt: parseDateToString(this.createdAt),
+                updatedAt: parseDateToString(this.updatedAt),
+                isRepeated: this.isRepeated,
+                rRule: this.rRule,
+                reminders: this.reminders,
+            }
+        )
+    }
+
 
   static async enhance(stateItem: any, localItem: any) {
     const stateItemEnhanced: any = { ...stateItem };

@@ -2,6 +2,7 @@ import { v4 } from 'uuid';
 import { TCalendarNotificationType } from '../../../types/types';
 import { parseDateToString, parseToDate } from '../../../components/calendar-view/calendar-common';
 import Crypto from '../../../bloben-package/utils/encryption';
+import OpenPgp from "../../../bloben-package/utils/OpenPgp";
 
 export type CalendarsStateType = 'calendars';
 export const CALENDARS_STATE: string = 'calendars';
@@ -124,13 +125,27 @@ export default class CalendarStateEntity {
   public encryptCalendar = async (password: string): Promise<string> =>
       Crypto.encrypt(this.getCalendarPropsForEncryption(), password)
 
-
-  public formatBodyToSend = async (password: string): Promise<CalendarBodyToSend> =>
+  public formatBodyToSend = async (cryptoPassword: string): Promise<CalendarBodyToSend> =>
       (
           {
             id: this.id,
             color: this.color,
-            data: await this.encryptCalendar(password),
+            data: await this.encryptCalendar(cryptoPassword),
+            createdAt: parseDateToString(this.createdAt),
+            updatedAt: parseDateToString(this.updatedAt),
+            isShared: this.isShared,
+            isPublic: this.isPublic,
+            reminders: this.reminders.length > 0
+                ? JSON.stringify(this.reminders)
+                : null,
+          }
+      )
+  public formatBodyToSendPgp = async (publicKey: string): Promise<CalendarBodyToSend> =>
+      (
+          {
+            id: this.id,
+            color: this.color,
+            data: await OpenPgp.encrypt(publicKey, this.getCalendarPropsForEncryption()),
             createdAt: parseDateToString(this.createdAt),
             updatedAt: parseDateToString(this.updatedAt),
             isShared: this.isShared,

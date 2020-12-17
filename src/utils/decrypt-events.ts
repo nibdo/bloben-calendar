@@ -7,10 +7,9 @@ import {  findInArrayWithIndex } from './filter/findInArray';
 import { EventResultDTO } from '../data/types';
 import eventsLastSynced from '../redux/reducers/eventsLastSynced';
 import { logger } from '../bloben-package/utils/common';
+import OpenPgp, {PgpKeys} from "../bloben-package/utils/OpenPgp";
 
 const decryptEvent = async (cryptoPassword: string, item: EventResultDTO): Promise<EventStateEntity> => {
-    logger('CRYPTO', cryptoPassword)
-
     const eventResultDTO: EventResultDTO = item;
     const decryptedData: any = await Crypto.decrypt(
         eventResultDTO.data,
@@ -26,18 +25,44 @@ const decryptEvent = async (cryptoPassword: string, item: EventResultDTO): Promi
     return newEvent.getReduxStateObj();
 }
 
+const decryptEventPgp = async (password: string, pgpKeys: PgpKeys, item: EventResultDTO): Promise<EventStateEntity> => {
+
+    const eventResultDTO: EventResultDTO = item;
+    let decryptedData: any = await OpenPgp.decrypt(pgpKeys.publicKey, pgpKeys.privateKey, password, eventResultDTO.data);
+    decryptedData = JSON.parse(decryptedData)
+
+    const finalForm: any = {
+        ...eventResultDTO,
+        ...decryptedData,
+    };
+    const newEvent: EventStateEntity = new EventStateEntity(finalForm);
+
+    return newEvent.getReduxStateObj();
+}
+
+
 export const decryptAllEvents = async (
     data: any
 ): Promise<void> => {
     const store: any = reduxStore.getState();
     const cryptoPassword: any = store.cryptoPassword;
+    const password: string = store.password;
+    const pgpKeys: PgpKeys = store.pgpKeys;
+
     let allEventsClone: any = cloneDeep(store.allEvents);
+
     // Handle new, updated and deleted events
     if (store.eventsLastSynced) {
         logger('data', data)
 
         for (let j = 0; j < data.length; j += 1) {
-            const newItem: any = await decryptEvent(cryptoPassword, data[j]);
+            let newItem: any;
+
+            if (cryptoPassword) {
+                newItem = await decryptEvent(cryptoPassword, data[j]);
+            } else {
+                newItem = await decryptEventPgp(password, pgpKeys, data[j])
+            }
 
             // Filter deleted events
             if (newItem.deletedAt) {
@@ -74,8 +99,12 @@ export const decryptAllEvents = async (
         if (data && data.length > 0) {
             for (const item of data) {
                 const eventResultDTO: EventResultDTO = item;
-                const simpleEventObj: EventStateEntity = await decryptEvent(cryptoPassword, eventResultDTO);
-
+                let simpleEventObj: EventStateEntity;
+                if (cryptoPassword) {
+                    simpleEventObj = await decryptEvent(cryptoPassword, eventResultDTO);
+                } else {
+                    simpleEventObj = await decryptEventPgp(password, pgpKeys, eventResultDTO)
+                }
                 result.push(simpleEventObj);
             }
         }
@@ -94,6 +123,8 @@ export const decryptEvents = async (
     const stateClone: any = cloneDeep(store.events);
 
     const cryptoPassword: any = store.cryptoPassword;
+    const password: string = store.password;
+    const pgpKeys: PgpKeys = store.pgpKeys;
 
     if (!data || data.length === 0) {
         return;
@@ -110,10 +141,18 @@ export const decryptEvents = async (
         //   agendaDays.push(key);
         // }
         const eventResultDTO: EventResultDTO = data[i];
-        const decryptedData: any = await Crypto.decrypt(
-            eventResultDTO.data,
-            cryptoPassword
-        );
+
+        let decryptedData: any;
+
+        if (cryptoPassword) {
+            decryptedData = await Crypto.decrypt(
+                eventResultDTO.data,
+                cryptoPassword
+            );
+        } else {
+            decryptedData = await OpenPgp.decrypt(pgpKeys.publicKey, pgpKeys.privateKey, password, eventResultDTO.data);
+            decryptedData = JSON.parse(decryptedData);
+        }
 
         const finalForm: any = {
             ...eventResultDTO,
