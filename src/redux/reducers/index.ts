@@ -24,31 +24,36 @@ import calendarDaysCurrentIndex from './calendarDaysCurrentIndex';
 import eventsLastSynced from './eventsLastSynced';
 import allEvents from './allEvents';
 import isFirstLogin from './isFirstLogin';
+import pgpKeys from './pgpKeys';
+import password from './password';
+
 export const allReducers: any = combineReducers({
-                                                    rangeFrom: rangeFromReducer,
-                                                    rangeTo: rangeToReducer,
-                                                    calendarDays: calendarDaysReducer,
-                                                    cryptoPassword: cryptoPasswordReducer,
-                                                    events: eventsReducer,
-                                                    calendarView: calendarViewReducer,
-                                                    selectedEvent: selectedEventReducer,
-                                                    calendars: calendarsReducer,
-                                                    isDark: isDarkReducer,
-                                                    isMobile,
-                                                    isLogged,
-                                                    username,
-                                                    isLoading,
-                                                    isAppStarting,
-                                                    passwords,
-                                                    notifications,
-                                                    selectedDate,
-                                                    eventsAreFetching,
-                                                    calendarBodyWidth,
-                                                    calendarBodyHeight,
-                                                    calendarDaysCurrentIndex,
-                                                    eventsLastSynced,
-                                                    allEvents,
-                                                    isFirstLogin
+    pgpKeys,
+    password,
+    rangeFrom: rangeFromReducer,
+    rangeTo: rangeToReducer,
+    calendarDays: calendarDaysReducer,
+    cryptoPassword: cryptoPasswordReducer,
+    events: eventsReducer,
+    calendarView: calendarViewReducer,
+    selectedEvent: selectedEventReducer,
+    calendars: calendarsReducer,
+    isDark: isDarkReducer,
+    isMobile,
+    isLogged,
+    username,
+    isLoading,
+    isAppStarting,
+    passwords,
+    notifications,
+    selectedDate,
+    eventsAreFetching,
+    calendarBodyWidth,
+    calendarBodyHeight,
+    calendarDaysCurrentIndex,
+    eventsLastSynced,
+    allEvents,
+    isFirstLogin
 });
 const rootReducer = (state: any, action: any) => {
     if (action.type === 'USER_LOGOUT') {

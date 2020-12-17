@@ -22,6 +22,10 @@ import { logger } from '../bloben-package/utils/common';
 import axios from 'axios';
 import GeneralApi from '../bloben-common/api/general.api';
 import { MOBILE_MAX_WIDTH } from '../bloben-common/utils/common';
+import * as openpgp from 'openpgp';
+
+// Init webworker for better openpgp performance outside main thread
+openpgp.initWorker({ path: 'openpgp.worker.js' })
 
 const StoreLayer = (props: any) => {
     const { initPath } = props;
@@ -33,6 +37,7 @@ const StoreLayer = (props: any) => {
 
     // Redux selectors
     const cryptoPassword: string = useSelector((state: any) => state.cryptoPassword);
+    const password: string = useSelector((state: any) => state.password);
     const isAppStarting: boolean = useSelector((state: any) => state.isAppStarting);
     const isDark: boolean = useSelector((state: any) => state.isDark);
     const username: string = useSelector((state: any) => state.username);
@@ -119,7 +124,7 @@ const StoreLayer = (props: any) => {
 
     // Verify authentication
     const isAuthenticated: boolean =
-        isLogged && username.length > 1 && cryptoPassword.length > 1;
+        isLogged && username.length > 1 && (cryptoPassword.length > 1 || password.length > 1);
 
     // TODO PIN code
     const needPinCode: boolean = false;

@@ -1,3 +1,15 @@
+export const setPgpKeys = (pgpKeys: any) => {
+    return {
+        type: 'SET_PGP_KEYS',
+        payload: pgpKeys
+    }
+}
+export const setPassword = (password: string) => {
+    return {
+        type: 'SET_PASSWORD',
+        payload: password
+    }
+}
 export const addWeek = (rangeFromInit: Date) => {
     return {
         type: 'ADD_WEEK'

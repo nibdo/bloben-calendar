@@ -8,6 +8,7 @@ import { addNotification, removeNotification } from '../../../utils/common';
 import { useDispatch, useSelector } from 'react-redux';
 import { stompClient } from '../../../layers/authenticated-layer';
 import { addCalendar, mergeEvent } from '../../../redux/actions';
+import {PgpKeys} from "../../../bloben-package/utils/OpenPgp";
 
 const NewCalendar = (props: any) => {
   const [state, dispatchState]: any = useReducer(
@@ -19,6 +20,8 @@ const NewCalendar = (props: any) => {
 
   const dispatch: any = useDispatch();
   const cryptoPassword: any = useSelector((state: any) => state.cryptoPassword);
+  const password: string = useSelector((state: any) => state.password);
+  const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
 
   const setLocalState = (stateName: string, type: string, data: any): void => {
     const payload: any = { stateName, type, data };
@@ -48,7 +51,9 @@ const NewCalendar = (props: any) => {
     const newCalendar: CalendarStateEntity = new CalendarStateEntity(state);
 
     // Encrypt data
-    const bodyToSend: CalendarBodyToSend = await newCalendar.formatBodyToSend(cryptoPassword);
+    const bodyToSend: CalendarBodyToSend = cryptoPassword
+        ? await newCalendar.formatBodyToSend(cryptoPassword)
+        : await newCalendar.formatBodyToSendPgp(pgpKeys.publicKey);
 
     // Save to redux store
     dispatch(addCalendar(newCalendar));
