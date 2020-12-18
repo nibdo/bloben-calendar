@@ -17,5 +17,5 @@ Initial release
 
 # Road map
 
-- ical import/export
+- ics import/export
 - calendar sharing
