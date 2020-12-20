@@ -56,10 +56,12 @@ const CalendarContentView = (props: any) => {
     addNotification,
     reminders,
     removeNotification,
-    deleteCalendar
+    deleteCalendar,
+    calendarId
   } = props;
   const { name, color } = state;
   const isDark: boolean = useSelector((state: any) => state.isDark);
+  const defaultCalendar: string = useSelector((state: any) => state.defaultCalendar);
 
   const history = useHistory();
   const params = useParams();
@@ -71,7 +73,7 @@ const CalendarContentView = (props: any) => {
         handleSave={saveCalendar}
         hasHeaderShadow={true}
         title={'Calendar'}
-        handleDelete={deleteCalendar}
+        handleDelete={defaultCalendar !== calendarId ? deleteCalendar : null}
         icons={[]}
       />
       <div className={'event_detail__wrapper'} style={{ padding: 0 }}>
@@ -119,7 +121,7 @@ const CalendarContentView = (props: any) => {
 };
 
 const CalendarContent = (props: any) => {
-  const { selectColor, addNotification, removeNotification, deleteCalendar } = props;
+  const { selectColor, addNotification, removeNotification, deleteCalendar, calendarId } = props;
   const [colorModalIsOpen, openColorModal] = useState(false);
 
   const history = useHistory();
@@ -147,6 +149,7 @@ const CalendarContent = (props: any) => {
       addNotification={addNotification}
       removeNotification={removeNotification}
       deleteCalendar={deleteCalendar}
+      calendarId={calendarId}
     />
   );
 };

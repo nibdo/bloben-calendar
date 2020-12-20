@@ -26,9 +26,11 @@ import allEvents from './allEvents';
 import isFirstLogin from './isFirstLogin';
 import pgpKeys from './pgpKeys';
 import password from './password';
+import defaultCalendar from './defaultCalendar';
 
 export const allReducers: any = combineReducers({
     pgpKeys,
+    defaultCalendar,
     password,
     rangeFrom: rangeFromReducer,
     rangeTo: rangeToReducer,

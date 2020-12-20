@@ -111,6 +111,7 @@ const EditCalendar = (props: any) => {
       addNotification={addNotificationCalendar}
       removeNotification={removeNotificationCalendar}
       deleteCalendar={deleteCalendar}
+      calendarId={params.id}
     />
   );
 };

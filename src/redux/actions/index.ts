@@ -4,6 +4,12 @@ export const setPgpKeys = (pgpKeys: any) => {
         payload: pgpKeys
     }
 }
+export const setDefaultCalendar = (calendarId: string) => {
+    return {
+        type: 'SET_DEFAULT_CALENDAR',
+        payload: calendarId
+    }
+}
 export const setPassword = (password: string) => {
     return {
         type: 'SET_PASSWORD',

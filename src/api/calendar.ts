@@ -2,6 +2,9 @@ import Axios from 'bloben-common/utils/axios';
 import { CALENDAR_URL } from '../bloben-common/globals/url';
 import { stompClient } from '../layers/authenticated-layer';
 
+export const APP_API_PREFIX: string = '/calendar-app';
+export const API_GET_CALENDAR_SETTINGS: string = 'settings';
+
 export const WEBSOCKET_GET_ONE_EVENT: string = '/app/events/get/one'
 export const WEBSOCKET_GET_ALL_EVENTS: string = '/app/events/get/all'
 export const WEBSOCKET_GET_EVENTS: string = '/app/events/get';
@@ -24,6 +27,11 @@ export const sendWebsocketMessage = (destination: string, data?: any | null) => 
 }
 
 const CalendarApi = {
+  getCalendarSettings: async () => {
+    const result: any = (await Axios.get(`${APP_API_PREFIX}/${API_GET_CALENDAR_SETTINGS}`)).data;
+
+    return result;
+  },
   /*
    * Get calendars from server, check only new one after repeated attempts
    * Update timestamp of last server check

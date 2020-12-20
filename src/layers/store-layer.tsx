@@ -9,7 +9,7 @@ import AnonymView from '../bloben-package/layers/anonym-layer';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     setCalendarBodyHeight,
-    setCalendarBodyWidth,
+    setCalendarBodyWidth, setDefaultCalendar,
     setIsAppStarting,
     setIsMobile,
 } from '../redux/actions';
@@ -23,6 +23,7 @@ import axios from 'axios';
 import GeneralApi from '../bloben-common/api/general.api';
 import { MOBILE_MAX_WIDTH } from '../bloben-common/utils/common';
 import * as openpgp from 'openpgp';
+import CalendarApi from "../api/calendar";
 
 // Init webworker for better openpgp performance outside main thread
 openpgp.initWorker({ path: 'openpgp.worker.js' })
@@ -42,6 +43,7 @@ const StoreLayer = (props: any) => {
     const isDark: boolean = useSelector((state: any) => state.isDark);
     const username: string = useSelector((state: any) => state.username);
     const isLogged: boolean = useSelector((state: any) => state.isLogged);
+    const defaultCalendar: string = useSelector((state: any) => state.defaultCalendar);
 
     /**
      * Set mobile/desktop layout
@@ -99,11 +101,21 @@ const StoreLayer = (props: any) => {
                 try {
                     const userData: any = (await Axios.get('/user/account')).data;
 
+                    if (defaultCalendar.length < 1) {
+
+                        // Load app settings
+                        const settings: any = await CalendarApi.getCalendarSettings();
+
+                        dispatch(setDefaultCalendar(settings.defaultCalendar))
+                    }
+
+
                     // TODO CHECK if while offline it doesn't delete database
                     if (
                         (userData.username && userData.username !== username) ||
                         !userData.username
                     ) {
+
 
                         // Different user, destroy prev user
                         // TODO CLEAR REDUX
