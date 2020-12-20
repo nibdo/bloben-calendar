@@ -3,6 +3,7 @@ import './calendar-settings.scss';
 import { ButtonBase } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router';
 import { useSelector } from 'react-redux';
+import EventImporter from "../EventImporter/EventImporter";
 
 const CalendarSettingsItem = (props: any) => {
   const { onClick, title, isDisabled } = props;
@@ -26,6 +27,7 @@ const CalendarSettingsItem = (props: any) => {
   );
 };
 
+
 const CalendarSettingsView = (props: any) => {
   const {
     handleEditList,
@@ -40,7 +42,10 @@ const CalendarSettingsView = (props: any) => {
         title={'Add calendar'}
         onClick={() => navigateTo('/calendar/new')}
       />
-      {/*<CalendarSettingsItem title={'Edit calendars'} onClick={handleEditList} />*/}
+      <CalendarSettingsItem
+          title={'Import events'}
+          onClick={() => navigateTo('/events/import')}
+      />
       <CalendarSettingsItem
         title={'Settings'}
         onClick={() => navigateTo('/settings')}

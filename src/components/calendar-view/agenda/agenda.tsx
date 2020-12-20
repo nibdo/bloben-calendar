@@ -37,7 +37,8 @@ const AgendaEvent = (props: any) => {
     isFirstForDay,
     changeHeaderTitle,
     initScrollOffset,
-    history
+    history,
+      isDisabled
   } = props;
   const { id, color, text, startAt, endAt, calendarId } = item;
   //TODO get hours from - to
@@ -69,8 +70,13 @@ const AgendaEvent = (props: any) => {
     }
   }, []);
 
-  const handleEventClick = (): void =>
-      history.push(`/event/${id}`)
+  const handleEventClick = (): void => {
+    if (isDisabled) {
+      return;
+    }
+
+    history.push(`/event/${id}`)
+  }
 
   return (
     <div className={'agenda-item__wrapper'} id={format(startAt, 'MMMM')} onClick={handleEventClick}>
@@ -115,11 +121,11 @@ const AgendaEvent = (props: any) => {
 };
 
 const AgendaComponent = (props: any) => {
-  const { events } = props;
+  const { events, isDisabled } = props;
   const history: any = useHistory();
 
   return events.map((event: EventStateEntity, index: number) => {
-    return <AgendaEvent item={event} {...props} isFirstForDay={index === 0} history={history}/>;
+    return <AgendaEvent item={event} {...props} isFirstForDay={index === 0} history={history} isDisabled={isDisabled}/>;
   });
 };
 
@@ -127,7 +133,8 @@ export const renderAgendaEvents = (
   data: any,
   isDark: boolean,
   changeHeaderTitle: any,
-  setListHeight: any
+  setListHeight: any,
+  isDisabled?: boolean
 ) => {
   // TODO handle multi day events
 
@@ -189,6 +196,7 @@ export const renderAgendaEvents = (
             changeHeaderTitle={changeHeaderTitle}
             isNewMonth={isNewMonth}
             initScrollOffset={isDateToday ? initScrollOffset : null}
+            isDisabled={isDisabled}
           />{' '}
         </div>
       );

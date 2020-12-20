@@ -6,7 +6,7 @@ import {
     formatTimestampToDate, parseDateToString,
     parseToDate
 } from '../../../components/calendar-view/calendar-common';
-import OpenPgp, {PgpKeys} from "../../../bloben-package/utils/OpenPgp";
+import OpenPgp, { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
 
 export type EventsStateType = 'events';
 export const EVENTS_STATE: string = 'events';
@@ -31,6 +31,8 @@ export type EventStateType = {
   updatedAt: Date;
   deletedAt: Date | null;
   color: string | null;
+  // ICS specific
+  externalId: string | null;
   // App state
   isLocal: boolean;
   isSynced: boolean;
@@ -75,6 +77,7 @@ export type EventBodyToSend = {
   isRepeated: boolean;
   rRule: rRule | null;
   reminders: TCalendarNotificationType[] | string;
+  externalId: string | null;
 }
 
 export default class EventStateEntity {
@@ -94,11 +97,13 @@ export default class EventStateEntity {
   createdAt: Date;
   updatedAt: Date;
   deletedAt: Date | null = null;
+  externalId: string | null;
   isLocal: boolean;
   isSynced: boolean;
 
   constructor(data: any, rRule?: rRuleOriginal) {
       const isNotNew: boolean = data.id;
+      const isIcs: boolean = data.isIcs;
 
       this.id = isNotNew ? data.id : v4();
       this.calendarId = data.calendarId;
@@ -118,6 +123,7 @@ export default class EventStateEntity {
       this.deletedAt = data.deletedAt ? data.deletedAt : null;
       this.isLocal = !isNotNew;
       this.isSynced = isNotNew;
+      this.externalId = isIcs ? data.externalId : null;
   }
 
   public createFromEncrypted = (encryptedEvent: any, decryptedData: any) => {
@@ -278,8 +284,8 @@ export default class EventStateEntity {
   public encryptEvent = async (password: string): Promise<string> =>
     Crypto.encrypt(this.getEventPropsForEncryption(), password)
 
-  public formatBodyToSend = async (password: string): Promise<EventBodyToSend> => {
-      return   (
+  public formatBodyToSend = async (password: string): Promise<EventBodyToSend> =>
+      (
           {
               id: this.id,
               calendarId: this.calendarId,
@@ -291,9 +297,9 @@ export default class EventStateEntity {
               isRepeated: this.isRepeated,
               rRule: this.rRule,
               reminders: this.reminders,
+              externalId: this.externalId,
           }
       )
-  }
 
   public formatBodyToSendOpenPgp = async (pgpKeys: PgpKeys): Promise<EventBodyToSend> => {
         const data: any = await OpenPgp.encrypt(pgpKeys.publicKey, this.getEventPropsForEncryption());
@@ -310,10 +316,10 @@ export default class EventStateEntity {
                 isRepeated: this.isRepeated,
                 rRule: this.rRule,
                 reminders: this.reminders,
+                externalId: this.externalId,
             }
         )
     }
-
 
   static async enhance(stateItem: any, localItem: any) {
     const stateItemEnhanced: any = { ...stateItem };

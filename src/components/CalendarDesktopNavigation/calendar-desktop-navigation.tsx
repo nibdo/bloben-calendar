@@ -4,7 +4,6 @@ import { ButtonBase, IconButton } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 
 import HeaderCalendarTitle from '../HeaderCalendarTitle/HeaderCalendarTitle';
-import WebAuthn from '../../service/WebAuthn';
 import EvaIcons from '../../bloben-common/components/eva-icons';
 
 /**

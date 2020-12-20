@@ -120,6 +120,7 @@ const HeaderModal = (props: any) => {
     isFavourite,
     handleSave,
     title,
+      onClose
   } = props;
   const [animation, setAnimation] = useState('');
   const history = useHistory();
@@ -134,7 +135,11 @@ const HeaderModal = (props: any) => {
   }, [hasHeaderShadow]);
 
   const goBack = () => {
-    history.goBack();
+    if (onClose) {
+      onClose()
+    } else {
+      history.goBack();
+    }
   };
 
   const onDelete = () => {
