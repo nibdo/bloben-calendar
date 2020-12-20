@@ -63,12 +63,12 @@ $DRAWER_WIDTH_DESKTOP: 270px;
   overflow-x: hidden;
   height: 100%;
   @media (min-width: 750px) {
-    position: absolute;
+    //position: absolute;
     top: 55px;
     left: 0;
     width: $DRAWER_WIDTH_DESKTOP;
     background: $SURFACE_LIGHT;
-    z-index: 999;
+    z-index: 9;
     max-height: 100vh;
     box-shadow: $boxShadow;
   }

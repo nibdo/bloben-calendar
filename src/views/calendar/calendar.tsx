@@ -31,11 +31,9 @@ import { v4 } from 'uuid';
 import { useDispatch, useSelector } from 'react-redux';
 import EditEvent from '../../components/event/edit-event/edit-event';
 import { selectEvent } from '../../redux/actions';
-import WebAuthn from '../../service/WebAuthn';
 import CalendarDesktopNavigation
   from '../../components/CalendarDesktopNavigation/calendar-desktop-navigation';
 import AddIcon from "@material-ui/icons/Add";
-import Slider from "react-slick";
 
 const CalendarType = (props: any) => {
   const {
@@ -156,7 +154,7 @@ const CalendarView = (props: any) => {
               // <IconButton onClick={() => toggleDrawer(true)}>
               //   <EvaIcons.Menu className={'icon-svg'} />
               // </IconButton>,
-              <IconButton key={'bell'} onClick={() => WebAuthn.register()}>
+              <IconButton key={'bell'}>
                 <EvaIcons.Bell className={'icon-svg'} />
                 {/*<Dropdown isOpen={true} values={['day', 'week']} />*/}
               </IconButton>,

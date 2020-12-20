@@ -6,6 +6,7 @@ export const WEBSOCKET_GET_ONE_EVENT: string = '/app/events/get/one'
 export const WEBSOCKET_GET_ALL_EVENTS: string = '/app/events/get/all'
 export const WEBSOCKET_GET_EVENTS: string = '/app/events/get';
 export const WEBSOCKET_CREATE_EVENT: string = '/app/events/create';
+export const WEBSOCKET_IMPORT_EVENTS: string = '/app/events/import';
 export const WEBSOCKET_UPDATE_EVENT: string = '/app/events/update';
 export const WEBSOCKET_DELETE_EVENT: string = '/app/events/delete';
 export const WEBSOCKET_SYNC_EVENTS: string = '/app/events/sync';

@@ -1,0 +1,17 @@
+@import "bloben-common/globals/theme.scss";
+
+.event_uploader__wrapper {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 10px !important;
+}
+
+.event_uploader__container {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 10px !important;
+}
+
+.event_uploader__input {
+  display: none;
+}

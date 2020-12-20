@@ -122,7 +122,7 @@ const parseRRuleText = (rRule: any) => {
   return repeatString;
 };
 
-const Calendar = (props: any) => {
+export const Calendar = (props: any) => {
   const { setForm, calendar, coordinates, setCoordinates } = props;
   const [anchor, setAnchor] = useState(null);
   const [isOpen, openMenu] = useState(false);

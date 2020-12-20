@@ -46,11 +46,11 @@ import {
   WEBSOCKET_GET_EVENTS, WEBSOCKET_SYNC_CALENDARS, WEBSOCKET_SYNC_EVENTS
 } from '../api/calendar';
 import Axios from '../bloben-common/utils/axios';
-import { reduxStore } from '../App';
 import Search from '../views/search';
 import IntroScreen from '../views/intro-screen/intro-screen';
 import { checkIfIsSafari } from '../bloben-package/utils/common';
 import { logger } from '../bloben-package/utils/common';
+import EventImporter from "../components/EventImporter/EventImporter";
 
 // STOMP WEBSOCKETS
 let socket;
@@ -417,7 +417,6 @@ const AuthenticatedLayer = (props: any) => {
             </div>
           )}
         </Route>
-
         <Route path={'/'}>
           {(calendarDays &&
             selectedDate &&
@@ -449,6 +448,11 @@ const AuthenticatedLayer = (props: any) => {
         <Route path={'/settings'}>
           <Modal {...props}>
             <Settings />
+          </Modal>
+        </Route>
+        <Route path={'/events/import'}>
+          <Modal {...props}>
+            <EventImporter autoFocus={true}/>
           </Modal>
         </Route>
         <Route exact path={'/about'} render={() => <IntroScreen />} />
