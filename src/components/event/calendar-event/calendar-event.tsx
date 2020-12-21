@@ -269,8 +269,8 @@ const CalendarEvent = (props: any) => {
     borderColor: colorCode,
     opacity: isFuture(parseISO(props.event.endDate)) ? 1 : 1, //0.4,
     backgroundColor: colorCode,
-    top: state.offsetTop,
-    left: state.offsetLeft,
+    top: props.offsetTop,
+    left: props.offsetLeft,
     boxShadow: state.dragging
       ? '0 14px 28px rgba(0,0,0,0.25), 0 10px 10px rgba(0,0,0,0.22)'
       : '',

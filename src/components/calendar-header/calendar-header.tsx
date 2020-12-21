@@ -1,7 +1,7 @@
 import React from 'react';
 import './calendar-header.scss';
 import {
-  areIntervalsOverlapping,
+  areIntervalsOverlapping, differenceInCalendarDays,
   differenceInMinutes, format, formatISO,
   getDate,
   getMonth,
@@ -21,6 +21,7 @@ import { useSelector } from 'react-redux';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import OneDay from '../one-day/one-day';
 import { useHistory } from 'react-router-dom';
+import {checkOverlappingEvents} from "../../utils/common";
 
 const EventHeader = (props: any) => {
   const history: any = useHistory();
@@ -222,35 +223,43 @@ const HeaderDays = (props: any) => {
 
 const HeaderEvents = (props: any) => {
   const events: any   = useSelector((state: any) => state.events);
+  const calendarBodyWidth: number = useSelector((state: any) => state.calendarBodyWidth);
 
-  const renderEvents = (dataset: any) => {
+  const renderEvents = (baseWidth: number, dataset: any) => {
     let offsetCount: any = []; //Store every event id of overlapping items
     let offsetCountFinal: any; //Sort events by id number
-    const offsetCountHeader: any = []; //Store every event id of overlapping items
-    let offsetCountFinalHeader: any; //Sort events by id number
-    const tableWidth: any =
-        (props.width - CALENDAR_OFFSET_LEFT) / props.daysNum;
+    const tableWidth: number = baseWidth  / props.daysNum;
+
 
     if (dataset) {
-      return dataset.filter((item: any) => item.allDay).map((event: any) => {
+      return dataset.filter((item: any) => item.allDay || differenceInCalendarDays(
+          item.endAt,
+          item.startAt
+      ) > 0).map((event: any) => {
 
         let width = 1; //Full width
         let offsetLeft = 0;
-        dataset.map((item2: any) => {
-          if (
-              event.id !== item2.id &&
-              offsetCount.includes(item2.id) === false &&
-              item2.allDay
-          ) {
-            width = width + 1; //add width for every overlapping item
-            offsetCount.push(item2.id);
-          }
-        })
 
+        // Compare events
+        dataset.forEach((item2: any) => {
+          if (event.id !== item2.id && (item2.allDay || differenceInCalendarDays(
+              item2.endAt,
+              item2.startAt
+          ) > 0)) {
+            if (
+                checkOverlappingEvents(event, item2)
+            ) {
+              width = width + 1; //add width for every overlapping item
+              offsetCount.push(item2.id); // set offset for positioning
+              offsetCount.push(event.id); // set offset for positioning
+            }
+          }
+        });
+
+        //sort items for proper calculations of offset by id
+        // prevent different order in loop
         if (offsetCount.length > 0) {
-            offsetCountFinal = offsetCount.sort((a: any, b: any) => {
-              return a - b; //sort items for proper calculations of offset by id
-            });
+          offsetCountFinal = offsetCount.sort();
           }
 
         if (offsetCountFinal) {
@@ -301,7 +310,7 @@ const HeaderEvents = (props: any) => {
     }
   }
 
-  const column = (props.width - CALENDAR_OFFSET_LEFT) / props.daysNum;
+  const column = calendarBodyWidth / props.daysNum;
 
   const headerStyle: any = {
     display: 'flex',
@@ -329,7 +338,7 @@ const HeaderEvents = (props: any) => {
 
     const dataForDay: any = events ? events[formattedDayString] : [];
 
-    const headerEvents: any = renderEvents(dataForDay);
+    const headerEvents: any = renderEvents(calendarBodyWidth, dataForDay);
 
     return (
       <div key={day} style={todayDay}>

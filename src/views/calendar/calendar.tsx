@@ -4,7 +4,7 @@ import StateReducer from '../../utils/state-reducer';
 import Utils from './calendar.utils';
 import { Router,  useHistory,  } from 'react-router';
 import {
-  useCurrentHeight, useCurrentWidth,
+  useCurrentHeight,
 } from 'bloben-common/utils/layout';
 import Navbar from '../../components/navbar';
 import Header from '../../components/header';
@@ -15,19 +15,15 @@ import {Fab, IconButton} from '@material-ui/core';
 import EvaIcons from '../../bloben-common/components/eva-icons';
 import WeekView from '../../components/calendar-view/week-view/week-view';
 import {
-  CALENDAR_DRAWER_DESKTOP_WIDTH,
-  CALENDAR_OFFSET_LEFT,
   getDaysNum,
 } from '../../components/calendar-view/calendar-common';
-import NewEvent from '../../components/event/new-event/new-event';
 import {
-  format, formatISO,
+  format
 } from 'date-fns';
 import CalendarDrawer from '../../components/calendar-drawer/calendar-drawer';
 import MonthView from '../../components/calendar-view/month-view/month-view';
 import Agenda from '../../components/calendar-view/agenda/agenda';
 import CalendarSettings from '../../components/calendar-settings/calendar-settings';
-import { v4 } from 'uuid';
 import { useDispatch, useSelector } from 'react-redux';
 import EditEvent from '../../components/event/edit-event/edit-event';
 import CalendarDesktopNavigation
