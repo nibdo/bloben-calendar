@@ -14779,7 +14779,6 @@
          * var pako = require('pako')
          *   , data = Uint8Array([1,2,3,4,5,6,7,8,9]);
          *
-         * console.log(pako.deflate(data));
          * ```
          **/
         function deflate(input, options) {
@@ -15202,7 +15201,6 @@
          * try {
          *   output = pako.inflate(input);
          * } catch (err)
-         *   console.log(err);
          * }
          * ```
          **/
@@ -43633,7 +43631,6 @@
                 print_debug_hexarray_dump: function print_debug_hexarray_dump(str, arrToHex) {
                     if (_config2.default.debug) {
                         str += ': ' + _util2.default.Uint8Array_to_hex(arrToHex);
-                        console.log(str);
                     }
                 },
 
@@ -43670,7 +43667,6 @@
                  */
                 print_entire_stream: function print_entire_stream(str, input, concat) {
                     _webStreamTools2.default.readToEnd(_webStreamTools2.default.clone(input), concat).then(result => {
-                        console.log(str + ': ', result);
                     });
                 },
 
