@@ -17,7 +17,6 @@ const WeekViewContainer = (props: any) => {
     daysNum,
     openNewEvent,
     getNewCalendarDays,
-    data,
   } = props;
 
   const width: number = useCurrentWidth();
@@ -46,14 +45,12 @@ const WeekViewContainer = (props: any) => {
               index={0}
               daysNum={daysNum}
               selectedDate={selectedDate}
-              data={[]} // TODO add header events
               hasHeaderEvents={false}
           />
           <CalendarBody
               index={0}
               daysNum={daysNum}
               openNewEvent={openNewEvent}
-              data={data}
           />
         </div>
             <div style={{ height: '100%', width, display: 'flex'}}>
@@ -61,14 +58,12 @@ const WeekViewContainer = (props: any) => {
               index={1}
               daysNum={daysNum}
               selectedDate={selectedDate}
-              data={[]} // TODO add header events
               hasHeaderEvents={false}
           />
           <CalendarBody
               index={1}
               daysNum={daysNum}
               openNewEvent={openNewEvent}
-              data={data}
           />
         </div>
         <div style={{ height: '100%', width, display: 'flex'}}>
@@ -76,14 +71,12 @@ const WeekViewContainer = (props: any) => {
               index={2}
               daysNum={daysNum}
               selectedDate={selectedDate}
-              data={[]} // TODO add header events
               hasHeaderEvents={false}
           />
           <CalendarBody
               index={2}
               daysNum={daysNum}
               openNewEvent={openNewEvent}
-              data={data}
           />
         </div>
       </Slider>
@@ -92,14 +85,12 @@ const WeekViewContainer = (props: any) => {
                 index={isMobile ? 1 : calendarDaysCurrentIndex}
                 daysNum={daysNum}
                 selectedDate={selectedDate}
-                data={[]} // TODO add header events
                 hasHeaderEvents={false}
             />
             <CalendarBody
                 index={isMobile ? 1 : calendarDaysCurrentIndex}
                 daysNum={daysNum}
                 openNewEvent={openNewEvent}
-                data={data}
             />
           </div>
 );

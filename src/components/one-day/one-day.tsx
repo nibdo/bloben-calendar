@@ -22,20 +22,8 @@ import Modal from '../../bloben-package/components/modal';
 import NewEvent from '../event/new-event/new-event';
 import { useSelector } from 'react-redux';
 import { parseCssDark } from '../../bloben-common/utils/common';
-// import Event from 'components/Calendar/Event/Event';
+import {checkOverlappingEvents} from "../../utils/common";
 
-const checkOverlappingEvents = (firstDate: any, secondDate: any) => {
-  return areIntervalsOverlapping(
-    {
-      start: firstDate.startAt,
-      end: firstDate.endAt,
-    },
-    {
-      start: secondDate.startAt,
-      end: secondDate.endAt,
-    }
-  );
-};
 const renderEvents = (
   props: any,
   dataset: any,
@@ -49,7 +37,7 @@ const renderEvents = (
   let offsetCountFinalHeader: any; //Sort events by id number
   const tableWidth: number = baseWidth  / props.daysNum;
   if (dataset) {
-    return dataset.map((event: any) => {
+    return dataset.filter((item: any) => !item.allDay).map((event: any) => {
       let width = 1; //Full width
       let offsetLeft = 0;
 

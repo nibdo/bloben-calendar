@@ -72,6 +72,7 @@ export type EventBodyToSend = {
   data: string;
   startAt: string;
   endAt: string;
+  allDay: boolean;
   createdAt: string;
   updatedAt: string;
   isRepeated: boolean;
@@ -132,6 +133,7 @@ export default class EventStateEntity {
       this.text = decryptedData.text;
       this.startAt = parseToDate(encryptedEvent.startAt);
       this.endAt = parseToDate(encryptedEvent.endAt);
+      this.allDay = encryptedEvent.allDay;
       this.isRepeated = encryptedEvent.isRepeated;
       this.location = decryptedData.location;
       this.color = encryptedEvent.color;
@@ -155,6 +157,7 @@ export default class EventStateEntity {
         startAt: this.startAt,
         endAt: this.endAt,
         timeZone: this.timeZone,
+        allDay: this.allDay,
         isRepeated: this.isRepeated,
         rRule: this.rRule,
         color: this.color,
@@ -292,6 +295,7 @@ export default class EventStateEntity {
               data: await this.encryptEvent(password),
               startAt: parseDateToString(this.startAt),
               endAt: parseDateToString(this.endAt),
+              allDay: this.allDay,
               createdAt: parseDateToString(this.createdAt),
               updatedAt: parseDateToString(this.updatedAt),
               isRepeated: this.isRepeated,
@@ -311,6 +315,7 @@ export default class EventStateEntity {
                 data,
                 startAt: parseDateToString(this.startAt),
                 endAt: parseDateToString(this.endAt),
+                allDay: this.allDay,
                 createdAt: parseDateToString(this.createdAt),
                 updatedAt: parseDateToString(this.updatedAt),
                 isRepeated: this.isRepeated,

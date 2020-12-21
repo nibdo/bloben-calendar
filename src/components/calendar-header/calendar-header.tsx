@@ -13,14 +13,18 @@ import {
 import { useCurrentWidth } from 'bloben-common/utils/layout';
 import {
   CALENDAR_DRAWER_DESKTOP_WIDTH,
-  CALENDAR_OFFSET_LEFT,
-  daysText,
+  CALENDAR_OFFSET_LEFT, calendarColors,
+  daysText, formatTimestampToDate,
   getWeekDays,
 } from '../calendar-view/calendar-common';
 import { useSelector } from 'react-redux';
 import { parseCssDark } from '../../bloben-common/utils/common';
+import OneDay from '../one-day/one-day';
+import { useHistory } from 'react-router-dom';
 
 const EventHeader = (props: any) => {
+  const history: any = useHistory();
+
   const style: any = {
     width: props.eventWidth,
     borderColor: props.calendarColor,
@@ -29,11 +33,17 @@ const EventHeader = (props: any) => {
     left: props.offsetLeft,
   };
 
+  const handleEventSelect = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
+    history.push(`/event/${props.event.id}`)
+  }
+
   return (
     <div
       className={'event_header__container'}
       style={style}
-      onClick={(e) => props.selectEvent(props.event)}
+      onClick={handleEventSelect}
     >
       <p className={`event_header__text${props.isDark ? '--dark' : ''}`}>
         {props.event.text}{' '}
@@ -55,7 +65,6 @@ const DaysText = (props: any) => {
   const isMobile: boolean = useSelector((state: any) => state.isMobile);
 
   const isMonthView: boolean = calendarView === 'month';
-
 
   const colWidth: number = isMonthView ? (isMobile ? width : width - CALENDAR_DRAWER_DESKTOP_WIDTH) / daysNum : (calendarBodyWidth) / daysNum ;
 
@@ -111,7 +120,7 @@ const DaysNumeric = (props: any) => {
   const calendarBodyWidth: number = useSelector((state: any) => state.calendarBodyWidth);
   const {
     daysNum,
-      index
+    index
   } = props;
 
   const colWidth: number = (calendarBodyWidth) / daysNum;
@@ -212,60 +221,7 @@ const HeaderDays = (props: any) => {
 };
 
 const HeaderEvents = (props: any) => {
-  const checkOverlappingEvents = (firstDate: any, secondDate: any) =>
-    areIntervalsOverlapping(
-      {
-        start: parseISO(firstDate.startDate),
-        end: parseISO(firstDate.endDate),
-      },
-      {
-        start: parseISO(secondDate.startDate),
-        end: parseISO(secondDate.endDate),
-      }
-    );
-
-  const checkOverlappingHeaderEvents: any = (
-    firstDate: any,
-    secondDate: any
-  ) => {
-    const firstDateStart: any = new Date(
-      getYear(parseISO(firstDate.startDate)),
-      getMonth(parseISO(firstDate.startDate)),
-      getDate(parseISO(firstDate.startDate)),
-      0,
-      0,
-      0
-    );
-    const firstDateEnd: any = new Date(
-      getYear(parseISO(firstDate.endDate)),
-      getMonth(parseISO(firstDate.endDate)),
-      getDate(parseISO(firstDate.endDate)),
-      23,
-      59,
-      59
-    );
-    const secondDateStart: any = new Date(
-      getYear(parseISO(secondDate.startDate)),
-      getMonth(parseISO(secondDate.startDate)),
-      getDate(parseISO(secondDate.startDate)),
-      0,
-      0,
-      0
-    );
-    const secondDateEnd: any = new Date(
-      getYear(parseISO(secondDate.endDate)),
-      getMonth(parseISO(secondDate.endDate)),
-      getDate(parseISO(secondDate.endDate)),
-      23,
-      59,
-      59
-    );
-
-    return areIntervalsOverlapping(
-      { start: firstDateStart, end: firstDateEnd },
-      { start: secondDateStart, end: secondDateEnd }
-    );
-  };
+  const events: any   = useSelector((state: any) => state.events);
 
   const renderEvents = (dataset: any) => {
     let offsetCount: any = []; //Store every event id of overlapping items
@@ -273,83 +229,60 @@ const HeaderEvents = (props: any) => {
     const offsetCountHeader: any = []; //Store every event id of overlapping items
     let offsetCountFinalHeader: any; //Sort events by id number
     const tableWidth: any =
-      (props.width - CALENDAR_OFFSET_LEFT) / props.daysNum;
+        (props.width - CALENDAR_OFFSET_LEFT) / props.daysNum;
 
     if (dataset) {
-      return dataset.map((event: any) => {
+      return dataset.filter((item: any) => item.allDay).map((event: any) => {
+
         let width = 1; //Full width
         let offsetLeft = 0;
+        dataset.map((item2: any) => {
+          if (
+              event.id !== item2.id &&
+              offsetCount.includes(item2.id) === false &&
+              item2.allDay
+          ) {
+            width = width + 1; //add width for every overlapping item
+            offsetCount.push(item2.id);
+          }
+        })
 
-        return props.calendars.map((calendar: any) => {
-          if (calendar.id === event.calendarId) {
-            if (calendar.isChecked || calendar) {
-              dataset.map((item2: any) => {
-                if (
-                  (checkOverlappingEvents(event, item2) &&
-                    event.id !== item2.id &&
-                    offsetCount.includes(item2.id) === false) ||
-                  (checkOverlappingEvents(event, item2) &&
-                    event.id !== item2.id &&
-                    offsetCount.includes(item2.id) === false &&
-                    item2.allDay)
-                ) {
-                  width = width + 1; //add width for every overlapping item
-                  offsetCount.push(item2.id);
-                } else if (
-                  (checkOverlappingEvents(event, item2) &&
-                    event.id === item2.id &&
-                    offsetCount.includes(event.id) === false) ||
-                  (checkOverlappingEvents(event, item2) &&
-                    event.id === item2.id &&
-                    item2.allDay &&
-                    offsetCount.includes(event.id) === false)
-                ) {
-                  offsetCount.push(event.id);
-                } //BUG event width is shrinked because of multi day events
-              });
+        if (offsetCount.length > 0) {
+            offsetCountFinal = offsetCount.sort((a: any, b: any) => {
+              return a - b; //sort items for proper calculations of offset by id
+            });
+          }
 
-              if (offsetCount.length > 0) {
-                offsetCountFinal = offsetCount.sort((a: any, b: any) => {
-                  return a - b; //sort items for proper calculations of offset by id
-                });
-              }
+        if (offsetCountFinal) {
+            offsetLeft =
+                (tableWidth / offsetCountFinal.length) *
+                offsetCountFinal.indexOf(event.id); //count offset
+          }
+        // @ts-ignore
+        const calendarColor = calendarColors[event.color ? event.color : 'indigo'][props.isDark ? 'dark' : 'light'];
 
-              if (offsetCountFinal) {
-                offsetLeft =
-                  (tableWidth / offsetCountFinal.length) *
-                  offsetCountFinal.indexOf(event.id); //count offset
-              }
-              let calendarColor;
-              if (calendar.id === event.calendarId) {
-                if (props.darkTheme) {
-                  calendarColor = calendar.color.dark;
-                } else {
-                  calendarColor = calendar.color.light;
-                }
-              }
-
-              const offsetTop: any = differenceInMinutes(
-                parseISO(event.startDate),
-                new Date(
+        const offsetTop: any = differenceInMinutes(
+              parseISO(event.startDate),
+              new Date(
                   getYear(parseISO(event.startDate)),
                   getMonth(parseISO(event.startDate)),
                   getDate(parseISO(event.startDate)),
                   0,
                   0,
                   0
-                )
-              );
-              const eventHeight: any = 20;
-              const eventWidth: any = tableWidth / width - 2; ///event.width.toString() + "%"
-              //event.left
-              // BUG/TODO break event if continues next day
-              // Current status: events is displayed in wrong place
-              offsetCount = [];
-              offsetCountFinal = '';
-              const eventElevation: any = 0;
+              )
+          );
+        const eventHeight: any = 25;
+        const eventWidth: any = tableWidth / width - 2; ///event.width.toString() + "%"
+          //event.left
+          // BUG/TODO break event if continues next day
+          // Current status: events is displayed in wrong place
+        offsetCount = [];
+        offsetCountFinal = '';
+        const eventElevation: any = 0;
 
-              return (
-                <EventHeader
+        return (
+              <EventHeader
                   key={event.id}
                   eventHeight={eventHeight}
                   offsetTop={offsetTop}
@@ -362,14 +295,11 @@ const HeaderEvents = (props: any) => {
                   cryptoPassword={props.cryptoPassword}
                   selectEvent={props.selectEvent}
                   colors={props.colors}
-                />
-              );
-            }
-          }
-        });
-      });
+              />
+          );
+      })
     }
-  };
+  }
 
   const column = (props.width - CALENDAR_OFFSET_LEFT) / props.daysNum;
 
@@ -395,7 +325,10 @@ const HeaderEvents = (props: any) => {
   };
 
   const daysNumbers = props.calendarDays.map((day: any, index: any) => {
-    const dataForDay: any = props.data[index];
+    const formattedDayString: string = formatTimestampToDate(day);
+
+    const dataForDay: any = events ? events[formattedDayString] : [];
+
     const headerEvents: any = renderEvents(dataForDay);
 
     return (
@@ -403,7 +336,7 @@ const HeaderEvents = (props: any) => {
         <div
           style={{
             width: column,
-            height: props.data[index].length > 0 ? 30 : 8,
+            height: 30,
             display: 'flex',
             alignItems: 'center',
             alignSelf: 'center',
@@ -460,9 +393,9 @@ const CalendarHeader = (props: any) => {
         selectedDate={selectedDate}
         isMonthView={isMonthView}
       />
-      {hasHeaderEvents && !isMonthView ? (
+      {!isMonthView ? (
         <HeaderEvents
-          calendarDays={calendarDays}
+          calendarDays={calendarDays[index]}
           hours={hours}
           data={data}
           width={width}

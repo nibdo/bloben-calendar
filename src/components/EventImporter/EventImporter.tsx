@@ -197,9 +197,6 @@ const EventImporter = (props: any) => {
         if (!file) {
             return;
         }
-
-        // console.log('FILE', file)
-
     },        [file])
 
     /**

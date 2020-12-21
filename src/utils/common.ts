@@ -3,6 +3,7 @@ import { reduxStore } from '../App';
 import { TCalendarNotificationType } from '../types/types';
 import { v4 } from 'uuid';
 import {
+    areIntervalsOverlapping,
     differenceInCalendarDays,
     differenceInHours,
     differenceInMinutes,
@@ -319,3 +320,16 @@ export const parseStartAtDateForNotification = (date: Date): string => {
 
     return `Event starts in ${daysBetween} days`
 }
+
+export const checkOverlappingEvents = (firstDate: any, secondDate: any) => {
+    return areIntervalsOverlapping(
+        {
+            start: firstDate.startAt,
+            end: firstDate.endAt,
+        },
+        {
+            start: secondDate.startAt,
+            end: secondDate.endAt,
+        }
+    );
+};

@@ -13,15 +13,14 @@ import { useSelector } from 'react-redux';
 import _ from 'lodash';
 import { parseCssDark } from '../../bloben-common/utils/common';
 
-
 const renderOneDay = (
   calendarDays: Date[],
   props: any,
   showNewEvent: any,
   selectEvent: any,
   events: any
-) => {
-  return calendarDays.map((day: Date, index: number) => {
+) =>
+  calendarDays.map((day: Date, index: number) => {
     const formattedDayString: string = formatTimestampToDate(day);
 
     return (
@@ -44,14 +43,13 @@ const renderOneDay = (
       />
     );
   });
-};
 const HoursText = (props: any) => {
   const {  width,  } = props;
   const isDark: boolean = useSelector((state: any) => state.isDark);
 
-  const renderHours = () => {
-    return hoursArrayString.map((hour: any) => {
-      return (
+  const renderHours = () =>
+    hoursArrayString.map((hour: any) =>
+      (
             hour === '00' || hour === '24' ? null : (
                 <div key={hour} className={'one_day__hours_container'} >
                   <p className={parseCssDark('one_day__hours_text', isDark)}>
@@ -63,9 +61,7 @@ const HoursText = (props: any) => {
                   />
                 </div>
             )
-      )
-    })
-  };
+      ));
 
   const hours: any = renderHours();
 
@@ -74,11 +70,11 @@ const HoursText = (props: any) => {
 const CalendarBodyView = (props: any) => {
   const {  hasHeaderEvents, openNewEvent, index } = props;
   const calendarDays: Date[][] = useSelector((state: any) => state.calendarDays);
-  const events: any = useSelector((state: any) => state.events);
   const calendarBodyWidth: number = useSelector((state: any) => state.calendarBodyWidth);
   const calendarBodyHeight: number = useSelector((state: any) => state.calendarBodyHeight);
   const isMobile: boolean = useSelector((state: any) => state.isMobile);
   const calendarDaysCurrentIndex: number   = useSelector((state: any) => state.calendarDaysCurrentIndex);
+  const events: any   = useSelector((state: any) => state.events);
 
   const width: number = useCurrentWidth();
   const days: any = renderOneDay(calendarDays[index], props, openNewEvent, [], events);
@@ -128,7 +124,7 @@ const CalendarBodyView = (props: any) => {
       return;
     }
     setCurrentOffset(index);
-  }, 50);
+  },                              50);
 
   return (
     <div style={style} className={'calendar-body__wrapper'} id={`timetable_${index}`} onScroll={handleScroll}>
@@ -140,9 +136,8 @@ const CalendarBodyView = (props: any) => {
   );
 };
 
-const CalendarBody = (props: any) => {
+const CalendarBody = (props: any) =>
 
-  return <CalendarBodyView {...props} />;
-};
+  <CalendarBodyView {...props} />;
 
 export default CalendarBody;

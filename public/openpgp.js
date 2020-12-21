@@ -14545,7 +14545,6 @@
          *
          * if (deflate.err) { throw new Error(deflate.err); }
          *
-         * console.log(deflate.result);
          * ```
          **/
         function Deflate(options) {
@@ -14920,7 +14919,6 @@
          *
          * if (inflate.err) { throw new Error(inflate.err); }
          *
-         * console.log(inflate.result);
          * ```
          **/
         function Inflate(options) {
@@ -43622,7 +43620,6 @@
                  */
                 print_debug: function print_debug(str) {
                     if (_config2.default.debug) {
-                        console.log(str);
                     }
                 },
 
@@ -43650,7 +43647,6 @@
                 print_debug_hexstr_dump: function print_debug_hexstr_dump(str, strToHex) {
                     if (_config2.default.debug) {
                         str += _util2.default.str_to_hex(strToHex);
-                        console.log(str);
                     }
                 },
 

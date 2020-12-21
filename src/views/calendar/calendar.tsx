@@ -30,7 +30,6 @@ import CalendarSettings from '../../components/calendar-settings/calendar-settin
 import { v4 } from 'uuid';
 import { useDispatch, useSelector } from 'react-redux';
 import EditEvent from '../../components/event/edit-event/edit-event';
-import { selectEvent } from '../../redux/actions';
 import CalendarDesktopNavigation
   from '../../components/CalendarDesktopNavigation/calendar-desktop-navigation';
 import AddIcon from "@material-ui/icons/Add";

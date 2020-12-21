@@ -116,10 +116,5 @@ export const getEvents = async (
 
   reduxStore.dispatch(setIsAppStarting(false))
 
-  // setState('data', 'simple', eventsResult);
-  //
-  // console.log('agendaDays', [...state.agendaDays, ...agendaDays]);
-  // setState('agendaDays', 'simple', [...state.agendaDays, ...agendaDays]);
-
   // TODO add to cache??
 };
