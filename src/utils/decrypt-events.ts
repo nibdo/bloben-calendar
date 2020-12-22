@@ -6,7 +6,7 @@ import {
   setEventsAreFetching,
   setEventsLastSync,
 } from '../redux/actions';
-import { cloneDeep } from './common';
+import { cloneDeep, createMultiDayClone } from './common';
 import EventStateEntity from '../data/entities/state/event.entity';
 import { findInArrayWithIndex } from './filter/findInArray';
 import { EventResultDTO } from '../data/types';
@@ -164,10 +164,10 @@ export const decryptEvents = async (data: any): Promise<void> => {
 
     if (pgpKeys && pgpKeys.publicKey) {
       decryptedData = await OpenPgp.decrypt(
-        pgpKeys.publicKey,
-        pgpKeys.privateKey,
-        password,
-        eventResultDTO.data
+          pgpKeys.publicKey,
+          pgpKeys.privateKey,
+          password,
+          eventResultDTO.data
       );
       decryptedData = JSON.parse(decryptedData);
     } else {
@@ -181,40 +181,56 @@ export const decryptEvents = async (data: any): Promise<void> => {
     const newEvent: EventStateEntity = new EventStateEntity(finalForm);
     const simpleEventObj: EventStateEntity = newEvent.getReduxStateObj();
 
-    // Get datekey
-    const dateKey: string = newEvent.getDateKey();
-
-    const eventsArray: any[] = stateClone[dateKey];
-    // Check if there is date in redux store with event datekey
-    // Datekey exists, add new item or update existing
-    if (eventsArray && eventsArray.length > 0) {
-      const itemInState: any = await findInArrayWithIndex(
-        eventsArray,
-        simpleEventObj
-      );
-      // Item exists, update it
-      if (itemInState.children) {
-        stateClone[dateKey][itemInState.index] = simpleEventObj;
-        if (i + 1 === data.length) {
-          reduxStore.dispatch(setEvents(stateClone));
-          reduxStore.dispatch(setEventsAreFetching(false));
+    /**
+     * Logic for saving event
+     */
+    const handleEventSave = async (date: any) => {
+      const eventsArray: any[] = stateClone[date];
+      // Check if there is date in redux store with event datekey
+      // Datekey exists, add new item or update existing
+      if (eventsArray && eventsArray.length > 0) {
+        const itemInState: any = await findInArrayWithIndex(
+            eventsArray,
+            simpleEventObj
+        );
+        // Item exists, update it
+        if (itemInState.children) {
+          stateClone[date][itemInState.index] = simpleEventObj;
+          if (i + 1 === data.length) {
+            reduxStore.dispatch(setEvents(stateClone));
+            reduxStore.dispatch(setEventsAreFetching(false));
+          }
+        } else {
+          eventsArray.push(simpleEventObj);
+          if (i + 1 === data.length) {
+            reduxStore.dispatch(setEvents(stateClone));
+            reduxStore.dispatch(setEventsAreFetching(false));
+          }
         }
       } else {
-        eventsArray.push(simpleEventObj);
+        stateClone[date] = [];
+        stateClone[date].push(simpleEventObj);
         if (i + 1 === data.length) {
           reduxStore.dispatch(setEvents(stateClone));
           reduxStore.dispatch(setEventsAreFetching(false));
         }
       }
-    } else {
-      stateClone[dateKey] = [];
-      stateClone[dateKey].push(simpleEventObj);
-      if (i + 1 === data.length) {
-        reduxStore.dispatch(setEvents(stateClone));
-        reduxStore.dispatch(setEventsAreFetching(false));
+    };
+
+    /**
+     * Handle multi day events
+     * // TODO destroy on delete and on update and recreate new
+     */
+    if (newEvent.isMultiDay) {
+      const multiDayDates: any = createMultiDayClone(newEvent);
+
+      for (const date of multiDayDates) {
+        await handleEventSave(date);
       }
     }
-  }
+    // Get dateKey
+    const dateKey: string = newEvent.getDateKey();
 
-  // TODO add to cache??
-};
+    await handleEventSave(dateKey);
+  }
+}

@@ -3,6 +3,7 @@ import { reduxStore } from '../App';
 import { TCalendarNotificationType } from '../types/types';
 import { v4 } from 'uuid';
 import {
+    addDays,
     areIntervalsOverlapping,
     differenceInCalendarDays,
     differenceInHours,
@@ -17,8 +18,6 @@ import {
 import EventStateEntity from '../data/entities/state/event.entity';
 import { setCalendars, setEvents } from '../redux/actions';
 import { formatTimestampToDate } from '../components/calendar-view/calendar-common';
-
-
 
 export const mapTags = (tags: any) => {
   const tagsObj: any = {};
@@ -252,7 +251,6 @@ export const getEventAndCalendarIds = (): any => {
     return {calendars, events}
 }
 
-
 /**
  * Format array of events to object with date keys
  * @param events
@@ -283,7 +281,6 @@ export const mapEventsToDates = (events: EventStateEntity[]): any => {
 
     return result;
 }
-
 
 export const parseStartAtDateForNotification = (date: Date): string => {
     const dateNow: Date = new Date();
@@ -321,8 +318,8 @@ export const parseStartAtDateForNotification = (date: Date): string => {
     return `Event starts in ${daysBetween} days`
 }
 
-export const checkOverlappingEvents = (firstDate: any, secondDate: any) => {
-    return areIntervalsOverlapping(
+export const checkOverlappingEvents = (firstDate: any, secondDate: any) =>
+    areIntervalsOverlapping(
         {
             start: firstDate.startAt,
             end: firstDate.endAt,
@@ -332,4 +329,17 @@ export const checkOverlappingEvents = (firstDate: any, secondDate: any) => {
             end: secondDate.endAt,
         }
     );
-};
+
+export const createMultiDayClone = (event: EventStateEntity) => {
+    const data: any = [];
+
+    const daysBetween: number = differenceInCalendarDays(event.endAt, event.startAt);
+
+    for (let i = 1; i <= daysBetween; i++) {
+        const dateRef: any = addDays(event.startAt, i);
+
+        data.push(formatTimestampToDate(dateRef));
+    }
+
+    return data;
+}
