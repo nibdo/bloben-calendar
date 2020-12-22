@@ -122,10 +122,12 @@ const renderEvents = (
 };
 
 const TimeNowLine = (props: any) => {
+  const calendarBodyWidth: number = useSelector((state: any) => state.calendarBodyWidth);
+
   const { width, daysNum, nowPosition } = props;
   const lineStyle: any = {
     top: nowPosition,
-    width: (width - 40) / daysNum,
+    width: calendarBodyWidth / daysNum,
   };
 
   return <div id={'time-now'} className={'one_day__time-now'} style={lineStyle} />;
@@ -163,14 +165,14 @@ const OneDay = (props: any) => {
   const nowPosition: number = differenceInMinutes(
       dateNow,
       new Date(getYear(dateNow), getMonth(dateNow), getDate(dateNow), 0, 0, 0)
-  ) / 1.5;
+  ) / 1.2;
 
   useEffect(() => {
     if (isToday) {
       const elements: any = document.querySelectorAll('.calendar-body__wrapper');
 
       for (const element of elements) {
-        element.scrollTo({top: nowPosition, behavior: 'smooth'});
+        element.scrollTo({top: nowPosition - 40, behavior: 'smooth'});
       }
     }
   },        [])
