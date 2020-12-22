@@ -7,6 +7,11 @@ LIVE version: https://calendar.bloben.com
 Contact: hello@bloben.com
 
 # Change log
+- **0.1.3** \
+ added all day events,\
+fixed overlapping events,\
+fixed multi day events,\
+calendar layout fix
 - **0.1.2** \
 Added encryption with Open PGP for new accounts
 - **0.0.2** \
