@@ -28,6 +28,7 @@ import { calculateNewEventTime, setDefaultReminder } from '../event.utils';
 import { mergeEvent } from '../../../redux/actions';
 import {PgpKeys} from "../../../bloben-package/utils/OpenPgp";
 import {CalendarBodyToSend} from "../../../data/entities/state/calendar.entity";
+import _ from "lodash";
 
 const initialFormState: any = {
   prevItem: {},
@@ -84,7 +85,7 @@ const EditEvent = (props: any) => {
   const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
 
   const [calendar, setCalendar] = useState(null)
-
+  const [hasHeaderShadow, setHeaderShadow] = useState(false);
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -312,11 +313,25 @@ const EditEvent = (props: any) => {
     setLocalState(optionName, option);
   };
 
+    // Debounce scroll function
+  const handleScroll = _.debounce((e: any) => {
+    const element: any = document.getElementById('event_detail__wrapper');
+
+    if (element.scrollTop !== 0) {
+      setHeaderShadow(true)
+    } else {
+      setHeaderShadow(false)
+    }
+  }, 10);
+
   return (
-    <div className={'full-screen'}>
-      <HeaderModal goBack={handleClose} handleSave={saveEvent} handleDelete={isNewEvent ? null : deleteEvent}/>
+    <div className={'full-screen'} >
+      <HeaderModal
+          hasHeaderShadow={hasHeaderShadow}
+          goBack={handleClose} handleSave={saveEvent} handleDelete={isNewEvent ? null : deleteEvent}/>
       {calendar && startAt && endAt ? (
         <EventDetail
+            handleScroll={handleScroll}
             isNewEvent={isNewEvent}
           history={props.history}
           fetchEventsFromServer={props.fetchEventsFromServer}

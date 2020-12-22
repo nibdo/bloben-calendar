@@ -656,7 +656,7 @@ const Location = (props: any) => {
             className={parseCssDark('event_detail__input', isDark)}
             onChange={props.handleChange}
             value={props.value}
-            rows={1}
+            multiline={true}
         />
       </div>
   );
@@ -678,7 +678,7 @@ const Notes = (props: any) => {
             className={parseCssDark('event_detail__input', isDark)}
             onChange={props.handleChange}
             value={props.value}
-            rows={1}
+            multiline={true}
         />
       </div>
   );
@@ -714,7 +714,8 @@ const EventDetail = (props: any) => {
     reminders,
     addNotification,
     removeNotification,
-    isNewEvent
+    isNewEvent,
+      handleScroll
   } = props;
 
   /**
@@ -746,7 +747,7 @@ const EventDetail = (props: any) => {
   }
 
   return (
-    <div className={'event_detail__wrapper'} style={wrapperStyle}>
+    <div className={'event_detail__wrapper'} id={'event_detail__wrapper'} style={wrapperStyle} onScroll={handleScroll}>
       <Title  value={text} handleChange={handleChange} isNewEvent={isNewEvent} />
      <Calendar
           calendar={calendar}

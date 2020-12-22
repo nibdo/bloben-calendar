@@ -113,7 +113,7 @@ export default class EventStateEntity {
       this.startAt = parseToDate(data.startAt);
       this.endAt = parseToDate(data.endAt);
       this.allDay = data.allDay;
-      this.isMultiDay = !isSameDay(data.startAt, data.endAt);
+      this.isMultiDay = !isSameDay(parseToDate(data.startAt), parseToDate(data.endAt));
       this.timeZone = 'local';
       this.isRepeated = isNotNew ? data.isRepeated : data.isRepeated;
       this.location = data.location;
@@ -136,7 +136,7 @@ export default class EventStateEntity {
       this.startAt = parseToDate(encryptedEvent.startAt);
       this.endAt = parseToDate(encryptedEvent.endAt);
       this.allDay = encryptedEvent.allDay;
-      this.isMultiDay = !isSameDay(encryptedEvent.startAt, encryptedEvent.endAt);
+      this.isMultiDay = !isSameDay(parseToDate(encryptedEvent.startAt), parseToDate(encryptedEvent.endAt));
       this.isRepeated = encryptedEvent.isRepeated;
       this.location = decryptedData.location;
       this.color = encryptedEvent.color;

@@ -16,7 +16,6 @@
 
 .event_detail__row {
   width: 100%;
-  min-height: 55px !important;
   display: flex !important;
   padding: 0 24px 0 24px !important;
   flex-direction: row !important;
@@ -96,11 +95,11 @@
   outline: none;
   border: none;
   word-wrap: break-word;
-  justify-content: flex-start;
-  align-items: center;
-  padding: 0;
-  padding-left: 16px;
-  margin: 0;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  padding: 16px 16px 16px 16px !important;
+  //padding-left: 16px !important;
+  margin: 0 !important;
   font-family: Poppins !important;
   //height: 100% !important;
 
