@@ -165,7 +165,7 @@ const OneDay = (props: any) => {
   const nowPosition: number = differenceInMinutes(
       dateNow,
       new Date(getYear(dateNow), getMonth(dateNow), getDate(dateNow), 0, 0, 0)
-  ) / 1.2;
+  ) / 1.5;
 
   useEffect(() => {
     if (isToday) {
