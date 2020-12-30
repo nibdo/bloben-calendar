@@ -38,7 +38,6 @@
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-measure": "^2.3.0",
-    "react-native-webview-messaging": "^1.2.3",
     "react-redux": "^7.2.1",
     "react-router": "^5.0.1",
     "react-router-dom": "^5.0.1",
