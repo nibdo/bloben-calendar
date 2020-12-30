@@ -14,6 +14,8 @@ import Header from '../../components/header';
 import { logOut } from '../../bloben-package/utils/logout';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
+import SettingsSecurity
+    from "../../bloben-package/views/settings-security/settings-account";
 
 const SettingsRouter = (props: any) =>
   (
@@ -28,6 +30,11 @@ const SettingsRouter = (props: any) =>
           <Appearance />
         </Modal>
       </Route>
+        <Route path={'/settings/security'}>
+            <Modal {...props}>
+                <SettingsSecurity />
+            </Modal>
+        </Route>
         <Route exact path={'/settings'}>
             <Modal {...props}>
                 <SettingsBaseView />

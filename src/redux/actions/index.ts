@@ -107,6 +107,12 @@ export const setAllEvents = (data: any) => {
         payload: data,
     }
 }
+export const setEventsToImport = (data: any) => {
+    return {
+        type: 'SET_EVENTS_TO_IMPORT',
+        payload: data,
+    }
+}
 export const setIsFirstLogin = (data: any) => {
     return {
         type: 'SET_IS_FIRST_LOGIN',
@@ -138,7 +144,12 @@ export const setIsDark = (data: any) => {
         payload: data,
     }
 }
-
+export const setIsAndroidApp = (data: any) => {
+    return {
+        type: 'SET_IS_ANDROID_APP',
+        payload: data,
+    }
+}
 export const setIsMobile = (data: any) => {
     return {
         type: 'SET_IS_MOBILE',

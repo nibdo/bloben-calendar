@@ -22,10 +22,11 @@ import {
 } from '../components/calendar-view/calendar-common';
 import NewCalendar from '../views/calendar-edit/new-calendar/new-calendar';
 import Crypto from '../bloben-package/utils/encryption';
+// @ts-ignore
 
 import WebsocketHandler from '../utils/websocket'
 import {
-  setCalendarDays, setCalendarDaysCurrentIndex,
+  setCalendarDays, setCalendarDaysCurrentIndex, setEventsToImport,
   setIsAppStarting, setIsFirstLogin,
   setRangeFrom,
   setRangeTo,
@@ -50,7 +51,8 @@ import Search from '../views/search';
 import IntroScreen from '../views/intro-screen/intro-screen';
 import { checkIfIsSafari } from '../bloben-package/utils/common';
 import { logger } from '../bloben-package/utils/common';
-import EventImporter from "../components/EventImporter/EventImporter";
+import EventImportButton from "../components/EventImporter/EventImportButton/EventImportButton";
+import EventImport from "../components/EventImporter/EventImport";
 
 // STOMP WEBSOCKETS
 let socket;
@@ -83,6 +85,7 @@ const AuthenticatedLayer = (props: any) => {
   const selectedDate: Date = useSelector((state: any) => state.selectedDate);
   const calendarView: string = useSelector((state: any) => state.calendarView);
   const isAppStarting: boolean = useSelector((state: any) => state.isAppStarting);
+  const eventsToImport: string = useSelector((state: any) => state.eventsToImport);
 
   const dispatch: Dispatch = useDispatch();
 
@@ -142,6 +145,9 @@ const AuthenticatedLayer = (props: any) => {
         setTimeout(connectToWs, 7000)
       }
     }
+
+
+
 
     // TODO to websocket
     const sendIdsToSync = () => {
@@ -221,6 +227,7 @@ const AuthenticatedLayer = (props: any) => {
     dispatch(setRangeFrom(rangeFromInit))
     dispatch(setRangeTo(rangeToInit))
     // sendMessage()
+
   };
 
   useEffect(() => {
@@ -387,6 +394,17 @@ const AuthenticatedLayer = (props: any) => {
     sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {rangeFrom: formatISO(rangeTo), rangeTo: formatISO(newRangeTo)})
   }
 
+  /**
+   * Listener for different state
+   */
+  // Redirect to event import
+  useEffect(() => {
+    if (eventsToImport.length > 2) {
+      history.push('/events/import/ics')
+    }
+
+  }, [eventsToImport])
+
   return !isAppStarting ? (
     <div className={'app_wrapper'}>
       {!cryptoPassword ? <Redirect to={'/'}/> : null}
@@ -452,7 +470,12 @@ const AuthenticatedLayer = (props: any) => {
         </Route>
         <Route path={'/events/import'}>
           <Modal {...props}>
-            <EventImporter autoFocus={true}/>
+            <EventImportButton autoFocus={true}/>
+          </Modal>
+        </Route>
+        <Route path={'/events/import/ics'}>
+          <Modal {...props}>
+            <EventImport />
           </Modal>
         </Route>
         <Route exact path={'/about'} render={() => <IntroScreen />} />

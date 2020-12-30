@@ -3,7 +3,6 @@ import './calendar-settings.scss';
 import { ButtonBase } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router';
 import { useSelector } from 'react-redux';
-import EventImporter from "../EventImporter/EventImporter";
 
 const CalendarSettingsItem = (props: any) => {
   const { onClick, title, isDisabled } = props;

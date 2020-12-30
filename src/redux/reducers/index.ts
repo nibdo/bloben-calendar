@@ -27,8 +27,11 @@ import isFirstLogin from './isFirstLogin';
 import pgpKeys from './pgpKeys';
 import password from './password';
 import defaultCalendar from './defaultCalendar';
+import eventsToImport from './eventsToImport';
+import isAndroidApp from './isAndroidApp';
 
 export const allReducers: any = combineReducers({
+    isAndroidApp,
     pgpKeys,
     defaultCalendar,
     password,
@@ -37,6 +40,7 @@ export const allReducers: any = combineReducers({
     calendarDays: calendarDaysReducer,
     cryptoPassword: cryptoPasswordReducer,
     events: eventsReducer,
+    eventsToImport,
     calendarView: calendarViewReducer,
     selectedEvent: selectedEventReducer,
     calendars: calendarsReducer,

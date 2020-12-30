@@ -9,7 +9,10 @@ import AnonymView from '../bloben-package/layers/anonym-layer';
 import { useDispatch, useSelector } from 'react-redux';
 import {
     setCalendarBodyHeight,
-    setCalendarBodyWidth, setDefaultCalendar,
+    setCalendarBodyWidth,
+    setDefaultCalendar,
+    setEventsToImport,
+    setIsAndroidApp,
     setIsAppStarting,
     setIsMobile,
 } from '../redux/actions';
@@ -24,6 +27,8 @@ import GeneralApi from '../bloben-common/api/general.api';
 import { MOBILE_MAX_WIDTH } from '../bloben-common/utils/common';
 import * as openpgp from 'openpgp';
 import CalendarApi from "../api/calendar";
+// @ts-ignore
+import Modal from "../bloben-package/components/modal";
 
 // Init webworker for better openpgp performance outside main thread
 openpgp.initWorker({ path: 'openpgp.worker.js' })
@@ -35,6 +40,7 @@ const StoreLayer = (props: any) => {
     const height = useCurrentHeight();
     const width = useCurrentWidth();
     const dispatch: any = useDispatch();
+    const history: any = useHistory();
 
     // Redux selectors
     const cryptoPassword: string = useSelector((state: any) => state.cryptoPassword);
@@ -44,6 +50,7 @@ const StoreLayer = (props: any) => {
     const username: string = useSelector((state: any) => state.username);
     const isLogged: boolean = useSelector((state: any) => state.isLogged);
     const defaultCalendar: string = useSelector((state: any) => state.defaultCalendar);
+    const eventsToImport: string = useSelector((state: any) => state.eventsToImport);
 
     /**
      * Set mobile/desktop layout
@@ -91,6 +98,7 @@ const StoreLayer = (props: any) => {
      * Try to load user from database or load remote with saved session
      */
     useEffect(() => {
+
         // Init authentication
         const initApp: any = async () => {
             dispatch(setIsAppStarting(true))
@@ -131,18 +139,43 @@ const StoreLayer = (props: any) => {
         };
 
         initApp();
-    }, []);
 
+    }, []);
 
     // Verify authentication
     const isAuthenticated: boolean =
         isLogged && username.length > 1 && (cryptoPassword.length > 1 || password.length > 1);
+
+    /**
+     * Set listener for React Native Wrapper
+     */
+    useEffect(() => {
+        document.addEventListener("message", function (event) {
+            // @ts-ignore
+            const messageObj: any = JSON.parse(event.data);
+            const {action, data} = messageObj;
+
+            if (action === 'eventImport') {
+                dispatch(setEventsToImport(data))
+                history.push('/events/import/ics')
+            }
+
+            if (action === 'isAndroidApp') {
+                dispatch(setIsAndroidApp(true))
+            }
+
+            // window.postMessage(event.data);
+        });
+    }, [])
+
+
 
     // TODO PIN code
     const needPinCode: boolean = false;
 
     return (
         <div className={`root__wrapper${isDark ? '-dark' : ''}`}>
+
     {isAuthenticated ? (
         <AuthenticatedLayer initPath={initPath} />
     ) : needPinCode ? (
