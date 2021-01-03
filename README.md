@@ -24,3 +24,5 @@ Initial release
 
 - ics import/export
 - calendar sharing
+- data encryption in device
+- React Native wrapper for fingerprint unlock and ics file import
