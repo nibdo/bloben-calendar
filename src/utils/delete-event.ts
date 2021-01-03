@@ -1,5 +1,5 @@
 import CalendarApi from '../api/calendar';
-import { reduxStore } from '../App';
+import { reduxStore } from '../layers/redux-layer';
 import { addEvents, setEvents } from '../redux/actions';
 import { cloneDeep } from './common';
 

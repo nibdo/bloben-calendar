@@ -82,19 +82,6 @@ export default class CalendarStateEntity {
     }
   }
 
-  public createFromEncrypted = (encryptedData: any, decryptedData: any) => {
-    this.id = encryptedData.id
-    this.name = decryptedData.name;
-    this.color = encryptedData.color;
-    this.reminders = encryptedData.reminders;
-    this.createdAt = parseToDate(encryptedData.createdAt);
-    this.updatedAt = parseToDate(encryptedData.updatedAt);
-    this.isShared = encryptedData.isShared;
-    this.isPublic = encryptedData.isPublic;
-    this.isLocal = false;
-    this.isSynced = true;
-  }
-
   public getStoreObj = () => {
     return {
       id: this.id,

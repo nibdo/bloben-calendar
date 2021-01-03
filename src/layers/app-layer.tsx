@@ -21,19 +21,23 @@ import {
     CALENDAR_OFFSET_LEFT, HEADER_HEIGHT_BASE, HEADER_HEIGHT_BASE_DESKTOP, NAVBAR_HEIGHT_BASE
 } from '../components/calendar-view/calendar-common';
 import { logOut } from '../bloben-package/utils/logout';
-import { logger } from '../bloben-package/utils/common';
+import {
+    BIOMETRIC_SUPPORT_KEY,
+    sendMessageToReactNative
+} from '../bloben-package/utils/common';
 import axios from 'axios';
 import GeneralApi from '../bloben-common/api/general.api';
 import { MOBILE_MAX_WIDTH } from '../bloben-common/utils/common';
 import * as openpgp from 'openpgp';
-import CalendarApi from "../api/calendar";
+import CalendarApi from '../api/calendar';
 // @ts-ignore
-import Modal from "../bloben-package/components/modal";
+import Modal from '../bloben-package/components/modal';
+import { logger } from 'bloben-common/utils/common';
 
 // Init webworker for better openpgp performance outside main thread
 openpgp.initWorker({ path: 'openpgp.worker.js' })
 
-const StoreLayer = (props: any) => {
+const AppLayer = (props: any) => {
     const { initPath } = props;
 
     // Hooks
@@ -56,6 +60,7 @@ const StoreLayer = (props: any) => {
      * Set mobile/desktop layout
      */
     useEffect(() => {
+
         // tslint:disable-next-line:no-magic-numbers
         if (width < MOBILE_MAX_WIDTH) {
             dispatch(setIsMobile(true))
@@ -66,12 +71,13 @@ const StoreLayer = (props: any) => {
             dispatch(setCalendarBodyWidth(width - CALENDAR_OFFSET_LEFT - CALENDAR_DRAWER_DESKTOP_WIDTH))
             dispatch(setCalendarBodyHeight(height - HEADER_HEIGHT_BASE_DESKTOP))
         }
-    }, [width, isAppStarting]);
+    },        [width, isAppStarting]);
 
     /*
      * Add listener for preferred color theme
      */
     useEffect(() => {
+
         window.matchMedia('(prefers-color-scheme: dark)').addListener(async (e) => {
             // First check if system settings for theme are set
             // TODO GET THEME FROM STORE
@@ -87,11 +93,11 @@ const StoreLayer = (props: any) => {
                 await changeTheme('light', dispatch);
             }
         });
-    }, []);
+    },        []);
 
     useEffect(() => {
         GeneralApi.sendVisit(width < MOBILE_MAX_WIDTH, (username !== null || username !== '') && username.length > 1)
-    }, [])
+    },        [])
 
     /*
      * First initialization of app
@@ -108,7 +114,6 @@ const StoreLayer = (props: any) => {
                 // Try to compare userData with server
                 try {
                     const userData: any = (await Axios.get('/user/account')).data;
-
                     if (defaultCalendar.length < 1) {
 
                         // Load app settings
@@ -117,13 +122,11 @@ const StoreLayer = (props: any) => {
                         dispatch(setDefaultCalendar(settings.defaultCalendar))
                     }
 
-
                     // TODO CHECK if while offline it doesn't delete database
                     if (
                         (userData.username && userData.username !== username) ||
                         !userData.username
                     ) {
-
 
                         // Different user, destroy prev user
                         // TODO CLEAR REDUX
@@ -140,7 +143,7 @@ const StoreLayer = (props: any) => {
 
         initApp();
 
-    }, []);
+    },        []);
 
     // Verify authentication
     const isAuthenticated: boolean =
@@ -150,7 +153,7 @@ const StoreLayer = (props: any) => {
      * Set listener for React Native Wrapper
      */
     useEffect(() => {
-        document.addEventListener("message", function (event) {
+        document.addEventListener('message', function(event) {
             // @ts-ignore
             const messageObj: any = JSON.parse(event.data);
             const {action, data} = messageObj;
@@ -159,33 +162,20 @@ const StoreLayer = (props: any) => {
                 dispatch(setEventsToImport(data))
                 history.push('/events/import/ics')
             }
-
-            if (action === 'isAndroidApp') {
-                dispatch(setIsAndroidApp(true))
-            }
-
-            // window.postMessage(event.data);
         });
-    }, [])
-
-
-
-    // TODO PIN code
-    const needPinCode: boolean = false;
+    },        [])
 
     return (
         <div className={`root__wrapper${isDark ? '-dark' : ''}`}>
 
-    {isAuthenticated ? (
-        <AuthenticatedLayer initPath={initPath} />
-    ) : needPinCode ? (
-        <AuthenticatedLayer initPath={initPath} />
-    ) : (
+    {isAuthenticated ?
+        <AuthenticatedLayer initPath={initPath} encryptDataOnUnload={props.encryptDataOnUnload}/>
+     :
         <AnonymView />
-    )}
+    }
     {isAppStarting ? <LoadingScreen /> : null}
     </div>
 );
 };
 
-export default StoreLayer;
+export default AppLayer;

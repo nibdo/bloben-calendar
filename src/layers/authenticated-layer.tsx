@@ -50,7 +50,7 @@ import Axios from '../bloben-common/utils/axios';
 import Search from '../views/search';
 import IntroScreen from '../views/intro-screen/intro-screen';
 import { checkIfIsSafari } from '../bloben-package/utils/common';
-import { logger } from '../bloben-package/utils/common';
+import { logger } from 'bloben-common/utils/common';
 import EventImportButton from "../components/EventImporter/EventImportButton/EventImportButton";
 import EventImport from "../components/EventImporter/EventImport";
 
@@ -90,6 +90,9 @@ const AuthenticatedLayer = (props: any) => {
   const dispatch: Dispatch = useDispatch();
 
   const closeWebsockets = () => {
+    // if (window.localStorage.getItem('isStorageProtected') === STRING_TRUE) {
+    //   props.encryptDataOnUnload()
+    // }
     if (stompClient) {
       stompClient.disconnect();
     }

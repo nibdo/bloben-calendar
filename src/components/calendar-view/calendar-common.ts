@@ -7,7 +7,7 @@ import {
   parseISO,
   subDays, subMonths,
 } from 'date-fns';
-import { reduxStore } from '../../App';
+import { reduxStore } from '../../layers/redux-layer';
 import { setSelectedDate } from '../../redux/actions';
 
 const ONE_DAY: number = 1;

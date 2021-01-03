@@ -142,8 +142,6 @@ const EventImport = (props: any) => {
     // Parse string ics events to obj
     const parsedEvents: any = IcsParser.parseFile(fileString);
 
-    console.log('parsedEvents', parsedEvents)
-    console.log('calendar', calendar)
     if  (!calendar) {
       setCalendar(calendars[0]);
     }

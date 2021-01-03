@@ -4,7 +4,7 @@ import {
   parseStartAtDateForNotification
 } from "./common";
 import { checkIfIsSafari } from '../bloben-package/utils/common';
-import {logger} from "../bloben-package/utils/common";
+import { logger } from 'bloben-common/utils/common';
 
 const isSafari = checkIfIsSafari();
 

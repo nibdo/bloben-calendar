@@ -15,7 +15,8 @@ import { logOut } from '../../bloben-package/utils/logout';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import SettingsSecurity
-    from "../../bloben-package/views/settings-security/settings-account";
+    from "bloben-package/views/settings-security/settings-security";
+import { BIOMETRIC_SUPPORT_KEY, sendMessageToReactNative } from '../../bloben-package/utils/common';
 
 const SettingsRouter = (props: any) =>
   (
@@ -51,6 +52,9 @@ const SettingsRouterDesktop = (props: any) =>
       <Route path={'/settings/appearance'}>
         <Appearance />
       </Route>
+        <Route path={'/settings/security'}>
+                <SettingsSecurity />
+        </Route>
     </div>
   );
 
@@ -81,6 +85,16 @@ const SettingsBaseView = (props: any ) => {
                         title={'Account'}
                         link={'account'}
                         description={'Delete account'}
+                    />
+                    <SettingsItem
+                        icon={
+                            <EvaIcons.Lock
+                                className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}
+                            />
+                        }
+                        title={'Security'}
+                        link={'security'}
+                        description={'Storage encryption'}
                     />
                     <SettingsItem
                         icon={
@@ -143,6 +157,7 @@ const SettingsView = (props: any) => {
       isMobile ? <SettingsRouter /> : <SettingsRouterDesktop />
   );
 };
+
 
 const Settings = () =>
   <SettingsView />;

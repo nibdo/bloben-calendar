@@ -1,6 +1,6 @@
 import { stompClient } from '../layers/authenticated-layer';
 import { decryptAllEvents, decryptEvents } from './decrypt-events';
-import { reduxStore } from '../App';
+import { reduxStore } from '../layers/redux-layer';
 import Crypto from '../bloben-package/utils/encryption';
 import { addCalendar, setCalendars, setEvents } from '../redux/actions';
 import EventStateEntity from '../data/entities/state/event.entity';
@@ -14,6 +14,7 @@ import { GetEventWebsocketByIdDTO } from '../types/types';
 import { isBefore, parseISO } from 'date-fns';
 import CalendarStateEntity from '../data/entities/state/calendar.entity';
 import OpenPgp, {PgpKeys} from "../bloben-package/utils/OpenPgp";
+import { LocalForage } from '../bloben-package/utils/LocalForage';
 
 // Message constants
 const WEBSOCKET_EVENT_MESSAGE: WebsocketMessageType = 'event'
@@ -266,7 +267,7 @@ const WebsocketHandler = {
 
             // Merge
             const calendarData: any = {...item, ...decryptedData};
-            const calendar: CalendarStateEntity = new CalendarStateEntity(calendarData);
+            const calendar: any = new CalendarStateEntity(calendarData).getStoreObj();
 
             const calendarInState: CalendarStateEntity | null = await findInArrayById(stateClone, id);
 

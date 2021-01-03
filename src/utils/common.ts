@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { reduxStore } from '../App';
+import { reduxStore } from '../layers/redux-layer';
 import { TCalendarNotificationType } from '../types/types';
 import { v4 } from 'uuid';
 import {

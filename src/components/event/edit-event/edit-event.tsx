@@ -279,7 +279,7 @@ const EditEvent = (props: any) => {
     // Different handling for new event and edited event
     if (isNewEvent) {
       // Get only simple object
-      const simpleObj: EventStateEntity = newEvent.getReduxStateObj();
+      const simpleObj: any = newEvent.getReduxStateObj();
 
       // Save to redux store
       dispatch(mergeEvent(simpleObj));

@@ -1,5 +1,5 @@
 import Crypto from '../bloben-package/utils/encryption';
-import { reduxStore } from '../App';
+import { reduxStore } from '../layers/redux-layer';
 import {
   setAllEvents,
   setEvents,
@@ -11,7 +11,7 @@ import EventStateEntity from '../data/entities/state/event.entity';
 import { findInArrayWithIndex } from './filter/findInArray';
 import { EventResultDTO } from '../data/types';
 import eventsLastSynced from '../redux/reducers/eventsLastSynced';
-import { logger } from '../bloben-package/utils/common';
+import { logger } from 'bloben-common/utils/common';
 import OpenPgp, { PgpKeys } from '../bloben-package/utils/OpenPgp';
 
 const decryptEvent = async (
