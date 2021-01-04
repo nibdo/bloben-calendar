@@ -4,6 +4,7 @@ import { stompClient } from '../layers/authenticated-layer';
 
 export const APP_API_PREFIX: string = '/calendar-app';
 export const API_GET_CALENDAR_SETTINGS: string = 'settings';
+export const API_GET_SCHEDULED_REMINDERS: string = 'scheduled-reminders';
 
 export const WEBSOCKET_GET_ONE_EVENT: string = '/app/events/get/one'
 export const WEBSOCKET_GET_ALL_EVENTS: string = '/app/events/get/all'
@@ -28,9 +29,22 @@ export const sendWebsocketMessage = (destination: string, data?: any | null) => 
 
 const CalendarApi = {
   getCalendarSettings: async () => {
-    const result: any = (await Axios.get(`${APP_API_PREFIX}/${API_GET_CALENDAR_SETTINGS}`)).data;
+    const result: any = await Axios.get(`${APP_API_PREFIX}/${API_GET_CALENDAR_SETTINGS}`);
 
-    return result;
+    if (result) {
+      return result.data;
+    }
+
+    return
+  },
+  getScheduledReminders: async () => {
+    const result: any = await Axios.get(`${APP_API_PREFIX}/${API_GET_SCHEDULED_REMINDERS}`);
+
+    if (result) {
+      return result.data;
+    }
+
+    return
   },
   /*
    * Get calendars from server, check only new one after repeated attempts

@@ -72,6 +72,7 @@ const EncryptionLayer = (props: any) => {
       // @ts-ignore
       if (window && window.ReactNativeWebView) {
         await LocalForage.setItem('isReactNative', true);
+        setContext('isReactNative', true)
         // Ask RN if Biometric is supported
         // TODO remove?
         sendMessageToReactNative({
@@ -94,6 +95,10 @@ const EncryptionLayer = (props: any) => {
 
       // Init state
       setIsLoading(false);
+
+      if (isReactNativeLocalValue) {
+        setContext('isReactNative', true)
+      }
 
       // Handle Encrypted by React Native wrapper
       if (

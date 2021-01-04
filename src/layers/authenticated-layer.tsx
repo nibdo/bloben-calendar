@@ -1,5 +1,5 @@
 import { createBrowserHistory } from 'history';
-import React, {  useEffect } from 'react';
+import React, { useContext, useEffect } from 'react';
 import { Route } from 'react-router-dom';
 import { Redirect, Router } from 'react-router';
 import {
@@ -36,12 +36,12 @@ import {
   getArrayEnd,
   getArrayStart, getDayTimeEnd,
   getDayTimeStart, getEventAndCalendarIds,
-  nullTimeInDate
+  nullTimeInDate, parseStartAtDateForNotification
 } from '../utils/common';
 import { subscribeToPush } from '../bloben-package/utils/pushSubscription';
 import { setServiceWorkerLister } from '../utils/ServiceWorkerListener';
 import EditCalendar from '../views/calendar-edit/edit-calendar/edit-calendar';
-import {
+import CalendarApi, {
   sendWebsocketMessage,
   WEBSOCKET_GET_ALL_CALENDARS, WEBSOCKET_GET_ALL_EVENTS,
   WEBSOCKET_GET_EVENTS, WEBSOCKET_SYNC_CALENDARS, WEBSOCKET_SYNC_EVENTS
@@ -49,10 +49,15 @@ import {
 import Axios from '../bloben-common/utils/axios';
 import Search from '../views/search';
 import IntroScreen from '../views/intro-screen/intro-screen';
-import { checkIfIsSafari } from '../bloben-package/utils/common';
+import {
+  checkIfIsSafari,
+  findInArrayById,
+  sendMessageToReactNative
+} from '../bloben-package/utils/common';
 import { logger } from 'bloben-common/utils/common';
 import EventImportButton from "../components/EventImporter/EventImportButton/EventImportButton";
 import EventImport from "../components/EventImporter/EventImport";
+import { Context } from '../bloben-package/context/store';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -72,6 +77,10 @@ const initialState = {
 };
 
 const AuthenticatedLayer = (props: any) => {
+  const [store] = useContext(Context);
+
+  const {isReactNative} = store;
+
   const calendars: any = useSelector((state: any) => state.calendars);
   const events: any = useSelector((state: any) => state.events);
   const rangeFrom: any = useSelector((state: any) => state.rangeFrom);
@@ -80,19 +89,18 @@ const AuthenticatedLayer = (props: any) => {
   const calendarDaysCurrentIndex: number = useSelector((state: any) => state.calendarDaysCurrentIndex);
   const isFirstLogin: boolean = useSelector((state: any) => state.isFirstLogin);
   const isMobile: boolean = useSelector((state: any) => state.isMobile);
+  const allEvents: any = useSelector((state: any) => state.allEvents);
 
   const cryptoPassword: string = useSelector((state: any) => state.cryptoPassword);
   const selectedDate: Date = useSelector((state: any) => state.selectedDate);
   const calendarView: string = useSelector((state: any) => state.calendarView);
   const isAppStarting: boolean = useSelector((state: any) => state.isAppStarting);
   const eventsToImport: string = useSelector((state: any) => state.eventsToImport);
+  const eventsLastSynced: Date = useSelector((state: any) => state.eventsLastSynced);
 
   const dispatch: Dispatch = useDispatch();
 
   const closeWebsockets = () => {
-    // if (window.localStorage.getItem('isStorageProtected') === STRING_TRUE) {
-    //   props.encryptDataOnUnload()
-    // }
     if (stompClient) {
       stompClient.disconnect();
     }
@@ -101,7 +109,6 @@ const AuthenticatedLayer = (props: any) => {
 
   useEffect(() =>
     () => {
-      // alert("AsDAd")
       closeWebsockets()
     },      []);
 
@@ -150,22 +157,20 @@ const AuthenticatedLayer = (props: any) => {
     }
 
 
-
-
     // TODO to websocket
     const sendIdsToSync = () => {
       // Get event and calendar ids
       const data: any = getEventAndCalendarIds();
-      const {calendars, events} = data;
 
       if (calendars && calendars.length > 0) {
-        sendWebsocketMessage(WEBSOCKET_SYNC_CALENDARS, calendars)
+        sendWebsocketMessage(WEBSOCKET_SYNC_CALENDARS, data.calendars)
       }
 
       if (events && events.length > 0) {
-        sendWebsocketMessage(WEBSOCKET_SYNC_EVENTS, events)
+        sendWebsocketMessage(WEBSOCKET_SYNC_EVENTS, data.events)
       }
     }
+
 
     // Init connection
     stompClient.connect('user', 'password',
@@ -179,6 +184,7 @@ const AuthenticatedLayer = (props: any) => {
                             const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
 
                             sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS)
+                            sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null})
                             sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {rangeFrom: formatISO(rangeFromInit), rangeTo: formatISO(rangeToInit)})
                             dispatch(setIsAppStarting(false))
                             // Send all event and calendar ids to server to check if they exist
@@ -216,6 +222,7 @@ const AuthenticatedLayer = (props: any) => {
   const initLoad = async () => {
     connectToWs()
 
+
     if (!checkIfIsSafari()) {
       await setServiceWorkerLister();
       await subscribeToPush();
@@ -233,8 +240,40 @@ const AuthenticatedLayer = (props: any) => {
 
   };
 
+
+  // Get scheduled reminders for notifications from React Native wrapper
+  const getRemindersForReactNative = async () => {
+    if (isReactNative) {
+
+      const result: any = [];
+      // Get current reminders
+      const reminders: any = await CalendarApi.getScheduledReminders();
+
+      for (const reminder of reminders) {
+        const reminderPayload: any = JSON.parse(reminder.payload);
+
+        const eventWithReminder: any = await findInArrayById(allEvents, reminderPayload.id);
+
+        reminder.title = 'Event reminder';
+
+        if (eventWithReminder) {
+          reminder.body = `${eventWithReminder.text} ${parseStartAtDateForNotification(eventWithReminder.startAt)}`;
+        } else {
+          reminder.body = 'Unknown body';
+        }
+
+        result.push(reminder);
+      }
+
+      // Try to find events in storage to get decrypted text content for local notification
+      sendMessageToReactNative({action: 'scheduledReminders', data: reminders})
+    }
+  };
+
   useEffect(() => {
     initLoad();
+
+    getRemindersForReactNative()
     const currentDate: any = new Date();
     initCalendar(currentDate);
 
@@ -412,12 +451,13 @@ const AuthenticatedLayer = (props: any) => {
     <div className={'app_wrapper'}>
       {/*{!cryptoPassword ? <Redirect to={'/calendar'}/> : null}*/}
       <Router history={history}>
-        {userCustomRoute && userCustomRoute !== '' && userCustomRoute !== '/' ? (
-          <Redirect to={userCustomRoute} />
-        ) : (
-          <Redirect to={'/calendar'} />
-        )
-        }
+        {/*{userCustomRoute && userCustomRoute !== '' && userCustomRoute !== '/' ? (*/}
+        {/*  <Redirect to={userCustomRoute} />*/}
+        {/*) : (*/}
+        {/*  <Redirect to={'/calendar'} />*/}
+        {/*)*/}
+        {/*}*/}
+        <Redirect to={'/calendar'} />
         <Route exact path={'/search'}>
           {isMobile ? (
             <Modal {...props}>
