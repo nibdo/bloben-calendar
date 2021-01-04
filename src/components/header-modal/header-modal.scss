@@ -27,6 +27,17 @@ $HEADER_HEIGHT_MOBILE: 56px;
     padding: 0;
   }
 }
+
+.header-modal__forced-back-button {
+  display: flex;
+  top: 0;
+  left: 0;
+  z-index: 99;
+  flex-direction: column;
+  height: $HEADER_HEIGHT_MOBILE;
+  padding: 0;
+}
+
 .header-modal__wrapper-dark {
   @extend .header-modal__wrapper;
   background-color: $SURFACE_DARK;

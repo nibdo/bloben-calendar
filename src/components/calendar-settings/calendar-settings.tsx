@@ -43,7 +43,7 @@ const CalendarSettingsView = (props: any) => {
       />
       <CalendarSettingsItem
           title={'Import events'}
-          onClick={() => navigateTo('/events/import')}
+          onClick={() => navigateTo('/calendar/events/import')}
       />
       <CalendarSettingsItem
         title={'Settings'}

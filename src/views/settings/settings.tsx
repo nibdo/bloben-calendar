@@ -16,7 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import SettingsSecurity
     from "bloben-package/views/settings-security/settings-security";
-import { BIOMETRIC_SUPPORT_KEY, sendMessageToReactNative } from '../../bloben-package/utils/common';
+import { Router } from 'react-router';
 
 const SettingsRouter = (props: any) =>
   (
@@ -43,20 +43,30 @@ const SettingsRouter = (props: any) =>
         </Route>
     </div>
   );
-const SettingsRouterDesktop = (props: any) =>
-  (
-    <div style={{ width: '100%' }}>
-      <Route path={'/settings/account'}>
-        <SettingsAccount />
-      </Route>
-      <Route path={'/settings/appearance'}>
-        <Appearance />
-      </Route>
-        <Route path={'/settings/security'}>
-                <SettingsSecurity />
-        </Route>
-    </div>
-  );
+const SettingsRouterDesktop = (props: any) => {
+
+    return   (
+        <div style={{display: 'flex', flexDirection: 'row', height: '100%', width: '100%'}}>
+            <div style={{display: 'flex', flexDirection: 'column', height: '100%', width: '30%'}}>
+                    <SettingsBaseView />
+            </div>
+            <div style={{display: 'flex', flexDirection: 'column', height: '100%', width: '70%'}}>
+                    <Route path={'/settings/account'}>
+                        <SettingsAccount />
+                    </Route>
+                    <Route path={'/settings/appearance'}>
+                        <Appearance />
+                    </Route>
+                    <Route  path={'/settings/security'}>
+                        <div style={{display: 'flex', flexDirection: 'column', height: '100%'}}>
+                            <SettingsSecurity />
+                        </div>
+                    </Route>
+            </div>
+        </div>
+    );
+}
+
 
 const SettingsBaseView = (props: any ) => {
     const dispatch: Dispatch = useDispatch();
@@ -67,12 +77,12 @@ const SettingsBaseView = (props: any ) => {
         logOut(dispatch);
 
     return (
-        <div className={`column${isDark ? '-dark' : ''}`}>
+        <div className={`settings__wrapper_former${isDark ? '-dark' : ''}`}>
             {isMobile ? (
-                <HeaderModal />
-            ) : (
-                <Header title={'Settings'} hasHeaderShadow={false} />
-            )}
+                    <HeaderModal/>
+                ) :
+                null
+            }
             <div className={'settings__wrapper'}>
                 <div className={'settings__container'}>
                     <MobileTitle title={'Settings'} />

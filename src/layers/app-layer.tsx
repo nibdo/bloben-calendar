@@ -160,7 +160,7 @@ const AppLayer = (props: any) => {
 
             if (action === 'eventImport') {
                 dispatch(setEventsToImport(data))
-                history.push('/events/import/ics')
+                history.push('/calendar/events/import/ics')
             }
         });
     },        [])

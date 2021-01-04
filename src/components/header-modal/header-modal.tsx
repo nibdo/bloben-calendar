@@ -20,19 +20,20 @@ const HeaderModalMobile = (props: any) => {
     handleSave,
     title,
     icons,
+    forceBackButton
   } = props;
   const isMobile: boolean = useSelector((state: any) => state.isMobile);
   const isDark: boolean = useSelector((state: any) => state.isDark);
 
   return (
     <div
-      className={`header-modal__row${
+      className={forceBackButton ? 'header-modal__forced-back-button' : `header-modal__row${
         hasHeaderShadow && isMobile ? '-shadow' : ''
       }
       `}
     >
       <div className={'header-modal__icon-left'}>
-        {isMobile ? (
+        {isMobile || forceBackButton ? (
           <IconButton onClick={goBack}>
             <ArrowBack className={`icon-svg${isDark ? '-dark' : ''}`} />
           </IconButton>
@@ -81,6 +82,7 @@ const HeaderModalView = (props: any) => {
     isFavourite,
     handleSave,
     title,
+    forceBackButton,
   } = props;
   const isDark: boolean = useSelector((state: any) => state.isDark);
   const isMobile: boolean = useSelector((state: any) => state.isMobile);
@@ -104,6 +106,7 @@ const HeaderModalView = (props: any) => {
           isFavourite={isFavourite}
           handleSave={handleSave}
           title={title}
+          forceBackButton={forceBackButton}
         />
       </div>
     </div>
@@ -120,7 +123,8 @@ const HeaderModal = (props: any) => {
     isFavourite,
     handleSave,
     title,
-      onClose
+      onClose,
+    forceBackButton
   } = props;
   const [animation, setAnimation] = useState('');
   const history = useHistory();
@@ -159,6 +163,7 @@ const HeaderModal = (props: any) => {
       isFavourite={isFavourite}
       handleSave={handleSave}
       title={title}
+      forceBackButton={forceBackButton}
     />
   );
 };

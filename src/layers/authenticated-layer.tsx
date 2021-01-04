@@ -403,20 +403,21 @@ const AuthenticatedLayer = (props: any) => {
   // Redirect to event import
   useEffect(() => {
     if (eventsToImport.length > 2) {
-      history.push('/events/import/ics')
+      history.push('/calendar/events/import/ics')
     }
 
   }, [eventsToImport])
 
   return !isAppStarting ? (
     <div className={'app_wrapper'}>
-      {!cryptoPassword ? <Redirect to={'/'}/> : null}
+      {/*{!cryptoPassword ? <Redirect to={'/calendar'}/> : null}*/}
       <Router history={history}>
-        {userCustomRoute && userCustomRoute !== '/login/pin-code' ? (
+        {userCustomRoute && userCustomRoute !== '' && userCustomRoute !== '/' ? (
           <Redirect to={userCustomRoute} />
         ) : (
-          <Redirect to={'/'} />
-        )}
+          <Redirect to={'/calendar'} />
+        )
+        }
         <Route exact path={'/search'}>
           {isMobile ? (
             <Modal {...props}>
@@ -438,7 +439,12 @@ const AuthenticatedLayer = (props: any) => {
             </div>
           )}
         </Route>
-        <Route path={'/'}>
+        <Route path={'/settings'}>
+          {isMobile ?           <Modal {...props}>
+            <Settings />
+          </Modal> : <Settings/>}
+        </Route>
+        <Route path={'/calendar'}>
           {(calendarDays &&
             selectedDate &&
             calendarDays.length > 0 &&
@@ -466,17 +472,13 @@ const AuthenticatedLayer = (props: any) => {
            <EditCalendar />
           </Modal>
         </Route>
-        <Route path={'/settings'}>
-          <Modal {...props}>
-            <Settings />
-          </Modal>
-        </Route>
-        <Route path={'/events/import'}>
+
+        <Route path={'/calendar/events/import'}>
           <Modal {...props}>
             <EventImportButton autoFocus={true}/>
           </Modal>
         </Route>
-        <Route path={'/events/import/ics'}>
+        <Route path={'/calendar/events/import/ics'}>
           <Modal {...props}>
             <EventImport />
           </Modal>

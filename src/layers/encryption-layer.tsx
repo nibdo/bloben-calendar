@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import Crypto from '../bloben-package/utils/encryption';
 import BrowserLayer from './browser-layer';
 import {
@@ -12,22 +12,44 @@ import {
 } from '../bloben-package/utils/common';
 import { v4 } from 'uuid';
 import GetPin from '../bloben-package/views/get-pin/get-pin';
-import { logger } from 'bloben-common/utils/common';
+import { logger, MOBILE_MAX_WIDTH } from 'bloben-common/utils/common';
 import { LocalForage } from '../bloben-package/utils/LocalForage';
 import OpenPgp, { PgpKeys } from '../bloben-package/utils/OpenPgp';
 import { MAX_PIN_UNLOCK_ATTEMPTS } from '../bloben-package/components/pin-input/pin-input';
 import { logOut } from '../bloben-package/utils/logout';
+import { useCurrentWidth } from '../bloben-common/utils/layout';
+import Store, { Context } from '../bloben-package/context/store';
+import Snackbar from '../bloben-package/components/snackbar/snackbar';
+import pin from '../bloben-package/utils/pin';
 
 // TODO Find how to encrypt/decrypt localstorage with redux store without deleting former item
 
 const EncryptionLayer = (props: any) => {
+  const [store, dispatch] = useContext(Context);
+
   const [isStorageEncrypted, setIsStorageEncrypted] = useState(false);
   const [state, setState] = useState(null);
+
   const [wasUnlocked, setWasUnlocked] = useState(false)
   const [isLoading, setIsLoading] = useState(true);
   const [encryptionType, setEncryptionType] = useState('');
 
-  const [isReactNative, setIsReactNative] = useState(false);
+  const width = useCurrentWidth();
+
+  const setContext = (type: string, payload: any) => {
+    dispatch({ type, payload });
+  };
+
+  /**
+   * Set mobile/desktop layout
+   */
+  useEffect(() => {
+    if (width < MOBILE_MAX_WIDTH) {
+      setContext('isMobile', true)
+    } else {
+      setContext('isMobile', false)
+    }
+  },        [width]);
 
   const changeStorageEncryptedStatus = async (value: boolean): Promise<void> => {
     await LocalForage.setItem('isStorageEncrypted', value);
@@ -91,7 +113,6 @@ const EncryptionLayer = (props: any) => {
           isStorageEncryptedValue &&
           encryptionTypeLocalValue === 'PIN'
       ) {
-        console.log('encryptionTypeLocalValue', encryptionTypeLocalValue)
         setEncryptionType('PIN')
       }
     }
@@ -105,14 +126,14 @@ const EncryptionLayer = (props: any) => {
     await LocalForage.setItem('encryptionType', 'Biometric')
     await LocalForage.setItem('isStorageEncrypted', true)
 
-    const store: any = await LocalForage.getItem('root')
+    const storage: any = await LocalForage.getItem('root')
 
     const pgpKeys: PgpKeys = await OpenPgp.generateKeys('username', password);
 
     await LocalForage.setItem('systemKeys', pgpKeys);
 
     // Encrypt storage
-    const encrypted: any = await OpenPgp.encrypt(pgpKeys.publicKey, store);
+    const encrypted: any = await OpenPgp.encrypt(pgpKeys.publicKey, storage);
 
     await LocalForage.setItem('root', encrypted)
 
@@ -151,7 +172,6 @@ const EncryptionLayer = (props: any) => {
       }
 
     } catch (error) {
-      console.log('NO')
       await handlePinUnlock(false);
       logger(error);
     }
@@ -175,6 +195,8 @@ const EncryptionLayer = (props: any) => {
           // Log out user and clear database
           await logOut();
         } else {
+          setContext('showSnackbar', {text: `Wrong PIN. ${pinCodeAttempts - 1 } remaining attempts.`})
+
           await LocalForage.setItem('pinCodeAttempts', pinCodeAttempts - 1);
 
           return false;
@@ -216,6 +238,12 @@ const EncryptionLayer = (props: any) => {
     });
   },        []);
 
+  const {snackbarIsVisible, snackbar} = store;
+
+  const handleCloseSnackbar = () => {
+    setContext('snackbarIsVisible', false);
+  }
+
 
   // Handle different statuses
   // @ts-ignore
@@ -228,13 +256,18 @@ const EncryptionLayer = (props: any) => {
     encryptionType === 'PIN' &&
     !state;
 
-  return isAuthorized ? (
-    <BrowserLayer isDecrypted={isAuthorized} state={state} />
-  ) : isPinProtected ? (
-    <GetPin decryptStorage={decryptStorage} />
-  ) : (
-    <h3>Error!</h3>
-  );
+  return <div style={{width: '100%', height: '100%'}}>
+
+    {isAuthorized ? (
+        <BrowserLayer isDecrypted={isAuthorized} state={state} />
+    ) : isPinProtected ? (
+            <GetPin decryptStorage={decryptStorage}/>
+        ) :
+        null}
+
+    <Snackbar
+    />
+  </div>
 };
 
 export default EncryptionLayer;

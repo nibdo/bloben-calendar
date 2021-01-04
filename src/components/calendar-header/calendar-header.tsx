@@ -37,7 +37,7 @@ const EventHeader = (props: any) => {
   const handleEventSelect = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    history.push(`/event/${props.event.id}`)
+    history.push(`/calendar/event/${props.event.id}`)
   }
 
   return (

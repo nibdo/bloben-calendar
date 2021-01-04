@@ -175,7 +175,7 @@ const CalendarView = (props: any) => {
           ) : null}
           </div>
           <Router history={history}>
-            <Route path={'/new/event'}>
+            <Route path={'/calendar/new/event'}>
               {isMobile ? <Modal
                       {...props}
                       handleCloseModal={() => history.goBack()}
@@ -192,7 +192,7 @@ const CalendarView = (props: any) => {
                   </Modal>
               }
             </Route>
-            <Route path={'/event/:id'}>
+            <Route path={'/calendar/event/:id'}>
               <Modal
                   {...props}
                   handleCloseModal={() => history.goBack()}
@@ -304,7 +304,7 @@ const Calendar = (props: any) => {
   };
   const openNewEvent = (eventData: any) => {
     setLocalState('newEventIsOpen', 'simple', eventData);
-    history.push('/new/event')
+    history.push('/calendar/new/event')
   };
   // const mappedCalendarsData: any = mapCalendarColors(calendars);
 
