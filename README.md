@@ -7,6 +7,10 @@ LIVE version: https://calendar.bloben.com
 Contact: hello@bloben.com
 
 # Change log
+- **0.2.3** \
+PIN lock for encrypting data in storage and access to app, \
+minor bug fixes, \
+preparation for usage with React Native wrapper (support for offline notifications, unlock with fingeprint, better native .ics file import)
 - **0.1.3** \
  added all day events,\
 fixed overlapping events,\
