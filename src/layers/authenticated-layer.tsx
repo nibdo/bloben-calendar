@@ -3,8 +3,8 @@ import React, { useContext, useEffect } from 'react';
 import { Route } from 'react-router-dom';
 import { Redirect, Router } from 'react-router';
 import {
-  addDays, addMonths,
-  formatISO,
+  addDays, addMonths, format,
+  formatISO, parseISO, parseJSON,
   subDays,
 } from 'date-fns';
 import {  Stomp } from '@stomp/stompjs';
@@ -257,7 +257,7 @@ const AuthenticatedLayer = (props: any) => {
         reminder.title = 'Event reminder';
 
         if (eventWithReminder) {
-          reminder.body = `${eventWithReminder.text} ${parseStartAtDateForNotification(eventWithReminder.startAt)}`;
+          reminder.body = `${eventWithReminder.text} starts at ${format(parseJSON(eventWithReminder.startAt), 'HH:MM, dd. MMMM')}`;
         } else {
           reminder.body = 'Unknown body';
         }
