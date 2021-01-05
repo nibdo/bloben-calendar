@@ -21,6 +21,7 @@ import { useCurrentWidth } from '../bloben-common/utils/layout';
 import Store, { Context } from '../bloben-package/context/store';
 import Snackbar from '../bloben-package/components/snackbar/snackbar';
 import pin from '../bloben-package/utils/pin';
+import LoadingScreen from '../bloben-common/components/loading-screen/loading-screen';
 
 // TODO Find how to encrypt/decrypt localstorage with redux store without deleting former item
 
@@ -272,6 +273,8 @@ const EncryptionLayer = (props: any) => {
 
     <Snackbar
     />
+    {isLoading ? <LoadingScreen /> : null}
+
   </div>
 };
 
