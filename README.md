@@ -29,9 +29,8 @@ Initial release
 - ics import/export
 - calendar sharing
 - React Native wrapper for fingerprint unlock and ics file import
-
+- timezones
 
 # Known bugs
 - missing support for importing repeated events from ics file and adding automatically reminders,
 - dark theme not covering all components,
-- session expiring too soon
