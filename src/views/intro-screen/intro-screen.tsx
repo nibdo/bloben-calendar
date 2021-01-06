@@ -69,6 +69,9 @@ const DonateScreen = () => {
     </Landing.FreeLayout>
 }
 
+// @ts-ignore
+const isReactNative: boolean = window.ReactNativeWebView;
+
 const DesktopLayout = (props: any) => {
     const {navToLogin, navToRegister} = props;
     const isMobile: any = useSelector((state: any) => state.isMobile);
@@ -103,7 +106,7 @@ const DesktopLayout = (props: any) => {
         </Landing.ContainerRow>
         </Landing.OneScreen>
        <AboutScreen/>
-       <DonateScreen/>
+        {isReactNative ? null : <DonateScreen/> }
        <Landing.Separator/>
         <Landing.Separator/>
         <Landing.Separator/>
