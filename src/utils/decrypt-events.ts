@@ -1,5 +1,5 @@
 import Crypto from '../bloben-package/utils/encryption';
-import { reduxStore } from '../layers/redux-layer';
+import { reduxStore } from '../bloben-package/layers/redux-layer';
 import {
   setAllEvents,
   setEvents,

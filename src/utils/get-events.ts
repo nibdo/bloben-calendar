@@ -10,7 +10,7 @@ import {
   isDate, parseISO,
   subDays,
 } from 'date-fns';
-import { reduxStore } from '../layers/redux-layer';
+import { reduxStore } from '../bloben-package/layers/redux-layer';
 import {  setIsAppStarting } from '../redux/actions';
 import { decryptEvents } from './decrypt-events';
 
