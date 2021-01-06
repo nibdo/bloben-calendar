@@ -28,7 +28,6 @@ Initial release
 
 - ics import/export
 - calendar sharing
-- React Native wrapper for fingerprint unlock and ics file import
 - timezones
 
 # Known bugs
