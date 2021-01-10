@@ -1,4 +1,4 @@
-@import "bloben-common/globals/theme.scss";
+@import 'bloben-common/globals/theme.scss';
 $DRAWER_WIDTH_DESKTOP: 270px;
 
 .search__wrapper {
@@ -28,7 +28,7 @@ $DRAWER_WIDTH_DESKTOP: 270px;
     width: 100%;
     border: solid 0.6px $GRAY_300;
     background: $GRAY_200;
-    border-radius: 6px
+    border-radius: 6px;
   }
 }
 .search__input-wrapper {
@@ -47,7 +47,7 @@ $DRAWER_WIDTH_DESKTOP: 270px;
 .search__input {
   font-size: 1.7rem !important;
   @media (min-width: 750px) {
-  width: 100%;
+    width: 100%;
     padding: 0 3px 0 3px !important;
   }
 }
@@ -73,7 +73,7 @@ $DRAWER_WIDTH_DESKTOP: 270px;
     box-shadow: $boxShadow;
   }
 }
-.small-icon-button{
+.small-icon-button {
   height: 100% !important;
   padding: 8px !important;
 }
@@ -81,17 +81,23 @@ $DRAWER_WIDTH_DESKTOP: 270px;
   height: 20px !important;
 }
 
-.search_empty__wrapper{
+.search_empty__wrapper {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding-top: 48px;
+  height: 100%;
   @media (min-width: 750px) {
     width: 100%;
     height: 100%;
     justify-content: center;
   }
+}
+
+.search_empty__text {
+  font-size: 1.4rem;
+  color: $GRAY_500;
 }
 
 .search__image {

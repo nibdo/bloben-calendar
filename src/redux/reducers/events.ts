@@ -1,7 +1,7 @@
 import {
     formatIsoStringDate,
     formatTimestampToDate
-} from '../../components/calendar-view/calendar-common';
+} from '../../components/calendarView/calendar-common';
 import { cloneDeep } from '../../utils/common';
 
 const events = (state: any = {}, action: any) => {

@@ -1,6 +1,6 @@
 import { v4 } from 'uuid';
 import { TCalendarNotificationType } from '../../../types/types';
-import { parseDateToString, parseToDate } from '../../../components/calendar-view/calendar-common';
+import { parseDateToString, parseToDate } from '../../../components/calendarView/calendar-common';
 import Crypto from '../../../bloben-package/utils/encryption';
 import OpenPgp from "../../../bloben-package/utils/OpenPgp";
 

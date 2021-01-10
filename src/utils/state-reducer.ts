@@ -1,7 +1,7 @@
 import {
   formatIsoStringDate,
   formatTimestampToDate
-} from '../components/calendar-view/calendar-common';
+} from '../components/calendarView/calendar-common';
 
 const StateReducer: any = (state: any, action: any): any => {
   // Replace whole state

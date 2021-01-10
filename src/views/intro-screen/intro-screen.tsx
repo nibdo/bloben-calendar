@@ -3,17 +3,17 @@ import './intro-screen.scss';
 import { useSelector } from 'react-redux';
 import TresorImage from 'bloben-common/assets/small.svg';
 
-import Landing from '../../bloben-common/components/Landing';
 import { useHistory } from 'react-router';
-import { createDemoAccount } from '../../bloben-package/utils/authentication/registerAccount';
-import DonateButton from '../../bloben-common/components/donateButton/donateButton';
-import BitcoinButton from '../../bloben-common/components/bitcoinButton/bitcoinButton';
-import BitcoinPopup from '../../bloben-common/components/bitcoinPopup/bitcoinPopup';
+import { createDemoAccount } from '../../bloben-package/utils/registerAccount';
 import CalendarText from '../../bloben-common/texts/calendar';
 import DonateText from '../../bloben-common/texts/donate';
 import CalendarImage from 'bloben-common/assets/calendar.png';
+import Landing from 'bloben-common/components/landing/Landing';
+import DonateButton from '../../bloben-common/components/donateButton/DonateButton';
 import DonateButtonPatreon
-    from '../../bloben-common/components/donateButtonPatreon/donateButtonPatreon';
+    from '../../bloben-common/components/donateButtonPatreon/DonateButtonPatreon';
+import BitcoinButton from '../../bloben-common/components/bitcoinButton/BitcoinButton';
+import BitcoinPopup from '../../bloben-common/components/bitcoinPopup/BitcoinPopup';
 
 const AboutScreen = () => {
     return  <Landing.FreeLayout id={'about'} >

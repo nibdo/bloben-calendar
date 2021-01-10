@@ -3,8 +3,6 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import 'bloben-common/index.scss';
-import 'typeface-open-sans';
-import 'typeface-montserrat';
 import 'typeface-poppins';
 
 ReactDOM.render(

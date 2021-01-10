@@ -17,7 +17,7 @@ import {
 } from 'date-fns';
 import EventStateEntity from '../data/entities/state/event.entity';
 import { setCalendars, setEvents } from '../redux/actions';
-import { formatTimestampToDate } from '../components/calendar-view/calendar-common';
+import { formatTimestampToDate } from '../components/calendarView/calendar-common';
 
 export const mapTags = (tags: any) => {
   const tagsObj: any = {};

@@ -1,37 +1,43 @@
-import React, {  useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './search.scss';
-import { compareWords } from '../../bloben-package/utils/search';
-import Input from '../../components/input';
-import { useHistory } from 'react-router-dom';
 import IconButton from '@material-ui/core/IconButton';
 import EvaIcons from '../../bloben-common/components/eva-icons';
-import SearchImg from 'assets/search.svg';
 import { useSelector } from 'react-redux';
-import EventStateEntity from '../../data/entities/state/event.entity';
 import { mapEventsToDates } from '../../utils/common';
-import { formatTimestampToDate } from '../../components/calendar-view/calendar-common';
-import { renderAgendaEvents } from '../../components/calendar-view/agenda/agenda';
-import { useCurrentHeight } from '../../bloben-common/utils/layout';
-import { sendWebsocketMessage, WEBSOCKET_GET_ALL_EVENTS } from '../../api/calendar';
-import { formatISO } from 'date-fns';
+import { formatTimestampToDate } from '../../components/calendarView/calendar-common';
+import { renderAgendaEvents } from '../../components/calendarView/agenda/Agenda';
+import { HeightHook } from '../../bloben-common/utils/layout';
+import {
+  sendWebsocketMessage,
+  WEBSOCKET_GET_ALL_EVENTS,
+} from '../../api/calendar';
+import { Input } from '../../bloben-package/components/input/Input';
 
 const SearchImage = () => (
   <div className={'search_empty__wrapper'}>
-    <img className={'search__image'} src={SearchImg} alt={'empty'} />
+    <p className={'search_empty__text'}>No result</p>
   </div>
 );
 
-
 const Results = (props: any) => {
-  const { results, } = props;
+  const { results } = props;
   const isDark: boolean = useSelector((state: any) => state.isDark);
-  const height: number = useCurrentHeight() - 56;
+  const height: number = HeightHook() - 56;
 
   const emptyFunc: any = () => {};
 
-  const renderedResults: any = renderAgendaEvents(results, isDark, emptyFunc, emptyFunc);
+  const renderedResults: any = renderAgendaEvents(
+    results,
+    isDark,
+    emptyFunc,
+    emptyFunc
+  );
 
-  return <div className={'search__container-results'} style={{height}}>{renderedResults}</div>;
+  return (
+    <div className={'search__container-results'} style={{ height }}>
+      {renderedResults}
+    </div>
+  );
 };
 
 const SearchInput = (props: any) => {
@@ -64,13 +70,13 @@ const SearchHeader = (props: any) => {
   return (
     <div className={'search__header-container'}>
       <IconButton
-          onClick={goBack}
-          className={`${isMobile ? '' : 'small-icon-button'}`}
+        onClick={goBack}
+        className={`${isMobile ? '' : 'small-icon-button'}`}
       >
         <EvaIcons.ArrowBack
-            className={`icon-svg${isDark ? '-dark' : ''} ${
-                !isMobile ? 'small-svg' : ''
-            }`}
+          className={`icon-svg${isDark ? '-dark' : ''} ${
+            !isMobile ? 'small-svg' : ''
+          }`}
         />
       </IconButton>
       <SearchInput typedText={typedText} onChange={onSearchInput} />
@@ -104,13 +110,9 @@ const SearchHeader = (props: any) => {
 const MobileView = (props: any) => {
   const { results } = props;
 
-  const length: number = Object.keys(results).length
+  const length: number = Object.keys(results).length;
 
-  return length > 0 ? (
-    <Results results={results}/>
-  ) : (
-    <SearchImage />
-  );
+  return length > 0 ? <Results results={results} /> : <SearchImage />;
 };
 const DesktopView = (props: any) => {
   const { results, setState, mappedTags } = props;
@@ -140,27 +142,20 @@ const SearchView = (props: any) => {
       />
 
       {isMobile ? (
-        <MobileView
-          results={results}
-          setState={setState}
-        />
+        <MobileView results={results} setState={setState} />
       ) : (
-        <DesktopView
-          results={results}
-          setState={setState}
-        />
+        <DesktopView results={results} setState={setState} />
       )}
     </div>
   );
 };
 
-
 const Search = (props: any) => {
-  const {
-    goBack,
-  } = props;
+  const { goBack } = props;
   const allEvents: any = useSelector((state: any) => state.allEvents);
-  const eventsLastSynced: Date = useSelector((state: any) => state.eventsLastSynced);
+  const eventsLastSynced: Date = useSelector(
+    (state: any) => state.eventsLastSynced
+  );
 
   const [typedText, setTypedText] = useState('');
   const [results, setResults]: any = useState([]);
@@ -172,23 +167,24 @@ const Search = (props: any) => {
     if (result) {
       setMappedEvents(result);
     }
-
-  },        [allEvents.toString()])
+  }, [allEvents.toString()]);
 
   /**
    * Get changes in allEvents on mount
    */
   useEffect(() => {
-    sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null})
-  }, [])
+    sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
+      lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null,
+    });
+  }, []);
 
   const onSearchInput = (event: any) => {
-    setTypedText(event.target.value)
+    setTypedText(event.target.value);
   };
 
   const handleClearSearch = () => {
-      setTypedText('')
-      setResults([])
+    setTypedText('');
+    setResults([]);
   };
 
   useEffect(() => {
@@ -207,12 +203,13 @@ const Search = (props: any) => {
 
     for (const [key, value] of Object.entries(mappedEvents)) {
       for (const item of value as any) {
-        const {startAt, text, location, notes} = item;
+        const { startAt, text, location, notes } = item;
 
-        if (text.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
-            location.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
-            notes.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1) {
-
+        if (
+          text.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
+          location.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
+          notes.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1
+        ) {
           const dateKey: string = formatTimestampToDate(startAt);
 
           if (result[dateKey] === undefined) {
@@ -231,8 +228,6 @@ const Search = (props: any) => {
     setTypedText('');
     setResults([]);
   };
-
-
 
   return (
     <SearchView

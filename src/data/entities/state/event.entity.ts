@@ -5,7 +5,7 @@ import { TCalendarNotificationType } from '../../../types/types';
 import {
     formatTimestampToDate, parseDateToString,
     parseToDate
-} from '../../../components/calendar-view/calendar-common';
+} from '../../../components/calendarView/calendar-common';
 import OpenPgp, { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
 
 export type EventsStateType = 'events';

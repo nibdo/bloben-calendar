@@ -3,61 +3,69 @@ import React, { useContext, useEffect } from 'react';
 import { Route } from 'react-router-dom';
 import { Redirect, Router } from 'react-router';
 import {
-  addDays, addMonths, format,
-  formatISO, parseISO, parseJSON,
+  addDays,
+  addMonths,
+  format,
+  formatISO,
+  parseJSON,
   subDays,
 } from 'date-fns';
-import {  Stomp } from '@stomp/stompjs';
+import { Stomp } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { AxiosResponse } from 'axios';
 
-import Modal from '../bloben-package/components/modal';
 import Settings from '../views/settings';
-import Calendar from '../views/calendar/calendar';
+import Calendar from '../views/calendar/Calendar';
 import {
   chooseSelectedDateIndex,
   getCalendarDays,
-} from '../components/calendar-view/calendar-common';
-import NewCalendar from '../views/calendar-edit/new-calendar/new-calendar';
-import Crypto from '../bloben-package/utils/encryption';
-// @ts-ignore
+} from '../components/calendarView/calendar-common';
+import NewCalendar from '../views/calendarEdit/new-calendar/new-calendar';
 
-import WebsocketHandler from '../utils/websocket'
+import WebsocketHandler from '../utils/websocket';
 import {
-  setCalendarDays, setCalendarDaysCurrentIndex, setEventsToImport,
-  setIsAppStarting, setIsFirstLogin,
+  setCalendarDays,
+  setCalendarDaysCurrentIndex,
+  setEventsToImport,
+  setIsAppStarting,
+  setIsFirstLogin,
   setRangeFrom,
   setRangeTo,
   setSelectedDate,
 } from '../redux/actions';
 import {
   getArrayEnd,
-  getArrayStart, getDayTimeEnd,
-  getDayTimeStart, getEventAndCalendarIds,
-  nullTimeInDate, parseStartAtDateForNotification
+  getArrayStart,
+  getDayTimeEnd,
+  getDayTimeStart,
+  getEventAndCalendarIds,
+  nullTimeInDate,
 } from '../utils/common';
 import { subscribeToPush } from '../bloben-package/utils/pushSubscription';
 import { setServiceWorkerLister } from '../utils/ServiceWorkerListener';
-import EditCalendar from '../views/calendar-edit/edit-calendar/edit-calendar';
+import EditCalendar from '../views/calendarEdit/editCalendar/EditCalendar';
 import CalendarApi, {
   sendWebsocketMessage,
-  WEBSOCKET_GET_ALL_CALENDARS, WEBSOCKET_GET_ALL_EVENTS,
-  WEBSOCKET_GET_EVENTS, WEBSOCKET_SYNC_CALENDARS, WEBSOCKET_SYNC_EVENTS
+  WEBSOCKET_GET_ALL_CALENDARS,
+  WEBSOCKET_GET_ALL_EVENTS,
+  WEBSOCKET_GET_EVENTS,
+  WEBSOCKET_SYNC_CALENDARS,
+  WEBSOCKET_SYNC_EVENTS,
 } from '../api/calendar';
 import Axios from '../bloben-common/utils/axios';
 import Search from '../views/search';
 import IntroScreen from '../views/intro-screen/intro-screen';
 import {
-  checkIfIsSafari,
   findInArrayById,
-  sendMessageToReactNative
+  sendMessageToReactNative,
 } from '../bloben-package/utils/common';
-import { logger } from 'bloben-common/utils/common';
-import EventImportButton from "../components/EventImporter/EventImportButton/EventImportButton";
-import EventImport from "../components/EventImporter/EventImport";
+import { logger, checkIfIsSafari } from 'bloben-common/utils/common';
+import EventImportButton from '../components/eventImporter/eventImporterButton/EventImportButton';
+import EventImport from '../components/eventImporter/EventImport';
 import { Context } from '../bloben-package/context/store';
+import Modal from '../bloben-package/components/modal/Modal';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -79,24 +87,31 @@ const initialState = {
 const AuthenticatedLayer = (props: any) => {
   const [store] = useContext(Context);
 
-  const {isReactNative} = store;
+  const { isReactNative } = store;
 
   const calendars: any = useSelector((state: any) => state.calendars);
   const events: any = useSelector((state: any) => state.events);
   const rangeFrom: any = useSelector((state: any) => state.rangeFrom);
   const rangeTo: any = useSelector((state: any) => state.rangeTo);
   const calendarDays: any = useSelector((state: any) => state.calendarDays);
-  const calendarDaysCurrentIndex: number = useSelector((state: any) => state.calendarDaysCurrentIndex);
+  const calendarDaysCurrentIndex: number = useSelector(
+    (state: any) => state.calendarDaysCurrentIndex
+  );
   const isFirstLogin: boolean = useSelector((state: any) => state.isFirstLogin);
   const isMobile: boolean = useSelector((state: any) => state.isMobile);
   const allEvents: any = useSelector((state: any) => state.allEvents);
 
-  const cryptoPassword: string = useSelector((state: any) => state.cryptoPassword);
   const selectedDate: Date = useSelector((state: any) => state.selectedDate);
   const calendarView: string = useSelector((state: any) => state.calendarView);
-  const isAppStarting: boolean = useSelector((state: any) => state.isAppStarting);
-  const eventsToImport: string = useSelector((state: any) => state.eventsToImport);
-  const eventsLastSynced: Date = useSelector((state: any) => state.eventsLastSynced);
+  const isAppStarting: boolean = useSelector(
+    (state: any) => state.isAppStarting
+  );
+  const eventsToImport: string = useSelector(
+    (state: any) => state.eventsToImport
+  );
+  const eventsLastSynced: Date = useSelector(
+    (state: any) => state.eventsLastSynced
+  );
 
   const dispatch: Dispatch = useDispatch();
 
@@ -104,35 +119,37 @@ const AuthenticatedLayer = (props: any) => {
     if (stompClient) {
       stompClient.disconnect();
     }
-    logger('DISCONNECT WS')
-  }
+    logger('DISCONNECT WS');
+  };
 
-  useEffect(() =>
-    () => {
-      closeWebsockets()
-    },      []);
+  useEffect(
+    () => () => {
+      closeWebsockets();
+    },
+    []
+  );
 
   /**
    * Fetch all events on first login
    */
   const handleFirstLogin = (): void => {
     if (isFirstLogin) {
-      sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {lastSync: null})
-      dispatch(setIsFirstLogin(false))
+      sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, { lastSync: null });
+      dispatch(setIsFirstLogin(false));
     }
-  }
+  };
 
   const connectToWs = async (): Promise<void> => {
     // First verify if session is still active
     try {
       const response: AxiosResponse = await Axios.get('/user/account');
       if (response.status !== 200) {
-        dispatch({type: 'USER_LOGOUT'});
+        dispatch({ type: 'USER_LOGOUT' });
 
         return;
       }
       if (response.data && !response.data.username) {
-        dispatch({type: 'USER_LOGOUT'});
+        dispatch({ type: 'USER_LOGOUT' });
 
         return;
       }
@@ -152,10 +169,9 @@ const AuthenticatedLayer = (props: any) => {
     // Handle connection loss
     stompClient.debug = (frame: any) => {
       if (frame.indexOf('Connection closed') !== -1) {
-        setTimeout(connectToWs, 7000)
+        setTimeout(connectToWs, 7000);
       }
-    }
-
+    };
 
     // TODO to websocket
     const sendIdsToSync = () => {
@@ -163,65 +179,78 @@ const AuthenticatedLayer = (props: any) => {
       const data: any = getEventAndCalendarIds();
 
       if (calendars && calendars.length > 0) {
-        sendWebsocketMessage(WEBSOCKET_SYNC_CALENDARS, data.calendars)
+        sendWebsocketMessage(WEBSOCKET_SYNC_CALENDARS, data.calendars);
       }
 
       if (events && events.length > 0) {
-        sendWebsocketMessage(WEBSOCKET_SYNC_EVENTS, data.events)
+        sendWebsocketMessage(WEBSOCKET_SYNC_EVENTS, data.events);
       }
-    }
-
+    };
 
     // Init connection
-    stompClient.connect('user', 'password',
-                        () => {
-                          // TODO REsolve not loading on init
-                          setTimeout(() => {
-                            handleFirstLogin()
+    stompClient.connect(
+      'user',
+      'password',
+      () => {
+        // TODO REsolve not loading on init
+        setTimeout(() => {
+          handleFirstLogin();
 
-                            const currentDate: Date = new Date();
-                            const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
-                            const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
+          const currentDate: Date = new Date();
+          const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
+          const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
 
-                            sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS)
-                            sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null})
-                            sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {rangeFrom: formatISO(rangeFromInit), rangeTo: formatISO(rangeToInit)})
-                            dispatch(setIsAppStarting(false))
-                            // Send all event and calendar ids to server to check if they exist
-                            // Return only ids of items to delete
-                            sendIdsToSync()
-                            stompClient.subscribe('/user/notifications', function(message: any) {
-                            });
-                          },         20)
+          sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS);
+          sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
+            lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null,
+          });
+          sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
+            rangeFrom: formatISO(rangeFromInit),
+            rangeTo: formatISO(rangeToInit),
+          });
+          dispatch(setIsAppStarting(false));
+          // Send all event and calendar ids to server to check if they exist
+          // Return only ids of items to delete
+          sendIdsToSync();
+          stompClient.subscribe(
+            '/user/notifications',
+            function (message: any) {}
+          );
+        }, 20);
 
-                          // Receive automatic updates from server
-                          stompClient.subscribe('/user/sync',  (message: any) => {
-                            WebsocketHandler.handleSyncGeneral(message)
-
-                          });
-                          stompClient.subscribe('/user/events', function(message: any) {
-                            WebsocketHandler.getEvents(message.body);
-                          });
-                          stompClient.subscribe('/user/calendars', function(message: any) {
-                            WebsocketHandler.handleCreateCalendar(message.body);
-                          });
-                          stompClient.send('/app/notifications', {}, JSON.stringify({name: 'username'})
-                          );
-                          stompClient.send('/app/updates', {}, JSON.stringify({name: 'store.username'})
-                          );
-                          // Do something
-                        }, function(e: any) {
-          connectToWs()
-          console.log('ERROR ', e)
+        // Receive automatic updates from server
+        stompClient.subscribe('/user/sync', (message: any) => {
+          WebsocketHandler.handleSyncGeneral(message);
         });
-
-  }
+        stompClient.subscribe('/user/events', function (message: any) {
+          WebsocketHandler.getEvents(message.body);
+        });
+        stompClient.subscribe('/user/calendars', function (message: any) {
+          WebsocketHandler.handleCreateCalendar(message.body);
+        });
+        stompClient.send(
+          '/app/notifications',
+          {},
+          JSON.stringify({ name: 'username' })
+        );
+        stompClient.send(
+          '/app/updates',
+          {},
+          JSON.stringify({ name: 'store.username' })
+        );
+        // Do something
+      },
+      function (e: any) {
+        connectToWs();
+        console.log('ERROR ', e);
+      }
+    );
+  };
 
   const { initPath } = props;
 
   const initLoad = async () => {
-    connectToWs()
-
+    connectToWs();
 
     if (!checkIfIsSafari()) {
       await setServiceWorkerLister();
@@ -234,17 +263,13 @@ const AuthenticatedLayer = (props: any) => {
     const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
     const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
 
-    dispatch(setRangeFrom(rangeFromInit))
-    dispatch(setRangeTo(rangeToInit))
-    // sendMessage()
-
+    dispatch(setRangeFrom(rangeFromInit));
+    dispatch(setRangeTo(rangeToInit));
   };
-
 
   // Get scheduled reminders for notifications from React Native wrapper
   const getRemindersForReactNative = async () => {
     if (isReactNative) {
-
       const result: any = [];
       // Get current reminders
       const reminders: any = await CalendarApi.getScheduledReminders();
@@ -252,12 +277,18 @@ const AuthenticatedLayer = (props: any) => {
       for (const reminder of reminders) {
         const reminderPayload: any = JSON.parse(reminder.payload);
 
-        const eventWithReminder: any = await findInArrayById(allEvents, reminderPayload.id);
+        const eventWithReminder: any = await findInArrayById(
+          allEvents,
+          reminderPayload.id
+        );
 
         reminder.title = 'Event reminder';
 
         if (eventWithReminder) {
-          reminder.body = `${eventWithReminder.text} starts at ${format(parseJSON(eventWithReminder.startAt), 'HH:MM, dd. MMMM')}`;
+          reminder.body = `${eventWithReminder.text} starts at ${format(
+            parseJSON(eventWithReminder.startAt),
+            'HH:MM, dd. MMMM'
+          )}`;
         } else {
           reminder.body = 'Unknown body';
         }
@@ -266,24 +297,25 @@ const AuthenticatedLayer = (props: any) => {
       }
 
       // Try to find events in storage to get decrypted text content for local notification
-      sendMessageToReactNative({action: 'scheduledReminders', data: reminders})
+      sendMessageToReactNative({
+        action: 'scheduledReminders',
+        data: reminders,
+      });
     }
   };
 
   useEffect(() => {
     initLoad();
 
-    getRemindersForReactNative()
+    getRemindersForReactNative();
     const currentDate: any = new Date();
     initCalendar(currentDate);
-
-  },        []);
+  }, []);
 
   useEffect(() => {
     const currentDate: Date = new Date();
     initCalendar(currentDate);
-
-  },        [calendarView]);
+  }, [calendarView]);
 
   // Navigate to custom user url path passed on app load
   const userCustomRoute: any =
@@ -294,89 +326,116 @@ const AuthenticatedLayer = (props: any) => {
       : null;
 
   const initCalendar = (date: any) => {
-    const calendarDaysNew = getCalendarDays(
-        calendarView,
-        date,
-        null, true
-    );
+    const calendarDaysNew = getCalendarDays(calendarView, date, null, true);
 
     const calendarDaysPrevNew = getCalendarDays(
-        calendarView,
-        getArrayStart(calendarDaysNew),
-        false
+      calendarView,
+      getArrayStart(calendarDaysNew),
+      false
     );
 
     const calendarDaysNextNew = getCalendarDays(
-        calendarView,
-        getArrayEnd(calendarDaysNew),
-        true
+      calendarView,
+      getArrayEnd(calendarDaysNew),
+      true
     );
-    dispatch(setCalendarDaysCurrentIndex(1))
+    dispatch(setCalendarDaysCurrentIndex(1));
 
-    dispatch(setCalendarDays([calendarDaysPrevNew, calendarDaysNew, calendarDaysNextNew]))
-
+    dispatch(
+      setCalendarDays([
+        calendarDaysPrevNew,
+        calendarDaysNew,
+        calendarDaysNextNew,
+      ])
+    );
   };
 
   const calculateCalendarDays = (
-                                 nextIndex: number,
-                                 isGoingForward: boolean) => {
+    nextIndex: number,
+    isGoingForward: boolean
+  ) => {
     if (isGoingForward) {
       switch (nextIndex) {
-        case (0):
-          return [calendarDays[0], getCalendarDays(
+        case 0:
+          return [
+            calendarDays[0],
+            getCalendarDays(
               calendarView,
               getArrayEnd(calendarDays[0]),
               isGoingForward
-          ),      calendarDays[2]]
-        case (1):
-          return [calendarDays[0], calendarDays[1], getCalendarDays(
+            ),
+            calendarDays[2],
+          ];
+        case 1:
+          return [
+            calendarDays[0],
+            calendarDays[1],
+            getCalendarDays(
               calendarView,
               getArrayEnd(calendarDays[1]),
               isGoingForward
-          ) ]
-        case (2):
-          return [getCalendarDays(
+            ),
+          ];
+        case 2:
+          return [
+            getCalendarDays(
               calendarView,
               getArrayEnd(calendarDays[2]),
               isGoingForward
-          ),      calendarDays[1], calendarDays[2] ];
+            ),
+            calendarDays[1],
+            calendarDays[2],
+          ];
         default:
           return 1;
       }
     } else {
       switch (nextIndex) {
-        case (0):
-          return [calendarDays[0], calendarDays[1], getCalendarDays(
+        case 0:
+          return [
+            calendarDays[0],
+            calendarDays[1],
+            getCalendarDays(
               calendarView,
-              getArrayStart(calendarDays[0]), isGoingForward) ]
-        case (1):
-          return [getCalendarDays(
+              getArrayStart(calendarDays[0]),
+              isGoingForward
+            ),
+          ];
+        case 1:
+          return [
+            getCalendarDays(
               calendarView,
               getArrayStart(calendarDays[1]),
               isGoingForward
-          ),      calendarDays[1], calendarDays[2] ]
-        case (2):
+            ),
+            calendarDays[1],
+            calendarDays[2],
+          ];
+        case 2:
           // 0 1 2
-          return [calendarDays[0], getCalendarDays(
+          return [
+            calendarDays[0],
+            getCalendarDays(
               calendarView,
               getArrayStart(calendarDays[2]),
               isGoingForward
-          ),      calendarDays[2]];
+            ),
+            calendarDays[2],
+          ];
         default:
           return 1;
       }
     }
-  }
+  };
 
-  const getNextIndex = (isGoingForward: boolean): number =>
-  {
+  const getNextIndex = (isGoingForward: boolean): number => {
     if (isGoingForward) {
       switch (calendarDaysCurrentIndex) {
-        case (0):
+        case 0:
           return 1;
-        case (1):
+        case 1:
           return 2;
-        case (2):
+        case 2:
           return 0;
         default:
           return 2;
@@ -384,16 +443,16 @@ const AuthenticatedLayer = (props: any) => {
     }
 
     switch (calendarDaysCurrentIndex) {
-      case (0):
+      case 0:
         return 2;
-      case (1):
+      case 1:
         return 0;
-      case (2):
+      case 2:
         return 1;
       default:
         return 0;
     }
-  }
+  };
 
   /**
    * Calculate new calendar days and get events
@@ -402,39 +461,56 @@ const AuthenticatedLayer = (props: any) => {
    */
   const getNewCalendarDays = (isGoingForward: boolean, index: number) => {
     if (isGoingForward === undefined) {
-      requestEvents()
+      requestEvents();
 
       return;
     }
 
     const nextIndex: number = index ? index : getNextIndex(isGoingForward);
-    const newCalendarDays: any = calculateCalendarDays(nextIndex, isGoingForward)
+    const newCalendarDays: any = calculateCalendarDays(
+      nextIndex,
+      isGoingForward
+    );
 
-    dispatch(setCalendarDays(newCalendarDays))
-    dispatch(setCalendarDaysCurrentIndex(nextIndex))
-    dispatch(setSelectedDate(newCalendarDays[nextIndex][chooseSelectedDateIndex(calendarView)]));
+    dispatch(setCalendarDays(newCalendarDays));
+    dispatch(setCalendarDaysCurrentIndex(nextIndex));
+    dispatch(
+      setSelectedDate(
+        newCalendarDays[nextIndex][chooseSelectedDateIndex(calendarView)]
+      )
+    );
 
     // Set range for fetch new events
-    const rangeFromFetch: Date = getDayTimeStart(getArrayStart(newCalendarDays[nextIndex]))
-    const rangeToFetch: Date = getDayTimeEnd(getArrayEnd(newCalendarDays[nextIndex]))
+    const rangeFromFetch: Date = getDayTimeStart(
+      getArrayStart(newCalendarDays[nextIndex])
+    );
+    const rangeToFetch: Date = getDayTimeEnd(
+      getArrayEnd(newCalendarDays[nextIndex])
+    );
 
     // Store new edge value of range
     if (isGoingForward) {
-      dispatch(setRangeTo(rangeToFetch))
+      dispatch(setRangeTo(rangeToFetch));
     } else {
-      dispatch(setRangeFrom(rangeFromFetch))
+      dispatch(setRangeFrom(rangeFromFetch));
     }
 
-    sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {rangeFrom: formatISO(rangeFromFetch), rangeTo: formatISO(rangeToFetch)})
+    sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
+      rangeFrom: formatISO(rangeFromFetch),
+      rangeTo: formatISO(rangeToFetch),
+    });
   };
 
-   const requestEvents = (): void => {
+  const requestEvents = (): void => {
     const newRangeTo: Date = addMonths(rangeTo, 2);
-    dispatch(setRangeFrom(rangeTo))
-    dispatch(setRangeTo(newRangeTo))
+    dispatch(setRangeFrom(rangeTo));
+    dispatch(setRangeTo(newRangeTo));
 
-    sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {rangeFrom: formatISO(rangeTo), rangeTo: formatISO(newRangeTo)})
-  }
+    sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
+      rangeFrom: formatISO(rangeTo),
+      rangeTo: formatISO(newRangeTo),
+    });
+  };
 
   /**
    * Listener for different state
@@ -442,10 +518,9 @@ const AuthenticatedLayer = (props: any) => {
   // Redirect to event import
   useEffect(() => {
     if (eventsToImport.length > 2) {
-      history.push('/calendar/events/import/ics')
+      history.push('/calendar/events/import/ics');
     }
-
-  }, [eventsToImport])
+  }, [eventsToImport]);
 
   return !isAppStarting ? (
     <div className={'app_wrapper'}>
@@ -473,16 +548,20 @@ const AuthenticatedLayer = (props: any) => {
                 width: '30%',
               }}
             >
-        <Modal {...props}>
-          <Search />
-        </Modal>
+              <Modal {...props}>
+                <Search />
+              </Modal>
             </div>
           )}
         </Route>
         <Route path={'/settings'}>
-          {isMobile ?           <Modal {...props}>
+          {isMobile ? (
+            <Modal {...props}>
+              <Settings />
+            </Modal>
+          ) : (
             <Settings />
-          </Modal> : <Settings/>}
+          )}
         </Route>
         <Route path={'/calendar'}>
           {(calendarDays &&
@@ -493,10 +572,7 @@ const AuthenticatedLayer = (props: any) => {
             calendarView === 'agenda' &&
             calendars.length > 0) ? (
             <Calendar
-              selectedDate={selectedDate}
               getNewCalendarDays={getNewCalendarDays}
-              // mappedCalendars={mappedCalendars}
-              allDays={events}
               initCalendar={initCalendar}
             />
           ) : null}
@@ -504,18 +580,18 @@ const AuthenticatedLayer = (props: any) => {
 
         <Route exact path={'/calendar/new'}>
           <Modal {...props}>
-            <NewCalendar/>
+            <NewCalendar />
           </Modal>
         </Route>
         <Route exact path={'/calendar/edit/:id'}>
           <Modal {...props}>
-           <EditCalendar />
+            <EditCalendar />
           </Modal>
         </Route>
 
         <Route path={'/calendar/events/import'}>
           <Modal {...props}>
-            <EventImportButton autoFocus={true}/>
+            <EventImportButton autoFocus={true} />
           </Modal>
         </Route>
         <Route path={'/calendar/events/import/ics'}>
@@ -525,7 +601,6 @@ const AuthenticatedLayer = (props: any) => {
         </Route>
         <Route exact path={'/about'} render={() => <IntroScreen />} />
       </Router>
-
     </div>
   ) : null;
 };

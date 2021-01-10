@@ -1,9 +1,8 @@
 import {
   findInEvents,
-  findInState,
   parseStartAtDateForNotification
 } from "./common";
-import { checkIfIsSafari } from '../bloben-package/utils/common';
+import { checkIfIsSafari } from 'bloben-common/utils/common';
 import { logger } from 'bloben-common/utils/common';
 
 const isSafari = checkIfIsSafari();

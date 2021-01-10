@@ -1,22 +1,20 @@
 import React from 'react';
 import './settings.scss';
 
-import MobileTitle from 'bloben-package/components/title/title';
-import HeaderModal from 'components/header-modal';
-import SettingsItem from 'bloben-package/components/settings-item/settings-item';
+import MobileTitle from 'bloben-package/components/title/Title';
+import SettingsItem from 'bloben-package/components/settingsItem/SettingsItem';
 import EvaIcons from 'bloben-common/components/eva-icons';
-import VersionFooter from '../../bloben-package/components/version-footer/version-footer';
-import { Route, useHistory } from 'react-router-dom';
-import Modal from '../../bloben-package/components/modal';
-import SettingsAccount from '../../bloben-package/views/settings-account/settings-account';
-import Appearance from '../../bloben-package/views/appearance/appearance';
-import Header from '../../components/header';
+import VersionFooter from '../../bloben-package/components/versionFooter/VersionFooter';
+import { Route } from 'react-router-dom';
+import SettingsAccount from '../../bloben-package/views/settingsAccount/SettingsAccount';
+import Appearance from '../../bloben-package/views/appearance/Appearance';
 import { logOut } from '../../bloben-package/utils/logout';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import SettingsSecurity
-    from "bloben-package/views/settings-security/settings-security";
-import { Router } from 'react-router';
+    from 'bloben-package/views/settingsSecurity/SettingsSecurity';
+import Modal from '../../bloben-package/components/modal/Modal';
+import HeaderModal from '../../bloben-package/components/headerModal/HeaderModal';
 
 const SettingsRouter = (props: any) =>
   (
@@ -68,7 +66,7 @@ const SettingsRouterDesktop = (props: any) => {
 }
 
 
-const SettingsBaseView = (props: any ) => {
+const SettingsBaseView = () => {
     const dispatch: Dispatch = useDispatch();
     const isMobile: boolean = useSelector((state: any) => state.isMobile);
     const isDark: boolean = useSelector((state: any) => state.isDark);
@@ -158,10 +156,8 @@ const SettingsBaseView = (props: any ) => {
         </div>
     )
 }
-const SettingsView = (props: any) => {
+const SettingsView = () => {
     const isMobile: boolean = useSelector((state: any) => state.isMobile);
-    const history: any = useHistory();
-    const isOnSubScreen: boolean = history.location.pathname.length > '/settings/'.length
 
     return (
       isMobile ? <SettingsRouter /> : <SettingsRouterDesktop />

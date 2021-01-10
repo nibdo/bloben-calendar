@@ -2,7 +2,12 @@ import React from 'react';
 import { withStyles } from '@material-ui/core/styles';
 import Switch from '@material-ui/core/Switch';
 
-const MySwitch = (props: any) => {
+interface IMySwitchProps {
+    value: any;
+    checked: boolean;
+    onValueChange: any;
+}
+const MySwitch = (props: IMySwitchProps) => {
     const PrimarySwitch = withStyles({
       switchBase: {
         '&$checked': {
