@@ -56,7 +56,7 @@ const NewCalendar = (props: any) => {
         : await newCalendar.formatBodyToSend(cryptoPassword);
 
             // Save to redux store
-    dispatch(addCalendar(newCalendar));
+    dispatch(addCalendar(newCalendar.getStoreObj()));
 
     // setState('calendars', 'create', enhancedState);
     stompClient.send(`/app/calendars/create`, {}, JSON.stringify(bodyToSend)
