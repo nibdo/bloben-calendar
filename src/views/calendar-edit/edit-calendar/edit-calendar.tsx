@@ -44,7 +44,11 @@ const EditCalendar = (props: any) => {
 
     // Set data
     for (const [key, value] of Object.entries(thisCalendar)) {
-      setLocalState(key, 'simple', value)
+      if (key === "reminders" && !value) {
+        setLocalState(key, "simple", []);
+      } else {
+        setLocalState(key, "simple", value);
+      }
     }
   }
 
