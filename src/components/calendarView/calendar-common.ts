@@ -7,7 +7,7 @@ import {
   parseISO,
   subDays, subMonths,
 } from 'date-fns';
-import { reduxStore } from '../../bloben-package/layers/redux-layer';
+import { reduxStore } from '../../bloben-package/layers/ReduxLayer';
 import { setSelectedDate } from '../../redux/actions';
 
 const ONE_DAY: number = 1;
@@ -250,10 +250,14 @@ export const getDaysNum = (calendarView: string): number => {
 export const parseStringToDate = (stringDate: string): Date => {
   const dateArray: any = stringDate.split('-');
 
+  const year: number = Number(dateArray[2]);
+  const month: number = Number(dateArray[1]);
+  const day: number = Number(dateArray[0]);
+
   return new Date(
-    Number(dateArray[2]),
-    Number(dateArray[1] - 1),
-    Number(dateArray[0])
+      year,
+      month - 1,
+      day
   );
 };
 

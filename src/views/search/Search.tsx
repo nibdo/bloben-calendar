@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import './search.scss';
+import React, { useContext, useEffect, useState } from 'react';
+import './Search.scss';
 import IconButton from '@material-ui/core/IconButton';
 import EvaIcons from '../../bloben-common/components/eva-icons';
 import { useSelector } from 'react-redux';
@@ -12,6 +12,8 @@ import {
   WEBSOCKET_GET_ALL_EVENTS,
 } from '../../api/calendar';
 import { Input } from '../../bloben-package/components/input/Input';
+import { Context } from '../../bloben-package/context/store';
+import { useHistory } from 'react-router-dom';
 
 const SearchImage = () => (
   <div className={'search_empty__wrapper'}>
@@ -19,9 +21,16 @@ const SearchImage = () => (
   </div>
 );
 
-const Results = (props: any) => {
+interface IResultsProps {
+  results: any;
+}
+const Results = (props: IResultsProps) => {
   const { results } = props;
-  const isDark: boolean = useSelector((state: any) => state.isDark);
+
+  const [store] = useContext(Context);
+
+  const {isDark} = store;
+
   const height: number = HeightHook() - 56;
 
   const emptyFunc: any = () => {};
@@ -40,11 +49,16 @@ const Results = (props: any) => {
   );
 };
 
-const SearchInput = (props: any) => {
+interface ISearchInputProps {
+  typedText: string;
+  onChange: any;
+}
+const SearchInput = (props: ISearchInputProps) => {
   const { typedText, onChange } = props;
 
-  const isMobile: boolean = useSelector((state: any) => state.isMobile);
-  const isDark: boolean = useSelector((state: any) => state.isDark);
+  const [store] = useContext(Context);
+
+  const {isMobile, isDark} = store;
 
   return (
     <div className={'search__input-wrapper'}>
@@ -62,10 +76,20 @@ const SearchInput = (props: any) => {
   );
 };
 
-const SearchHeader = (props: any) => {
-  const { typedText, onSearchInput, handleClearSearch, goBack } = props;
-  const isMobile: boolean = useSelector((state: any) => state.isMobile);
-  const isDark: boolean = useSelector((state: any) => state.isDark);
+interface ISearchHeaderProps {
+  typedText: string;
+  onSearchInput: any;
+  handleClearSearch: any;
+}
+const SearchHeader = (props: ISearchHeaderProps) => {
+  const { typedText, onSearchInput, handleClearSearch } = props;
+
+  const history: any = useHistory();
+  const [store] = useContext(Context);
+
+  const {isMobile, isDark} = store;
+
+  const goBack: any = () => history.goBack();
 
   return (
     <div className={'search__header-container'}>
@@ -107,30 +131,44 @@ const SearchHeader = (props: any) => {
   );
 };
 
-const MobileView = (props: any) => {
+interface IMobileViewProps {
+  results: any;
+}
+const MobileView = (props: IMobileViewProps) => {
   const { results } = props;
 
   const length: number = Object.keys(results).length;
 
   return length > 0 ? <Results results={results} /> : <SearchImage />;
 };
-const DesktopView = (props: any) => {
-  const { results, setState, mappedTags } = props;
+interface IDesktopViewProps {
+  results: any;
+}
+const DesktopView = (props: IDesktopViewProps) => {
+  const { results } = props;
 
   return results.length > 0 ? (
-    <Results results={results} setState={setState} mappedTags={mappedTags} />
+    <Results results={results} />
   ) : null;
 };
-const SearchView = (props: any) => {
+
+interface ISearchViewProps {
+  typedText: string;
+  results: any;
+  onSearchInput: any;
+  handleClearSearch: any;
+}
+const SearchView = (props: ISearchViewProps) => {
   const {
     typedText,
     results,
-    setState,
-    goBack,
     onSearchInput,
     handleClearSearch,
   } = props;
-  const isMobile: boolean = useSelector((state: any) => state.isMobile);
+
+  const [store] = useContext(Context);
+
+  const {isMobile} = store;
 
   return (
     <div className={'search__wrapper'}>
@@ -138,20 +176,18 @@ const SearchView = (props: any) => {
         typedText={typedText}
         onSearchInput={onSearchInput}
         handleClearSearch={handleClearSearch}
-        goBack={goBack}
       />
 
       {isMobile ? (
-        <MobileView results={results} setState={setState} />
+        <MobileView results={results} />
       ) : (
-        <DesktopView results={results} setState={setState} />
+        <DesktopView results={results} />
       )}
     </div>
   );
 };
 
-const Search = (props: any) => {
-  const { goBack } = props;
+const Search = () => {
   const allEvents: any = useSelector((state: any) => state.allEvents);
   const eventsLastSynced: Date = useSelector(
     (state: any) => state.eventsLastSynced
@@ -167,7 +203,7 @@ const Search = (props: any) => {
     if (result) {
       setMappedEvents(result);
     }
-  }, [allEvents.toString()]);
+  },        [allEvents.toString()]);
 
   /**
    * Get changes in allEvents on mount
@@ -176,7 +212,7 @@ const Search = (props: any) => {
     sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
       lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null,
     });
-  }, []);
+  },        []);
 
   const onSearchInput = (event: any) => {
     setTypedText(event.target.value);
@@ -196,7 +232,7 @@ const Search = (props: any) => {
     const foundItems: any[] = search(typedText);
 
     setResults(foundItems);
-  }, [typedText]);
+  },        [typedText]);
 
   const search = (keyWord: string) => {
     const result: any = {};
@@ -224,19 +260,12 @@ const Search = (props: any) => {
     return result;
   };
 
-  const handleClearText = () => {
-    setTypedText('');
-    setResults([]);
-  };
-
   return (
     <SearchView
       typedText={typedText}
       results={results}
-      goBack={goBack}
       onSearchInput={onSearchInput}
       handleClearSearch={handleClearSearch}
-      handleClearText={handleClearText}
     />
   );
 };

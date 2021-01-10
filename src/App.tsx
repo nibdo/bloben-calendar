@@ -1,6 +1,6 @@
 import React from 'react';
 import 'bloben-common/index.scss';
-import StorageLayer from './bloben-package/layers/storage-layer';
+import StorageLayer from './bloben-package/layers/StorageLayer';
 import Store from './bloben-package/context/store';
 
 const App = () =>

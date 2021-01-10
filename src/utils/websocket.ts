@@ -1,6 +1,6 @@
-import { stompClient } from '../layers/authenticated-layer';
+import { stompClient } from '../layers/AuthenticatedLayer';
 import { decryptAllEvents, decryptEvents } from './decrypt-events';
-import { reduxStore } from '../bloben-package/layers/redux-layer';
+import { reduxStore } from '../bloben-package/layers/ReduxLayer';
 import Crypto from '../bloben-package/utils/encryption';
 import { addCalendar, setCalendars, setEvents } from '../redux/actions';
 import EventStateEntity from '../data/entities/state/event.entity';

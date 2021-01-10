@@ -1,3 +1,4 @@
+/* tslint:disable:no-magic-numbers */
 import { createBrowserHistory } from 'history';
 import React, { useContext, useEffect } from 'react';
 import { Route } from 'react-router-dom';
@@ -16,11 +17,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { AxiosResponse } from 'axios';
 
-import Settings from '../views/settings';
+import Settings from '../views/settings/Settings';
 import WebsocketHandler from '../utils/websocket';
 import {
   setCalendarDays,
   setCalendarDaysCurrentIndex,
+  setDefaultCalendar,
   setIsAppStarting,
   setIsFirstLogin,
   setRangeFrom,
@@ -46,8 +48,8 @@ import CalendarApi, {
   WEBSOCKET_SYNC_EVENTS,
 } from '../api/calendar';
 import Axios from '../bloben-common/utils/axios';
-import Search from '../views/search';
-import IntroScreen from '../views/intro-screen/intro-screen';
+import Search from '../views/search/Search';
+import IntroScreen from '../views/introScreen/IntroScreen';
 import {
   findInArrayById,
   sendMessageToReactNative,
@@ -56,12 +58,12 @@ import { checkIfIsSafari, logger } from 'bloben-common/utils/common';
 import { Context } from '../bloben-package/context/store';
 import {
   chooseSelectedDateIndex,
-  getCalendarDays
+  getCalendarDays,
 } from '../components/calendarView/calendar-common';
 import Modal from '../bloben-package/components/modal/Modal';
 import EventImport from '../components/eventImporter/EventImport';
 import EventImportButton from '../components/eventImporter/eventImporterButton/EventImportButton';
-import NewCalendar from '../views/calendarEdit/new-calendar/new-calendar';
+import NewCalendar from '../views/calendarEdit/newCalendar/NewCalendar';
 import EditCalendar from '../views/calendarEdit/editCalendar/EditCalendar';
 import Calendar from '../views/calendar/Calendar';
 
@@ -74,18 +76,23 @@ const history: any = createBrowserHistory();
 
 const AuthenticatedLayer = () => {
   const [store] = useContext(Context);
-  const {isReactNative, isMobile} = store;
+  const { isReactNative, isMobile } = store;
 
+  const defaultCalendar: string = useSelector((state: any) => state.defaultCalendar);
   const calendars: any = useSelector((state: any) => state.calendars);
   const events: any = useSelector((state: any) => state.events);
   const isFirstLogin: boolean = useSelector((state: any) => state.isFirstLogin);
   const allEvents: any = useSelector((state: any) => state.allEvents);
   const calendarView: any = useSelector((state: any) => state.calendarView);
   const calendarDays: any = useSelector((state: any) => state.calendarDays);
-  const calendarDaysCurrentIndex: any = useSelector((state: any) => state.calendarDaysCurrentIndex);
+  const calendarDaysCurrentIndex: any = useSelector(
+    (state: any) => state.calendarDaysCurrentIndex
+  );
   const rangeTo: Date = useSelector((state: any) => state.rangeTo);
   const eventsToImport: any = useSelector((state: any) => state.eventsToImport);
-  const isAppStarting: boolean = useSelector((state: any) => state.isAppStarting);
+  const isAppStarting: boolean = useSelector(
+    (state: any) => state.isAppStarting
+  );
   const selectedDate: Date = useSelector((state: any) => state.selectedDate);
 
   const eventsLastSynced: Date = useSelector(
@@ -108,6 +115,12 @@ const AuthenticatedLayer = () => {
     []
   );
 
+  const loadDefaultCalendar = async () => {
+    const settings: any = await CalendarApi.getCalendarSettings();
+
+    dispatch(setDefaultCalendar(settings.defaultCalendar));
+  }
+
   /**
    * Fetch all events on first login
    */
@@ -115,6 +128,9 @@ const AuthenticatedLayer = () => {
     if (isFirstLogin) {
       sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, { lastSync: null });
       dispatch(setIsFirstLogin(false));
+
+      // Load app settings
+      loadDefaultCalendar()
     }
   };
 
@@ -179,11 +195,6 @@ const AuthenticatedLayer = () => {
           const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
           const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
 
-          if (!checkIfIsSafari()) {
-            setServiceWorkerLister();
-            subscribeToPush();
-          }
-
           sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS);
           sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
             lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null,
@@ -196,20 +207,17 @@ const AuthenticatedLayer = () => {
           // Send all event and calendar ids to server to check if they exist
           // Return only ids of items to delete
           sendIdsToSync();
-          stompClient.subscribe(
-            '/user/notifications',
-            function (message: any) {}
-          );
+          stompClient.subscribe('/user/notifications', (message: any) => {});
         }, 20);
 
         // Receive automatic updates from server
         stompClient.subscribe('/user/sync', (message: any) => {
           WebsocketHandler.handleSyncGeneral(message);
         });
-        stompClient.subscribe('/user/events', function (message: any) {
+        stompClient.subscribe('/user/events', (message: any) => {
           WebsocketHandler.getEvents(message.body);
         });
-        stompClient.subscribe('/user/calendars', function (message: any) {
+        stompClient.subscribe('/user/calendars', (message: any) => {
           WebsocketHandler.handleCreateCalendar(message.body);
         });
         stompClient.send(
@@ -224,19 +232,23 @@ const AuthenticatedLayer = () => {
         );
         // Do something
       },
-      function (e: any) {
+      (e: any) => {
         connectToWs();
         console.log('ERROR ', e);
       }
     );
   };
 
-  const initLoad = async () => {
+  const initLoad = () => {
     connectToWs();
 
+    if (!defaultCalendar) {
+      loadDefaultCalendar();
+    }
+
     if (!checkIfIsSafari()) {
-      await setServiceWorkerLister();
-      await subscribeToPush();
+      setServiceWorkerLister();
+      subscribeToPush();
     }
 
     const currentDate: Date = nullTimeInDate(new Date());
@@ -502,7 +514,7 @@ const AuthenticatedLayer = () => {
         <Redirect to={'/calendar'} />
         <Route exact path={'/search'}>
           {isMobile ? (
-            <Modal >
+            <Modal>
               <Search />
             </Modal>
           ) : (
@@ -515,7 +527,7 @@ const AuthenticatedLayer = () => {
                 width: '30%',
               }}
             >
-              <Modal >
+              <Modal>
                 <Search />
               </Modal>
             </div>
@@ -523,7 +535,7 @@ const AuthenticatedLayer = () => {
         </Route>
         <Route path={'/settings'}>
           {isMobile ? (
-            <Modal >
+            <Modal>
               <Settings />
             </Modal>
           ) : (
@@ -546,12 +558,12 @@ const AuthenticatedLayer = () => {
         </Route>
 
         <Route exact path={'/calendar/new'}>
-          <Modal >
+          <Modal>
             <NewCalendar />
           </Modal>
         </Route>
         <Route exact path={'/calendar/edit/:id'}>
-          <Modal >
+          <Modal>
             <EditCalendar />
           </Modal>
         </Route>
@@ -562,7 +574,7 @@ const AuthenticatedLayer = () => {
           </Modal>
         </Route>
         <Route path={'/calendar/events/import/ics'}>
-          <Modal >
+          <Modal>
             <EventImport />
           </Modal>
         </Route>

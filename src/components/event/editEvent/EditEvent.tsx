@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useState } from 'react';
+import React, { useReducer, useEffect, useState, useContext } from 'react';
 import { addHours, isBefore, parseISO } from 'date-fns';
 import { formReducer, stateReducer } from 'utils/reducer/baseReducer';
 import EventDetail from '../eventDetail/EventDetail';
@@ -27,6 +27,7 @@ import { mergeEvent } from '../../../redux/actions';
 import { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
 import _ from 'lodash';
 import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
+import { Context } from '../../../bloben-package/context/store';
 
 const initialFormState: any = {
   prevItem: {},
@@ -76,6 +77,11 @@ const EditEvent = (props: IEditEventProps) => {
     stateReducer,
     initialRRulState
   );
+
+  const [store, dispatchContext] = useContext(Context);
+  const setContext = (type: string, payload: any) => {
+    dispatchContext({ type, payload });
+  };
 
   const { isNewEvent, newEventTime, defaultReminder } = props;
   const params: any = useParams();
@@ -235,29 +241,57 @@ const EditEvent = (props: IEditEventProps) => {
     removeNotification(item, setForm, reminders);
   };
 
+  /**
+   * Validate event interval
+   * @param changedDate
+   * @param startAtDate
+   * @param endAtDate
+   */
   const validateDate = (
     changedDate: string,
     startAtDate: any,
     endAtDate: any
-  ) => {
-    setLocalState('isStartDateValid', true);
+  ): boolean => {
     if (changedDate === 'startAt') {
       if (isBefore(endAtDate, startAtDate)) {
-        setLocalState('isStartDateValid', false);
+        return false;
       }
     } else if (changedDate === 'endAt') {
       if (isBefore(endAtDate, startAtDate)) {
-        setLocalState('isStartDateValid', false);
+        return false;
       }
     }
+
+    return true;
   };
+  /**
+   * Validate startAt date before change
+   * @param dateValue
+   */
   const handleChangeDateFrom = (dateValue: Date) => {
-    setForm('startAt', dateValue);
-    validateDate('startAt', dateValue, endAt);
+    const isDateValid: boolean = validateDate('startAt', dateValue, endAt);
+
+    if (isDateValid) {
+      setForm('startAt', dateValue);
+    } else {
+      setContext('showSnackbar', {
+        text: 'Error: Starting date before event end.',
+      });
+    }
   };
+  /**
+   * Validate endAt date before change
+   * @param dateValue
+   */
   const handleChangeDateTill = (dateValue: Date) => {
-    setForm('endAt', dateValue);
-    validateDate('endAt', startAt, dateValue);
+    const isDateValid: boolean = validateDate('endAt', startAt, dateValue);
+    if (isDateValid) {
+      setForm('endAt', dateValue);
+    } else {
+      setContext('showSnackbar', {
+        text: 'Error: Ending date before event start.',
+      });
+    }
   };
 
   const handleChange = (event: any) => {
@@ -331,7 +365,7 @@ const EditEvent = (props: IEditEventProps) => {
     <div className={'full-screen'}>
       <HeaderModal
         hasHeaderShadow={hasHeaderShadow}
-        goBack={handleClose}
+        onClose={handleClose}
         handleSave={saveEvent}
         handleDelete={isNewEvent ? null : deleteEvent}
       />

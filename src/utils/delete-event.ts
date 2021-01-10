@@ -1,5 +1,5 @@
 import CalendarApi from '../api/calendar';
-import { reduxStore } from '../bloben-package/layers/redux-layer';
+import { reduxStore } from '../bloben-package/layers/ReduxLayer';
 import { addEvents, setEvents } from '../redux/actions';
 import { cloneDeep } from './common';
 

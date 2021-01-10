@@ -1,73 +1,73 @@
 import React, { useReducer } from 'react';
-import { useHistory, useParams } from 'react-router';
-import CalendarContent from '../calendar-content/calendar-content';
+import { useHistory } from 'react-router';
 import StateReducer from '../../../utils/state-reducer';
-import Utils from '../calendar-edit.utils';
-import CalendarStateEntity, { CalendarBodyToSend } from '../../../data/entities/state/calendar.entity';
+import Utils from '../CalendarEdit.utils';
+import CalendarStateEntity, {
+  CalendarBodyToSend,
+} from '../../../data/entities/state/calendar.entity';
 import { addNotification, removeNotification } from '../../../utils/common';
 import { useDispatch, useSelector } from 'react-redux';
-import { stompClient } from '../../../layers/authenticated-layer';
-import { addCalendar, mergeEvent } from '../../../redux/actions';
-import {PgpKeys} from "../../../bloben-package/utils/OpenPgp";
+import { stompClient } from '../../../layers/AuthenticatedLayer';
+import { addCalendar } from '../../../redux/actions';
+import { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
+import CalendarContent from '../calendarContent/CalendarContent';
 
-const NewCalendar = (props: any) => {
-  const [state, dispatchState]: any = useReducer(
+const NewCalendar = () => {
+  const [calendarState, dispatchState]: any = useReducer(
     StateReducer,
     Utils.initialState
   );
-  const { name, color, reminders, isShared, isPublic } = state;
+  const { name, color, reminders, isShared, isPublic } = calendarState;
   const history = useHistory();
 
   const dispatch: any = useDispatch();
   const cryptoPassword: any = useSelector((state: any) => state.cryptoPassword);
-  const password: string = useSelector((state: any) => state.password);
   const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
 
   const setLocalState = (stateName: string, type: string, data: any): void => {
     const payload: any = { stateName, type, data };
     // @ts-ignore
-    dispatchState({ state, payload });
+    dispatchState({ calendarState, payload });
   };
 
   const handleChange = (event: any) => {
     const target = event.target;
-    const name = target.name;
-    setLocalState(name, 'simple', event.target.value);
+    setLocalState(target.name, 'simple', event.target.value);
   };
 
-  const selectColor = (color: any) => {
-    setLocalState('color', 'simple', color);
+  const selectColor = (colorValue: any) => {
+    setLocalState('color', 'simple', colorValue);
   };
 
   const addNotificationCalendar = (item: any) => {
     addNotification(item, setLocalState, reminders);
-  }
+  };
 
   const removeNotificationCalendar = (item: any) => {
-    removeNotification(item, setLocalState, reminders)
-  }
+    removeNotification(item, setLocalState, reminders);
+  };
 
   const saveCalendar = async () => {
-    const newCalendar: CalendarStateEntity = new CalendarStateEntity(state);
+    const newCalendar: CalendarStateEntity = new CalendarStateEntity(calendarState);
 
     // Encrypt data
-    const bodyToSend: CalendarBodyToSend = pgpKeys && pgpKeys.publicKey
+    const bodyToSend: CalendarBodyToSend =
+      pgpKeys && pgpKeys.publicKey
         ? await newCalendar.formatBodyToSendPgp(pgpKeys.publicKey)
         : await newCalendar.formatBodyToSend(cryptoPassword);
 
-            // Save to redux store
+    // Save to redux store
     dispatch(addCalendar(newCalendar.getStoreObj()));
 
     // setState('calendars', 'create', enhancedState);
-    stompClient.send(`/app/calendars/create`, {}, JSON.stringify(bodyToSend)
-    );
+    stompClient.send('/app/calendars/create', {}, JSON.stringify(bodyToSend));
 
     history.goBack();
   };
 
   return (
     <CalendarContent
-      state={state}
+      calendarState={calendarState}
       handleChange={handleChange}
       selectColor={selectColor}
       saveCalendar={saveCalendar}

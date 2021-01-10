@@ -192,7 +192,7 @@ const EventImport = () => {
   };
   const clearData = () => {
     setData(null);
-    history.push('/');
+    history.push('/calendar');
   };
 
   /**

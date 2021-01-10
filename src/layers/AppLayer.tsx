@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
-import AuthenticatedLayer from 'layers/authenticated-layer';
+import AuthenticatedLayer from 'layers/AuthenticatedLayer';
 import { WidthHook, HeightHook } from 'bloben-common/utils/layout';
 import { useHistory } from 'react-router';
 import Axios from 'bloben-common/utils/axios';
 import LoadingScreen from '../bloben-common/components/loadingScreen/LoadingScreen';
 import { changeTheme } from '../bloben-package/utils/change-theme';
-import AnonymView from '../bloben-package/layers/anonym-layer';
+import AnonymView from '../bloben-package/layers/AnonymLayer';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   setCalendarBodyHeight,
@@ -163,7 +163,7 @@ const AppLayer = (props: any) => {
    * Set listener for React Native Wrapper
    */
   useEffect(() => {
-    document.addEventListener('message', function (event) {
+    document.addEventListener('message', (event) => {
       // @ts-ignore
       const messageObj: any = JSON.parse(event.data);
       const { action, data } = messageObj;
@@ -179,8 +179,6 @@ const AppLayer = (props: any) => {
     <div className={`root__wrapper${isDark ? '-dark' : ''}`}>
       {isAuthenticated ? (
         <AuthenticatedLayer
-          initPath={initPath}
-          encryptDataOnUnload={props.encryptDataOnUnload}
         />
       ) : (
         <AnonymView />

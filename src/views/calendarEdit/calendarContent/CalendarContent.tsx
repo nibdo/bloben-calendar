@@ -13,6 +13,7 @@ import { useSelector } from 'react-redux';
 import { Input } from '../../../bloben-package/components/input/Input';
 import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
 import { Context } from '../../../bloben-package/context/store';
+import { parseCssDark } from '../../../bloben-common/utils/common';
 
 interface ICalendarColorProps {
   color: any;
@@ -89,7 +90,7 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
   return (
     <div>
       <HeaderModal
-        goBack={goBack}
+          onClose={goBack}
         handleSave={saveCalendar}
         hasHeaderShadow={true}
         title={'Calendar'}
@@ -102,7 +103,7 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
             <CalendarIcon className={'event_detail__icon--hidden'} />
           </div>
           <Input
-            className={`calendar-content${isDark ? '-dark' : ''} `}
+            className={parseCssDark('event_detail__input', isDark)}
             name={'name'}
             value={name}
             placeholder={'Type calendar name'}

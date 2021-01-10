@@ -1,6 +1,6 @@
 import Axios from 'bloben-common/utils/axios';
 import { CALENDAR_URL } from '../bloben-common/globals/url';
-import { stompClient } from '../layers/authenticated-layer';
+import { stompClient } from '../layers/AuthenticatedLayer';
 
 export const APP_API_PREFIX: string = '/calendar-app';
 export const API_GET_CALENDAR_SETTINGS: string = 'settings';

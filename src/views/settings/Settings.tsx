@@ -1,5 +1,5 @@
-import React from 'react';
-import './settings.scss';
+import React, { useContext } from 'react';
+import './Settings.scss';
 
 import MobileTitle from 'bloben-package/components/title/Title';
 import SettingsItem from 'bloben-package/components/settingsItem/SettingsItem';
@@ -15,33 +15,34 @@ import SettingsSecurity
     from 'bloben-package/views/settingsSecurity/SettingsSecurity';
 import Modal from '../../bloben-package/components/modal/Modal';
 import HeaderModal from '../../bloben-package/components/headerModal/HeaderModal';
+import { Context } from '../../bloben-package/context/store';
 
-const SettingsRouter = (props: any) =>
+const SettingsRouter = () =>
   (
     <div>
       <Route path={'/settings/account'}>
-        <Modal {...props}>
+        <Modal>
           <SettingsAccount />
         </Modal>
       </Route>
       <Route path={'/settings/appearance'}>
-        <Modal {...props}>
+        <Modal >
           <Appearance />
         </Modal>
       </Route>
         <Route path={'/settings/security'}>
-            <Modal {...props}>
+            <Modal >
                 <SettingsSecurity />
             </Modal>
         </Route>
         <Route exact path={'/settings'}>
-            <Modal {...props}>
+            <Modal>
                 <SettingsBaseView />
             </Modal>
         </Route>
     </div>
   );
-const SettingsRouterDesktop = (props: any) => {
+const SettingsRouterDesktop = () => {
 
     return   (
         <div style={{display: 'flex', flexDirection: 'row', height: '100%', width: '100%'}}>
@@ -67,9 +68,11 @@ const SettingsRouterDesktop = (props: any) => {
 
 
 const SettingsBaseView = () => {
+    const [store] = useContext(Context);
+
+    const {isMobile, isDark} = store;
+
     const dispatch: Dispatch = useDispatch();
-    const isMobile: boolean = useSelector((state: any) => state.isMobile);
-    const isDark: boolean = useSelector((state: any) => state.isDark);
 
     const handleLogOut = async (): Promise<void> =>
         logOut(dispatch);
@@ -157,7 +160,9 @@ const SettingsBaseView = () => {
     )
 }
 const SettingsView = () => {
-    const isMobile: boolean = useSelector((state: any) => state.isMobile);
+    const [store] = useContext(Context);
+
+    const {isMobile} = store;
 
     return (
       isMobile ? <SettingsRouter /> : <SettingsRouterDesktop />

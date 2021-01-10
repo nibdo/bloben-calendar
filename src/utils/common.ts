@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { reduxStore } from '../bloben-package/layers/redux-layer';
+import { reduxStore } from '../bloben-package/layers/ReduxLayer';
 import { TCalendarNotificationType } from '../types/types';
 import { v4 } from 'uuid';
 import {

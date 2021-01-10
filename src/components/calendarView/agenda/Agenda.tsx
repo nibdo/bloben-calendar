@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './Agenda.scss';
-import { format, getMonth, isBefore, isToday } from 'date-fns';
+import { format, getMonth, isAfter, isBefore, isSameMonth, isToday } from 'date-fns';
 import {
   HEADER_HEIGHT_SMALL,
   NAVBAR_HEIGHT_BASE,
@@ -73,14 +73,14 @@ const AgendaEvent = (props: IAgendaEventProps) => {
         element.scrollTo({ top: initScrollOffset * 102 });
       }
     }
-  }, []);
+  },        []);
 
   const handleEventClick = (): void => {
     if (isDisabled) {
       return;
     }
 
-    history.push(`/event/${id}`);
+    history.push(`/calendar/event/${id}`);
   };
 
   return (
@@ -159,6 +159,22 @@ const AgendaComponent = (props: IAgendaComponentProps) => {
   ));
 };
 
+/**
+ * Format string date to number in reverse order for comparing dates
+ * @param dateString
+ */
+const parseDateKeysForSort = (dateString: string): number => {
+  const dateArray: string[] = dateString.split('-');
+
+  const year: string = dateArray[2];
+  const month: string = dateArray[1];
+  const day: string = dateArray[0];
+
+  const stringResult: string = `${year}${month}${day}`;
+
+  return Number(stringResult);
+}
+
 export const renderAgendaEvents = (
   data: any,
   isDark: boolean,
@@ -168,7 +184,10 @@ export const renderAgendaEvents = (
 ) => {
   // TODO handle multi day events
 
-  let prevMonth: any;
+  let prevMonth: Date | null = null;
+
+  let hasEventsForToday: boolean = false;
+  let scrollOffsetFinished: boolean = false;
 
   // Store offset for each event
   let initScrollOffset: number = 0;
@@ -178,15 +197,29 @@ export const renderAgendaEvents = (
 
   const objectData: any = Object.keys(data);
 
-  return objectData.map((keyName: string, index: number) => {
+  const objectDataSorted: any = objectData.sort((a: any, b: any) => parseDateKeysForSort(a) - parseDateKeysForSort(b)).reduce(
+      (value: any, key: string) => {
+        value[key] = data[key];
+
+        return value;
+      },
+      {}
+  );
+
+  return Object.keys(objectDataSorted).map((keyName: string, index: number) => {
     // const { id, startAt, endDate, scrollToSet } = item;
     const item: any = data[keyName];
 
     const dateObj: Date = parseStringToDate(keyName);
     const thisMonth: any = getMonth(dateObj);
+
     const isNewMonth: boolean = thisMonth !== prevMonth;
     const isDateToday: boolean = isToday(dateObj);
-    const isBeforeToday: boolean = isBefore(dateObj, new Date());
+    const isAfterToday: boolean = isAfter(new Date(), dateObj);
+
+    if (!scrollOffsetFinished && !hasEventsForToday && isAfterToday) {
+      scrollOffsetFinished = true;
+    }
 
     prevMonth = thisMonth;
     const dayEvents: EventStateEntity[] = item;
@@ -196,10 +229,37 @@ export const renderAgendaEvents = (
         itemsCount += 1;
         initScrollOffset += 1;
       }
-      if (!isDateToday && isBeforeToday) {
+
+      // Add offset only till today date
+      if (!isDateToday && !hasEventsForToday) {
         initScrollOffset += dayEvents.length;
       }
-      // TODO handle when no event for today
+      if (isDateToday) {
+        hasEventsForToday = true;
+      }
+      // Set offset to first item after today
+      if (!hasEventsForToday && isAfterToday) {
+        initScrollOffset += dayEvents.length;
+
+        // Prevent other
+        hasEventsForToday = true;
+
+        return (
+            <div>
+              {isNewMonth ? (
+                  <MonthTitle title={format(dateObj, 'MMMM')} isDark={isDark} />
+              ) : null}
+              <AgendaComponent
+                  key={dateObj.toString()}
+                  events={dayEvents}
+                  isDark={isDark}
+                  changeHeaderTitle={changeHeaderTitle}
+                  initScrollOffset={initScrollOffset}
+                  isDisabled={isDisabled}
+              />{' '}
+            </div>
+        );
+      }
 
       // Store items count
       itemsCount = itemsCount + dayEvents.length;
@@ -283,7 +343,7 @@ const Agenda = (props: IAgendaProps) => {
   // Debounce scroll function
   const handleScroll = _.debounce((e: any) => {
     handleScrollFunc(e);
-  }, 50);
+  },                              50);
 
   // Handle onScroll event
   // Fetch new data on list end and update header title
