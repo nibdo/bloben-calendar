@@ -17,18 +17,10 @@ import { Dispatch } from 'redux';
 import { AxiosResponse } from 'axios';
 
 import Settings from '../views/settings';
-import Calendar from '../views/calendar/Calendar';
-import {
-  chooseSelectedDateIndex,
-  getCalendarDays,
-} from '../components/calendarView/calendar-common';
-import NewCalendar from '../views/calendarEdit/new-calendar/new-calendar';
-
 import WebsocketHandler from '../utils/websocket';
 import {
   setCalendarDays,
   setCalendarDaysCurrentIndex,
-  setEventsToImport,
   setIsAppStarting,
   setIsFirstLogin,
   setRangeFrom,
@@ -45,7 +37,6 @@ import {
 } from '../utils/common';
 import { subscribeToPush } from '../bloben-package/utils/pushSubscription';
 import { setServiceWorkerLister } from '../utils/ServiceWorkerListener';
-import EditCalendar from '../views/calendarEdit/editCalendar/EditCalendar';
 import CalendarApi, {
   sendWebsocketMessage,
   WEBSOCKET_GET_ALL_CALENDARS,
@@ -61,11 +52,18 @@ import {
   findInArrayById,
   sendMessageToReactNative,
 } from '../bloben-package/utils/common';
-import { logger, checkIfIsSafari } from 'bloben-common/utils/common';
-import EventImportButton from '../components/eventImporter/eventImporterButton/EventImportButton';
-import EventImport from '../components/eventImporter/EventImport';
+import { checkIfIsSafari, logger } from 'bloben-common/utils/common';
 import { Context } from '../bloben-package/context/store';
+import {
+  chooseSelectedDateIndex,
+  getCalendarDays
+} from '../components/calendarView/calendar-common';
 import Modal from '../bloben-package/components/modal/Modal';
+import EventImport from '../components/eventImporter/EventImport';
+import EventImportButton from '../components/eventImporter/eventImporterButton/EventImportButton';
+import NewCalendar from '../views/calendarEdit/new-calendar/new-calendar';
+import EditCalendar from '../views/calendarEdit/editCalendar/EditCalendar';
+import Calendar from '../views/calendar/Calendar';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -74,41 +72,22 @@ export let stompClient: any;
 // BROWSER HISTORY
 const history: any = createBrowserHistory();
 
-// INITIAL STATE
-const initialState = {
-  selectedDate: '',
-  isLoadingCalendar: false,
-  mappedCalendars: {},
-  data: [],
-  agendaDays: [],
-  stateSavedAt: null,
-};
-
-const AuthenticatedLayer = (props: any) => {
+const AuthenticatedLayer = () => {
   const [store] = useContext(Context);
-
-  const { isReactNative } = store;
+  const {isReactNative, isMobile} = store;
 
   const calendars: any = useSelector((state: any) => state.calendars);
   const events: any = useSelector((state: any) => state.events);
-  const rangeFrom: any = useSelector((state: any) => state.rangeFrom);
-  const rangeTo: any = useSelector((state: any) => state.rangeTo);
-  const calendarDays: any = useSelector((state: any) => state.calendarDays);
-  const calendarDaysCurrentIndex: number = useSelector(
-    (state: any) => state.calendarDaysCurrentIndex
-  );
   const isFirstLogin: boolean = useSelector((state: any) => state.isFirstLogin);
-  const isMobile: boolean = useSelector((state: any) => state.isMobile);
   const allEvents: any = useSelector((state: any) => state.allEvents);
-
+  const calendarView: any = useSelector((state: any) => state.calendarView);
+  const calendarDays: any = useSelector((state: any) => state.calendarDays);
+  const calendarDaysCurrentIndex: any = useSelector((state: any) => state.calendarDaysCurrentIndex);
+  const rangeTo: Date = useSelector((state: any) => state.rangeTo);
+  const eventsToImport: any = useSelector((state: any) => state.eventsToImport);
+  const isAppStarting: boolean = useSelector((state: any) => state.isAppStarting);
   const selectedDate: Date = useSelector((state: any) => state.selectedDate);
-  const calendarView: string = useSelector((state: any) => state.calendarView);
-  const isAppStarting: boolean = useSelector(
-    (state: any) => state.isAppStarting
-  );
-  const eventsToImport: string = useSelector(
-    (state: any) => state.eventsToImport
-  );
+
   const eventsLastSynced: Date = useSelector(
     (state: any) => state.eventsLastSynced
   );
@@ -200,6 +179,11 @@ const AuthenticatedLayer = (props: any) => {
           const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
           const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
 
+          if (!checkIfIsSafari()) {
+            setServiceWorkerLister();
+            subscribeToPush();
+          }
+
           sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS);
           sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
             lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null,
@@ -246,8 +230,6 @@ const AuthenticatedLayer = (props: any) => {
       }
     );
   };
-
-  const { initPath } = props;
 
   const initLoad = async () => {
     connectToWs();
@@ -316,14 +298,6 @@ const AuthenticatedLayer = (props: any) => {
     const currentDate: Date = new Date();
     initCalendar(currentDate);
   }, [calendarView]);
-
-  // Navigate to custom user url path passed on app load
-  const userCustomRoute: any =
-    // @ts-ignore
-    initPath.length > process.env.REACT_APP_URL.length &&
-    process.env.REACT_APP_URL
-      ? initPath.slice(process.env.REACT_APP_URL.length)
-      : null;
 
   const initCalendar = (date: any) => {
     const calendarDaysNew = getCalendarDays(calendarView, date, null, true);
@@ -524,18 +498,11 @@ const AuthenticatedLayer = (props: any) => {
 
   return !isAppStarting ? (
     <div className={'app_wrapper'}>
-      {/*{!cryptoPassword ? <Redirect to={'/calendar'}/> : null}*/}
       <Router history={history}>
-        {/*{userCustomRoute && userCustomRoute !== '' && userCustomRoute !== '/' ? (*/}
-        {/*  <Redirect to={userCustomRoute} />*/}
-        {/*) : (*/}
-        {/*  <Redirect to={'/calendar'} />*/}
-        {/*)*/}
-        {/*}*/}
         <Redirect to={'/calendar'} />
         <Route exact path={'/search'}>
           {isMobile ? (
-            <Modal {...props}>
+            <Modal >
               <Search />
             </Modal>
           ) : (
@@ -548,7 +515,7 @@ const AuthenticatedLayer = (props: any) => {
                 width: '30%',
               }}
             >
-              <Modal {...props}>
+              <Modal >
                 <Search />
               </Modal>
             </div>
@@ -556,7 +523,7 @@ const AuthenticatedLayer = (props: any) => {
         </Route>
         <Route path={'/settings'}>
           {isMobile ? (
-            <Modal {...props}>
+            <Modal >
               <Settings />
             </Modal>
           ) : (
@@ -579,23 +546,23 @@ const AuthenticatedLayer = (props: any) => {
         </Route>
 
         <Route exact path={'/calendar/new'}>
-          <Modal {...props}>
+          <Modal >
             <NewCalendar />
           </Modal>
         </Route>
         <Route exact path={'/calendar/edit/:id'}>
-          <Modal {...props}>
+          <Modal >
             <EditCalendar />
           </Modal>
         </Route>
 
         <Route path={'/calendar/events/import'}>
-          <Modal {...props}>
+          <Modal>
             <EventImportButton autoFocus={true} />
           </Modal>
         </Route>
         <Route path={'/calendar/events/import/ics'}>
-          <Modal {...props}>
+          <Modal >
             <EventImport />
           </Modal>
         </Route>

@@ -112,6 +112,10 @@ export default class CalendarStateEntity {
   public encryptCalendar = async (password: string): Promise<string> =>
       Crypto.encrypt(this.getCalendarPropsForEncryption(), password)
 
+    /**
+     *
+     * @param cryptoPassword
+     */
   public formatBodyToSend = async (cryptoPassword: string): Promise<CalendarBodyToSend> =>
       (
           {
@@ -122,7 +126,7 @@ export default class CalendarStateEntity {
             updatedAt: parseDateToString(this.updatedAt),
             isShared: this.isShared,
             isPublic: this.isPublic,
-            reminders: this.reminders.length > 0
+            reminders: this.reminders && this.reminders.length > 0
                 ? JSON.stringify(this.reminders)
                 : null,
           }
@@ -137,7 +141,7 @@ export default class CalendarStateEntity {
             updatedAt: parseDateToString(this.updatedAt),
             isShared: this.isShared,
             isPublic: this.isPublic,
-            reminders: this.reminders.length > 0
+            reminders: this.reminders && this.reminders.length > 0
                 ? JSON.stringify(this.reminders)
                 : null,
           }
