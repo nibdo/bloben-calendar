@@ -17,6 +17,7 @@ import {
   WEBSOCKET_UPDATE_CALENDAR
 } from '../../../api/calendar';
 import { updateCalendar } from '../../../redux/actions';
+import {PgpKeys} from "../../../bloben-package/utils/OpenPgp";
 
 const EditCalendar = (props: any) => {
   const dispatch = useDispatch();
@@ -30,7 +31,7 @@ const EditCalendar = (props: any) => {
   const {id} = params;
   const cryptoPassword: any = useSelector((state: any) => state.cryptoPassword);
   const calendars: any = useSelector((state: any) => state.calendars);
-
+  const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
 
   // Init props of selected calendar
   const initEditCalendar = async () => {
@@ -91,8 +92,10 @@ const EditCalendar = (props: any) => {
       state,
     );
 
-  // Encrypt data
-    const bodyToSend: CalendarBodyToSend = await stateData.formatBodyToSend(cryptoPassword);
+    // Encrypt data
+    const bodyToSend: CalendarBodyToSend = pgpKeys && pgpKeys.publicKey
+        ? await stateData.formatBodyToSendPgp(pgpKeys.publicKey)
+        : await stateData.formatBodyToSend(cryptoPassword);
 
     dispatch(updateCalendar(stateData.getStoreObj()));
 
