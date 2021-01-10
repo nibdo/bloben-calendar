@@ -37,7 +37,7 @@ import {
   getEventAndCalendarIds,
   nullTimeInDate,
 } from '../utils/common';
-import { subscribeToPush } from '../bloben-package/utils/pushSubscription';
+import { subscribeToPush } from 'bloben-package/utils/pushSubscription';
 import { setServiceWorkerLister } from '../utils/ServiceWorkerListener';
 import CalendarApi, {
   sendWebsocketMessage,
@@ -53,14 +53,14 @@ import IntroScreen from '../views/introScreen/IntroScreen';
 import {
   findInArrayById,
   sendMessageToReactNative,
-} from '../bloben-package/utils/common';
+} from 'bloben-package/utils/common';
 import { checkIfIsSafari, logger } from 'bloben-common/utils/common';
-import { Context } from '../bloben-package/context/store';
+import { Context } from 'bloben-package/context/store';
 import {
   chooseSelectedDateIndex,
   getCalendarDays,
 } from '../components/calendarView/calendar-common';
-import Modal from '../bloben-package/components/modal/Modal';
+import Modal from 'bloben-package/components/modal/Modal';
 import EventImport from '../components/eventImporter/EventImport';
 import EventImportButton from '../components/eventImporter/eventImporterButton/EventImportButton';
 import NewCalendar from '../views/calendarEdit/newCalendar/NewCalendar';

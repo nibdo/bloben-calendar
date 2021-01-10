@@ -1,27 +1,10 @@
 # Bloben Calendar
 
-Encrypted and Private Calendar application
+Free encrypted and private Calendar application
 
 LIVE version: https://calendar.bloben.com
 
 Contact: hello@bloben.com
-
-# Change log
-- **0.2.3** \
-PIN lock for encrypting data in storage and access to app, \
-minor bug fixes, \
-preparation for usage with React Native wrapper (support for offline notifications, unlock with fingeprint, better native .ics file import)
-- **0.1.3** \
- added all day events,\
-fixed overlapping events,\
-fixed multi day events,\
-calendar layout fix
-- **0.1.2** \
-Added encryption with Open PGP for new accounts
-- **0.0.2** \
-Change license from MIT to GPL
-- **0.0.1** \
-Initial release
 
 
 # Road map
