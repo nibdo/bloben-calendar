@@ -50,7 +50,7 @@ export const saveState = async (root: any) => {
 const parseEventDates = (event: any) => {
   event.createdAt = new Date(event.createdAt);
   event.updatedAt = new Date(event.updatedAt);
-  event.deleletedAt = event.deleletedAt ? new Date(event.createdAt) : null;
+  event.deletedAt = event.deletedAt ? new Date(event.deletedAt) : null;
   event.startAt = new Date(event.startAt);
   event.endAt = new Date(event.endAt);
 
@@ -59,7 +59,7 @@ const parseEventDates = (event: any) => {
 const parseCalendarDays = (calendar: any) => {
   calendar.createdAt = new Date(calendar.createdAt);
   calendar.updatedAt = new Date(calendar.updatedAt);
-  calendar.deleletedAt = calendar.deleletedAt ? new Date(calendar.createdAt) : null;
+  calendar.deletedAt = calendar.deletedAt ? new Date(calendar.deletedAt) : null;
 
   return calendar;
 }

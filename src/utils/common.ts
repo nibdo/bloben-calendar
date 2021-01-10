@@ -16,7 +16,7 @@ import {
     getYear, subHours
 } from 'date-fns';
 import EventStateEntity from '../data/entities/state/event.entity';
-import { setCalendars, setEvents } from '../redux/actions';
+import {setAllEvents, setCalendars, setEvents} from '../redux/actions';
 import { formatTimestampToDate } from '../components/calendar-view/calendar-common';
 
 export const mapTags = (tags: any) => {
@@ -167,6 +167,7 @@ export const handleCalendarReduxDelete =  (calendarId: string) => {
     const store: any = reduxStore.getState();
     const stateCloneCalendars: any = cloneDeep(store.calendars);
     const stateCloneEvents: any = cloneDeep(store.events);
+    const stateCloneAllEvents: any = cloneDeep(store.allEvents);
 
     // Delete calendar
     const filteredCalendars: any = stateCloneCalendars.filter(
@@ -177,8 +178,14 @@ export const handleCalendarReduxDelete =  (calendarId: string) => {
     // Delete all events from this calendar
     const filteredEvents: any = deleteAllCalendarEvents(calendarId, stateCloneEvents);
 
+    const filteredAllEvents: any = stateCloneAllEvents.filter((item: any) =>
+        item.calendarId !== calendarId
+    )
+
     reduxStore.dispatch(setCalendars(filteredCalendars));
     reduxStore.dispatch(setEvents(filteredEvents));
+    reduxStore.dispatch(setAllEvents(filteredAllEvents));
+
 }
 export const addNotification = (data: any, setState: any, reminders: any) => {
     const newNotification: TCalendarNotificationType = {
@@ -209,12 +216,14 @@ export const getDayTimeEnd = (date: Date): Date =>
 const deleteAllCalendarEvents = (calendarId: string, events: any) => {
     const eventsObj: any = Object.entries(events);
 
+    const result: any = {};
+
     for (const [key, value] of eventsObj) {
-        eventsObj[key] = value.filter((item: any) =>
+        result[key] = value.filter((item: any) =>
             item.calendarId !== calendarId)
     }
 
-    return eventsObj;
+    return result;
 }
 
 export const getEventsList = (): any => {
