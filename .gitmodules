@@ -1,0 +1,6 @@
+[submodule "src/bloben-common"]
+	path = src/bloben-common
+	url = git@github.com:nibdo/bloben-common.git
+[submodule "src/bloben-package"]
+	path = src/bloben-package
+	url = git@github.com:nibdo/bloben-package.git
