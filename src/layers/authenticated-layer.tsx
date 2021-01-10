@@ -183,6 +183,11 @@ const AuthenticatedLayer = (props: any) => {
                             const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
                             const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
 
+                            if (!checkIfIsSafari()) {
+                              setServiceWorkerLister();
+                              subscribeToPush();
+                            }
+
                             sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS)
                             sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null})
                             sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {rangeFrom: formatISO(rangeFromInit), rangeTo: formatISO(rangeToInit)})
@@ -221,12 +226,6 @@ const AuthenticatedLayer = (props: any) => {
 
   const initLoad = async () => {
     connectToWs()
-
-
-    if (!checkIfIsSafari()) {
-      await setServiceWorkerLister();
-      await subscribeToPush();
-    }
 
     const currentDate: Date = nullTimeInDate(new Date());
 
