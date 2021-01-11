@@ -15,4 +15,4 @@ Contact: hello@bloben.com
 
 # Known bugs
 - missing support for importing repeated events from ics file and adding automatically reminders,
-- dark theme not covering all components,
+- desktop version layout and dark theme,
