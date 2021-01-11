@@ -1,4 +1,6 @@
 # Change log
+- **0.2.9** \
+  fix dark theme for mobiles
 - **0.2.8** \
   refactoring, better Typescript integration, cleaning, minor fixes
 - **0.2.7** \
