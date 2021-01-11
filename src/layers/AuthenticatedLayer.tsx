@@ -508,6 +508,7 @@ const AuthenticatedLayer = () => {
     }
   }, [eventsToImport]);
 
+
   return !isAppStarting ? (
     <div className={'app_wrapper'}>
       <Router history={history}>

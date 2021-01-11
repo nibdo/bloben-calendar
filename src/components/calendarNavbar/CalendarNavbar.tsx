@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import { ButtonBase, Fab } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
@@ -7,17 +7,13 @@ import { useHistory } from 'react-router';
 import EvaIcons from 'bloben-common/components/eva-icons';
 import { isCalendarApp } from '../../bloben-package/utils/common';
 import { useSelector } from 'react-redux';
-
-const NavbarDesktop = (props: any) => {
-  return <div className={'navbar__wrapper'}></div>;
-};
+import { Context } from '../../bloben-package/context/store';
 
 const NavbarView = (props: any) => {
   const {
     handleLeftClick,
     handleCenterClick,
     handleRightClick,
-    currentPath,
     isDark,
   } = props;
 
@@ -62,7 +58,6 @@ const NavbarViewCalendar = (props: any) => {
     handleLeftClick,
     handleCenterClick,
     handleRightClick,
-    currentPath,
     isDark,
   } = props;
 
@@ -107,7 +102,9 @@ const getCurrentPath = (pathName: string) => {
 };
 
 const CalendarNavbar = (props: any) => {
-  const isDark: string = useSelector((state: any) => state.isDark);
+  const [store] = useContext(Context);
+
+  const {isDark} = store;
 
   const history = useHistory();
   const [currentPath, setCurrentPath] = useState('');

@@ -2,15 +2,11 @@ import React, { useContext } from 'react';
 import './CalendarHeader.scss';
 import {
   differenceInCalendarDays,
-  differenceInMinutes,
   format,
   formatISO,
   getDate,
-  getMonth,
-  getYear,
   isSameDay,
   isToday,
-  parseISO,
 } from 'date-fns';
 import { WidthHook } from 'bloben-common/utils/layout';
 import {
@@ -400,7 +396,7 @@ const CalendarHeader = (props: ICalendarHeaderProps) => {
         isDayView ? '--day' : ''
       }${isMonthView ? '--small' : ''}${
         isDark ? '--dark' : ''
-      } calendar-animation`}
+      }`}
     >
       <HeaderDays
         index={index}

@@ -37,17 +37,23 @@ const HeaderCalendarButton = (props: IHeaderCalendarButtonProps) => {
  * Buttons for switching calendar view in desktop layout
  * @constructor
  */
-const HeaderCalendarButtons = () =>
-  (
-    <div
-      className={`header_calendar_buttons__container`}
-    >
-      <HeaderCalendarButton text={'Agenda'} />
-      <HeaderCalendarButton text={'Day'} />
-      <HeaderCalendarButton text={'3 Days'} />
-      <HeaderCalendarButton text={'Week'} />
-      <HeaderCalendarButton text={'Month'} />
-    </div>
+const HeaderCalendarButtons = () => {
+  const [store] = useContext(Context);
+
+  const {isDark} = store;
+
+  return (
+      <div
+          className={parseCssDark('header_calendar_buttons__container', isDark)}
+      >
+        <HeaderCalendarButton text={'Agenda'} />
+        <HeaderCalendarButton text={'Day'} />
+        <HeaderCalendarButton text={'3 Days'} />
+        <HeaderCalendarButton text={'Week'} />
+        <HeaderCalendarButton text={'Month'} />
+      </div>
   );
+}
+
 
 export default HeaderCalendarButtons;

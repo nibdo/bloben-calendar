@@ -23,6 +23,7 @@ import BottomSheet from 'bottom-sheet-react';
 import Modal from '../../bloben-package/components/modal/Modal';
 import CalendarNavbar from '../../components/calendarNavbar/CalendarNavbar';
 import { Context } from '../../bloben-package/context/store';
+import { parseCssDark } from '../../bloben-common/utils/common';
 
 interface ICalendarTypeProps {
   getNewCalendarDays: any;
@@ -154,7 +155,7 @@ const CalendarView = (props: ICalendarViewProps) => {
             hasHeaderShadow={isAgenda}
             icons={[
               <IconButton key={'bell'}>
-                <EvaIcons.Bell className={'icon-svg'} />
+                <EvaIcons.Bell className={parseCssDark('icon-svg', isDark)} />
               </IconButton>,
             ]}
           />
@@ -203,6 +204,8 @@ const CalendarView = (props: ICalendarViewProps) => {
           {isDrawerOpen ? (
             <BottomSheet
               {...props}
+              backdropClassName={isDark ? 'bottom-sheet__backdrop--dark' : ''}
+              containerClassName={isDark ? 'bottom-sheet__container--dark' : ''}
               customHeight={(height / 4) * 3}
               isExpandable={true}
               onClose={() => toggleDrawer(false)}
@@ -213,6 +216,8 @@ const CalendarView = (props: ICalendarViewProps) => {
           {areSettingsOpen ? (
             <BottomSheet
               {...props}
+              backdropClassName={isDark ? 'bottom-sheet__backdrop--dark' : ''}
+              containerClassName={isDark ? 'bottom-sheet__container--dark' : ''}
               isExpandable={false}
               onClose={() => toggleSettingsOpen(false)}
             >

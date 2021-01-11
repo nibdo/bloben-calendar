@@ -29,6 +29,10 @@
   font-size: 1.2rem;
   font-weight: 600;
 }
+.agenda-item__title-dark {
+  @extend .agenda-item__title;
+  color: $GRAY_900;
+}
 .agenda-item__hours {
   font-size: 1.1rem;
   font-weight: 400;
@@ -57,6 +61,17 @@
   font-weight: 500;
   margin: 0;
   padding: 0;
+}
+.agenda__day-text-dark {
+  @extend .agenda__day-text;
+  color: $GRAY_300;
+}
+.agenda__day-text-small {
+  color: inherit;
+}
+.agenda__day-text-small-dark {
+  @extend .agenda__day-text-small;
+  color: $GRAY_400;
 }
 .agenda__day-text-today {
   @extend .agenda__day-text;

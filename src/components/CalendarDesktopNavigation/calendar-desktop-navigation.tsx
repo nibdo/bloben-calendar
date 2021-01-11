@@ -1,19 +1,28 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import './calendar-desktop-navigation.scss';
-import { ButtonBase, IconButton } from '@material-ui/core';
-import { useDispatch, useSelector } from 'react-redux';
+import { IconButton } from '@material-ui/core';
 
 import HeaderCalendarTitle from '../headerCalendarTitle/HeaderCalendarTitle';
 import EvaIcons from '../../bloben-common/components/eva-icons';
+import { Context } from '../../bloben-package/context/store';
+import { parseCssDark } from '../../bloben-common/utils/common';
+
+interface ICalendarDesktopNavigationProps {
+  title: string;
+  getNewCalendarDays: any;
+}
 
 /**
  * Title with calendar navigation buttons for desktop layout
  * @param props
  * @constructor
  */
-const CalendarDesktopNavigation = (props: any) => {
+const CalendarDesktopNavigation = (props: ICalendarDesktopNavigationProps) => {
   const {title, getNewCalendarDays} = props;
-  const isDark: boolean = useSelector((state: any) => state.isDark);
+
+  const [store] = useContext(Context);
+
+  const {isDark} = store;
 
   const navigateBackwards = (): void =>
       getNewCalendarDays(false);
@@ -22,17 +31,17 @@ const CalendarDesktopNavigation = (props: any) => {
 
   return (
       <div
-          className={`calendar-desktop-navigation__container`}
+          className={parseCssDark('calendar-desktop-navigation__container', isDark)}
       >
         <div style={{display: 'flex', width: 300}}>
         <HeaderCalendarTitle title={title}/>
         </div>
         <div className={'calendar-desktop-navigation__buttons'}>
           <IconButton key={'left'} onClick={navigateBackwards}>
-            <EvaIcons.ChevronLeft className={'icon-svg'} />
+            <EvaIcons.ChevronLeft className={parseCssDark('icon-svg', isDark)} />
           </IconButton>
           <IconButton key={'right'} onClick={navigateForward}>
-            <EvaIcons.ChevronRight className={'icon-svg'} />
+            <EvaIcons.ChevronRight className={parseCssDark('icon-svg', isDark)} />
           </IconButton>
         </div>
       </div>

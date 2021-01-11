@@ -26,14 +26,14 @@ const CalendarColor = (props: ICalendarColorProps) => {
   const calendarColor: any = parseEventColor(color, isDark);
 
   return (
-    <ButtonBase className={'event_detail__row'} onClick={onClick}>
+    <ButtonBase className={parseCssDark('event_detail__row', isDark)} onClick={onClick}>
       <div className={'event_detail__container--icon'}>
         <EvaIcons.CircleFill
           className={'svg-icon calendar-content-svg'}
           fill={calendarColor}
         />
       </div>
-      <p className={`event_detail__input${isDark ? '--dark' : ''}`}>{color}</p>
+      <p className={parseCssDark('event_detail__input', isDark)}>{color}</p>
     </ButtonBase>
   );
 };
@@ -98,7 +98,7 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
         icons={[]}
       />
       <div className={'event_detail__wrapper'} style={{ padding: 0 }}>
-        <div className={'event_detail__row'}>
+        <div className={parseCssDark('event_detail__row', isDark)}>
           <div className={'event_detail__container--icon'}>
             <CalendarIcon className={'event_detail__icon--hidden'} />
           </div>

@@ -14,6 +14,7 @@ import {
 import { Input } from '../../bloben-package/components/input/Input';
 import { Context } from '../../bloben-package/context/store';
 import { useHistory } from 'react-router-dom';
+import { parseCssDark } from '../../bloben-common/utils/common';
 
 const SearchImage = () => (
   <div className={'search_empty__wrapper'}>
@@ -92,7 +93,7 @@ const SearchHeader = (props: ISearchHeaderProps) => {
   const goBack: any = () => history.goBack();
 
   return (
-    <div className={'search__header-container'}>
+    <div className={parseCssDark('search__header-container', isDark)}>
       <IconButton
         onClick={goBack}
         className={`${isMobile ? '' : 'small-icon-button'}`}

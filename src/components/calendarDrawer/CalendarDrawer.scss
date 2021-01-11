@@ -15,6 +15,12 @@
   }
 }
 
+.calendar-drawer__wrapper-dark {
+  @extend .calendar-drawer__wrapper;
+  background-color: $GRAY_900;
+  border-right: solid 0.5px $MODAL_DARK;
+}
+
 .calendar-drawer__button {
   width: 100%;
   display: flex;

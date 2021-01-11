@@ -13,6 +13,11 @@
   //box-shadow: 0 5px 5px -5px #333;
 }
 
+.calendar-desktop-navigation__container-dark {
+  @extend .calendar-desktop-navigation__container;
+  background-color: $MODAL_DARK;
+}
+
 .calendar-desktop-navigation__buttons {
   display: flex;
   flex-direction: row;

@@ -234,7 +234,7 @@ const CalendarDrawer = (props: ICalendarDrawerProps) => {
   const selectedDate: Date = useSelector((state: any) => state.selectedDate);
 
   const [store] = useContext(Context);
-  const { isMobile } = store;
+  const { isMobile, isDark } = store;
 
   const drawerHeight: number = HeightHook() - HEADER_HEIGHT_BASE;
 
@@ -255,7 +255,7 @@ const CalendarDrawer = (props: ICalendarDrawerProps) => {
   };
 
   return (
-    <div className={'calendar-drawer__wrapper'}>
+    <div className={parseCssDark('calendar-drawer__wrapper', isDark)}>
       {isMobile ? (
         <ViewSwitcher changeCalendarView={changeCalendarView} />
       ) : null}

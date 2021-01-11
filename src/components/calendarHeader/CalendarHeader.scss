@@ -22,6 +22,10 @@
   @extend .header_calendar__wrapper;
   height: 95px;
 }
+.header_calendar__wrapper--tall--dark {
+  @extend .header_calendar__wrapper--tall;
+  background-color: $MODAL_DARK;
+}
 .header_calendar__wrapper--small {
   @extend .header_calendar__wrapper;
   height: 30px;

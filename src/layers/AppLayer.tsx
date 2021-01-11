@@ -4,7 +4,7 @@ import { WidthHook, HeightHook } from 'bloben-common/utils/layout';
 import { useHistory } from 'react-router';
 import Axios from 'bloben-common/utils/axios';
 import LoadingScreen from '../bloben-common/components/loadingScreen/LoadingScreen';
-import { changeTheme } from '../bloben-package/utils/change-theme';
+import { changeTheme } from '../bloben-package/utils/changeTheme';
 import AnonymView from '../bloben-package/layers/AnonymLayer';
 import { useDispatch, useSelector } from 'react-redux';
 import {
@@ -83,26 +83,6 @@ const AppLayer = (props: any) => {
     }
   }, [width, isAppStarting]);
 
-  /*
-   * Add listener for preferred color theme
-   */
-  useEffect(() => {
-    window.matchMedia('(prefers-color-scheme: dark)').addListener(async (e) => {
-      // First check if system settings for theme are set
-      // TODO GET THEME FROM STORE
-
-      // if (theme.value !== 'system') {
-      //     return;
-      // }
-      if (e.matches) {
-        // Dark
-        await changeTheme('dark', dispatch);
-      } else {
-        // Light
-        await changeTheme('light', dispatch);
-      }
-    });
-  }, []);
 
   useEffect(() => {
     GeneralApi.sendVisit(

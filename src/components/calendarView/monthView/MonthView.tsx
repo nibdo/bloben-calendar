@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import './MonthView.scss';
 import CalendarHeader from '../../calendarHeader/CalendarHeader';
 import { getDate, isSameMonth, isToday } from 'date-fns';
@@ -14,6 +14,7 @@ import {
 import { useHistory } from 'react-router';
 import Slider from 'react-slick';
 import { parseCssDark } from '../../../bloben-common/utils/common';
+import { Context } from '../../../bloben-package/context/store';
 
 interface IEventProps {
   isDark: boolean;
@@ -88,7 +89,10 @@ interface IOneDayProps {
 const OneDay = (props: IOneDayProps) => {
   const {height, data, borderClass, day} = props;
   const selectedDate: Date = useSelector((state: any) => state.selectedDate);
-  const isDark: boolean = useSelector((state: any) => state.isDark);
+
+  const [store] = useContext(Context);
+
+  const {isDark} = store;
 
   const renderEvents = (dataset: any) => {
     const tableWidth: any = '90%';

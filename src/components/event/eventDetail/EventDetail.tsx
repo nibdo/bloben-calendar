@@ -61,9 +61,9 @@ const Title = (props: ITitleProps) => {
         <CalendarIcon className={'event_detail__icon--hidden'} />
       </div>
       <Input
-        placeholder="Add event"
-        type="text"
-        name="text"
+        placeholder='Add event'
+        type='text'
+        name='text'
         autoFocus={isNewEvent}
         multiline={true}
         value={value}
@@ -170,7 +170,7 @@ export const Calendar = (props: ICalendarProps) => {
             handleClose={handleMenuClose}
           >
             <MyMenu
-              variant="calendar"
+              variant='calendar'
               select={selectOption}
               selected={calendar}
               handleClose={handleMenuClose}
@@ -180,7 +180,7 @@ export const Calendar = (props: ICalendarProps) => {
         ) : (
           <ModalSmall isOpen={isOpen} handleClose={handleMenuClose}>
             <MyMenu
-              variant="calendar"
+              variant='calendar'
               select={selectOption}
               selected={calendar}
               handleClose={handleMenuClose}
@@ -362,9 +362,9 @@ const RepeatValueButton = (props: IRepeatValueButtonProps) => {
 
   return (
     <div className={'repeat__value-wrapper'}>
-      <p className={'repeat__value-label'}>{label}</p>
+      <p className={parseCssDark('repeat__value-label', isDark)}>{label}</p>
       <ButtonBase
-        className={'repeat__value-container'}
+          className={parseCssDark('repeat__value-container', isDark)}
         style={style}
         onClick={handleClick}
       >
@@ -395,24 +395,29 @@ export const RepeatValueDropDown = (props: IRepeatValueDropdownProps) => {
     style,
   } = props;
 
+  const [store] = useContext(Context);
+
+  const {isDark} = store;
+
   return (
     <div className={'repeat__value-wrapper'}>
-      <p className={'repeat__value-label'}>{label}</p>
+      <p className={parseCssDark('repeat__value-label', isDark)}>{label}</p>
       <ButtonBase
-        className={'repeat__value-container'}
+          className={parseCssDark('repeat__value-container', isDark)}
         style={style}
         onClick={handleOpen}
       >
-        <p className={'repeat__value-text'}>{value}</p>
-        <Dropdown
+        <p className={parseCssDark('repeat__value-text', isDark)}>{value}</p>
+
+      </ButtonBase>
+      <Dropdown
           isOpen={isOpen}
           handleClose={handleClose}
           selectedValue={value}
           values={values}
           onClick={handleSelect}
           variant={'simple'}
-        />
-      </ButtonBase>
+      />
     </div>
   );
 };
@@ -456,9 +461,15 @@ interface IRepeatOptionsProps {
 const RepeatOptions = (props: IRepeatOptionsProps) => {
   const { rRuleState, setRRule, handleClose } = props;
 
+  const [store] = useContext(Context);
+
+  const {isDark} = store;
+
   const { freq, interval, until, count } = rRuleState;
 
-  const [freqIsOpen, openFreq] = useState(false);
+  const DEFAULT_FREQ_OPEN_VALUE: any = {clientX: null}
+
+  const [freqIsOpen, openFreq] = useState(DEFAULT_FREQ_OPEN_VALUE);
   const [untilIsOpen, openUntil] = useState(false);
   const [repeatTillValue, setRepeatTillValue] = useState('forever');
   const [isDateTillVisible, openDateTill] = useState(false);
@@ -468,7 +479,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
       setRRule('freq', 'weekly');
       setRRule('interval', 1);
     }
-  }, []);
+  },        []);
 
   const selectFreq = (value: any) => {
     setRRule('freq', value);
@@ -484,7 +495,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
         setRRule('interval', 1);
       }
     }
-    openFreq(false);
+    openFreq(DEFAULT_FREQ_OPEN_VALUE);
   };
   const selectUntil = (value: any) => {
     if (value === 'date') {
@@ -522,6 +533,12 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
     handleClose();
   };
 
+  const openFreqDropdown = (e: any) => {
+    const nativeEvent: any = e.nativeEvent;
+    const { clientX, clientY } = nativeEvent;
+    openFreq({ clientX, clientY });
+  };
+
   const freqValues = ['none', 'daily', 'weekly', 'monthly'];
   const untilValues = ['forever', 'date', 'count'];
 
@@ -536,7 +553,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
         }}
       >
         <div style={{ width: '50%', justifyContent: 'flex-end' }}>
-          <h4 className={'repeat__subtitle'}>Repeat</h4>
+          <h4 className={parseCssDark('repeat__subtitle', isDark)}>Repeat</h4>
         </div>
         <div
           style={{ display: 'flex', width: '50%', justifyContent: 'flex-end' }}
@@ -553,11 +570,11 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
           label={'Frequency'}
           value={freq}
           style={{ width: 80 }}
-          handleOpen={() => openFreq(true)}
-          handleClose={() => openFreq(false)}
+          handleOpen={openFreqDropdown}
+          handleClose={() => openFreq(DEFAULT_FREQ_OPEN_VALUE)}
           values={freqValues}
           handleSelect={selectFreq}
-          isOpen={freqIsOpen}
+          isOpen={freqIsOpen.clientX ? true : null}
         />
         <div style={{ width: 25 }} />
         {freq !== 'none' ? (
@@ -572,7 +589,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
         ) : null}
       </div>
       {freq !== 'none' ? (
-        <h4 className={'repeat__subtitle'}>Repeat until</h4>
+              <h4 className={parseCssDark('repeat__subtitle', isDark)}>Repeat until</h4>
       ) : null}
       <div className={'repeat__row'}>
         {freq !== 'none' ? (
@@ -694,7 +711,7 @@ const Repeat = (props: IRepeatProps) => {
         isMobile ? (
           <ModalSmall isOpen={isOpen} handleClose={handleMenuClose}>
             <MyMenu
-              variant="radio"
+              variant='radio'
               select={selectOption}
               selected={{ label: isRepeated, value: isRepeated }}
               handleClose={handleMenuClose}
@@ -708,7 +725,7 @@ const Repeat = (props: IRepeatProps) => {
             handleClose={handleMenuClose}
           >
             <MyMenu
-              variant="radio"
+              variant='radio'
               select={selectOption}
               selected={{ label: isRepeated, value: isRepeated }}
               handleClose={handleMenuClose}
@@ -720,6 +737,8 @@ const Repeat = (props: IRepeatProps) => {
       {isCustomOpen ? (
         <BottomSheet
           {...props}
+          backdropClassName={isDark ? 'bottom-sheet__backdrop--dark' : ''}
+          containerClassName={isDark ? 'bottom-sheet__container--dark' : ''}
           customHeight={(height / 4) * 2}
           isExpandable={false}
           onClose={() => openCustomMenu(false)}
@@ -751,9 +770,9 @@ const Location = (props: ILocationProps) => {
         <EvaIcons.Pin className={'svg-icon event-content-svg'} />
       </div>
       <Input
-        type="text"
-        name="location"
-        placeholder="Add location"
+        type='text'
+        name='location'
+        placeholder='Add location'
         autoComplete={'off'}
         className={parseCssDark('event_detail__input', isDark)}
         onChange={handleChange}
@@ -780,9 +799,9 @@ const Notes = (props: INotesProps) => {
         <EvaIcons.Note className={'svg-icon event-content-svg'} />
       </div>
       <Input
-        type="text"
-        name="notes"
-        placeholder="Add notes"
+        type='text'
+        name='notes'
+        placeholder='Add notes'
         autoComplete={'off'}
         className={parseCssDark('event_detail__input', isDark)}
         onChange={handleChange}
@@ -866,7 +885,7 @@ const EventDetail = (props: IEventDetailProps) => {
     return () => {
       document.removeEventListener('click', handleNewCoordinates);
     };
-  }, []);
+  },        []);
 
   const wrapperStyle: any = {
     height: isMobile ? height - HEADER_HEIGHT_SMALL : height / 2,

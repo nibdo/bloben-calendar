@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './Agenda.scss';
-import { format, getMonth, isAfter, isBefore, isSameMonth, isToday } from 'date-fns';
+import { format, getMonth, isAfter, isToday } from 'date-fns';
 import {
   HEADER_HEIGHT_SMALL,
   NAVBAR_HEIGHT_BASE,
@@ -14,6 +14,7 @@ import _ from 'lodash';
 import { useHistory } from 'react-router';
 import { HeightHook } from '../../../bloben-common/utils/layout';
 import { Context } from '../../../bloben-package/context/store';
+import { parseCssDark } from '../../../bloben-common/utils/common';
 
 interface IMonthTitleProps {
   isDark: boolean;
@@ -25,7 +26,7 @@ const MonthTitle = (props: IMonthTitleProps) => {
   return (
     <div className={'agenda-item__wrapper-title'}>
       <div className={'header__title-button '}>
-        <p className={`header__title${isDark ? '-dark' : ''}`}>{title}</p>
+        <p className={parseCssDark('header__title', isDark)}>{title}</p>
       </div>
     </div>
   );
@@ -56,7 +57,7 @@ const AgendaEvent = (props: IAgendaEventProps) => {
   const eventColor: string = parseEventColor(color, isDark);
 
   const itemStyle: any = {
-    background: `${eventColor}33`,
+    background: `${eventColor}`,
   };
 
   const isDateToday: boolean = isFirstForDay ? isToday(startAt) : false;
@@ -108,18 +109,18 @@ const AgendaEvent = (props: IAgendaEventProps) => {
             <div
               className={`agenda__day-container${isDateToday ? '-today' : ''}`}
             >
-              <p className={`agenda__day-text${isDateToday ? '-today' : ''}`}>
+              <p className={parseCssDark(`agenda__day-text${isDateToday ? '-today' : ''}`, isDark)}>
                 {format(startAt, 'd')}
               </p>
             </div>
             <div className={'agenda__day-container-small'}>
-              <p>{format(startAt, 'iii')}</p>
+              <p className={parseCssDark('agenda__day-text-small', isDark)}>{format(startAt, 'iii')}</p>
             </div>
           </div>
         ) : null}
       </div>
       <div className={'agenda-item__container'} style={itemStyle}>
-        <p className={'agenda-item__title'}>{text}</p>
+        <p className={parseCssDark('agenda-item__title', isDark)}>{text}</p>
         <p className={'agenda-item__hours'}>
           {format(startAt, 'hh:mm')}- {format(endAt, 'hh:mm')}
         </p>
