@@ -156,7 +156,7 @@ const AppLayer = (props: any) => {
   }, []);
 
   return (
-    <div className={`root__wrapper${isDark ? '-dark' : ''}`}>
+    <div className={`root-wrapper${isDark ? '-dark' : ''}`}>
       {isAuthenticated ? (
         <AuthenticatedLayer
         />
