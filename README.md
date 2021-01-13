@@ -4,7 +4,7 @@ Free encrypted and private Calendar application
 
 LIVE version: https://calendar.bloben.com
 
-Contact: hello@bloben.com
+Contact: hello@nibdo.com
 
 
 # Road map
