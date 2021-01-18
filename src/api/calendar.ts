@@ -22,6 +22,10 @@ export const WEBSOCKET_UPDATE_CALENDAR: string = '/app/calendars/update';
 export const WEBSOCKET_DELETE_CALENDAR: string = '/app/calendars/delete';
 export const WEBSOCKET_SYNC_CALENDARS: string = '/app/calendars/sync';
 
+export const WEBSOCKET_GET_NOTIFICATIONS: string = '/app/notifications/get/all';
+export const WEBSOCKET_GET_ONE_NOTIFICATION: string = '/app/notifications/get/one';
+export const WEBSOCKET_READ_NOTIFICATION: string = '/app/notifications/read';
+
 export const sendWebsocketMessage = (destination: string, data?: any | null) => {
   stompClient.send(destination, {}, data ? JSON.stringify(data) : null
   );

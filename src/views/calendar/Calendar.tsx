@@ -24,6 +24,7 @@ import Modal from '../../bloben-package/components/modal/Modal';
 import CalendarNavbar from '../../components/calendarNavbar/CalendarNavbar';
 import { Context } from '../../bloben-package/context/store';
 import { parseCssDark } from '../../bloben-common/utils/common';
+import Notifications from '../../bloben-package/views/notifications/Notifications';
 
 interface ICalendarTypeProps {
   getNewCalendarDays: any;
@@ -154,7 +155,7 @@ const CalendarView = (props: ICalendarViewProps) => {
             title={headerTitle}
             hasHeaderShadow={isAgenda}
             icons={[
-              <IconButton key={'bell'}>
+              <IconButton key={'bell'} onClick={() => history.push('/calendar/notifications')}>
                 <EvaIcons.Bell className={parseCssDark('icon-svg', isDark)} />
               </IconButton>,
             ]}
@@ -191,6 +192,15 @@ const CalendarView = (props: ICalendarViewProps) => {
               <Modal {...props} handleClose={() => history.goBack()}>
                 <EditEvent isNewEvent={false} />
               </Modal>
+            </Route>
+            <Route path={'/calendar/notifications'}>
+              {isMobile ? (
+                  <Modal>
+                    <Notifications />
+                  </Modal>
+              ) : (
+                  <Notifications />
+              )}
             </Route>
           </Router>
 

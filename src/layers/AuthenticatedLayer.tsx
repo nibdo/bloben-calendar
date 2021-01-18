@@ -43,7 +43,7 @@ import CalendarApi, {
   sendWebsocketMessage,
   WEBSOCKET_GET_ALL_CALENDARS,
   WEBSOCKET_GET_ALL_EVENTS,
-  WEBSOCKET_GET_EVENTS,
+  WEBSOCKET_GET_EVENTS, WEBSOCKET_GET_NOTIFICATIONS,
   WEBSOCKET_SYNC_CALENDARS,
   WEBSOCKET_SYNC_EVENTS,
 } from '../api/calendar';
@@ -66,6 +66,7 @@ import EventImportButton from '../components/eventImporter/eventImporterButton/E
 import NewCalendar from '../views/calendarEdit/newCalendar/NewCalendar';
 import EditCalendar from '../views/calendarEdit/editCalendar/EditCalendar';
 import Calendar from '../views/calendar/Calendar';
+import Notifications from '../bloben-package/views/notifications/Notifications';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -195,6 +196,7 @@ const AuthenticatedLayer = () => {
           const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
           const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
 
+          sendWebsocketMessage(WEBSOCKET_GET_NOTIFICATIONS);
           sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS);
           sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
             lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null,
@@ -207,11 +209,14 @@ const AuthenticatedLayer = () => {
           // Send all event and calendar ids to server to check if they exist
           // Return only ids of items to delete
           sendIdsToSync();
-          stompClient.subscribe('/user/notifications', (message: any) => {});
+          stompClient.subscribe('/user/notifications', (message: any) => {
+            WebsocketHandler.handleCreateNotification(message.body);
+          });
         }, 20);
 
         // Receive automatic updates from server
         stompClient.subscribe('/user/sync', (message: any) => {
+          console.log(message.body)
           WebsocketHandler.handleSyncGeneral(message);
         });
         stompClient.subscribe('/user/events', (message: any) => {
@@ -543,6 +548,7 @@ const AuthenticatedLayer = () => {
             <Settings />
           )}
         </Route>
+
         <Route path={'/calendar'}>
           {(calendarDays &&
             selectedDate &&
