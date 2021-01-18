@@ -11,13 +11,14 @@ import { stompClient } from '../../../layers/AuthenticatedLayer';
 import { addCalendar } from '../../../redux/actions';
 import { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
 import CalendarContent from '../calendarContent/CalendarContent';
+import EditCalendar from '../editCalendar/EditCalendar';
 
 const NewCalendar = () => {
   const [calendarState, dispatchState]: any = useReducer(
     StateReducer,
     Utils.initialState
   );
-  const { name, color, reminders, isShared, isPublic } = calendarState;
+  const { name, color, reminders, isShared, isPublic, timezone } = calendarState;
   const history = useHistory();
 
   const dispatch: any = useDispatch();
@@ -38,6 +39,9 @@ const NewCalendar = () => {
   const selectColor = (colorValue: any) => {
     setLocalState('color', 'simple', colorValue);
   };
+
+  const selectTimezone = (timezoneValue: string) =>
+      setLocalState('timezone', 'simple', timezoneValue)
 
   const addNotificationCalendar = (item: any) => {
     addNotification(item, setLocalState, reminders);
@@ -74,6 +78,9 @@ const NewCalendar = () => {
       reminders={reminders}
       addNotification={addNotificationCalendar}
       removeNotification={removeNotificationCalendar}
+      isNewCalendar={true}
+      selectTimezone={selectTimezone}
+      timezone={timezone}
     />
   );
 };

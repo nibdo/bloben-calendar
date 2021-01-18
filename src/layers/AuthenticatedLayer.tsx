@@ -27,7 +27,7 @@ import {
   setIsFirstLogin,
   setRangeFrom,
   setRangeTo,
-  setSelectedDate,
+  setSelectedDate, setTimezones,
 } from '../redux/actions';
 import {
   getArrayEnd,
@@ -67,6 +67,7 @@ import NewCalendar from '../views/calendarEdit/newCalendar/NewCalendar';
 import EditCalendar from '../views/calendarEdit/editCalendar/EditCalendar';
 import Calendar from '../views/calendar/Calendar';
 import Notifications from '../bloben-package/views/notifications/Notifications';
+import GeneralApi from '../bloben-common/api/general.api';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -122,6 +123,12 @@ const AuthenticatedLayer = () => {
     dispatch(setDefaultCalendar(settings.defaultCalendar));
   }
 
+  const initTimezones = async () => {
+    const timezones: any = await GeneralApi.getTimezones()
+
+    dispatch(setTimezones(timezones.data.data));
+  }
+
   /**
    * Fetch all events on first login
    */
@@ -129,6 +136,9 @@ const AuthenticatedLayer = () => {
     if (isFirstLogin) {
       sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, { lastSync: null });
       dispatch(setIsFirstLogin(false));
+
+      // Load timezones
+      initTimezones()
 
       // Load app settings
       loadDefaultCalendar()
@@ -171,6 +181,7 @@ const AuthenticatedLayer = () => {
 
     // TODO to websocket
     const sendIdsToSync = () => {
+
       // Get event and calendar ids
       const data: any = getEventAndCalendarIds();
 
@@ -212,7 +223,7 @@ const AuthenticatedLayer = () => {
           stompClient.subscribe('/user/notifications', (message: any) => {
             WebsocketHandler.handleCreateNotification(message.body);
           });
-        }, 20);
+        },         20);
 
         // Receive automatic updates from server
         stompClient.subscribe('/user/sync', (message: any) => {
@@ -309,12 +320,12 @@ const AuthenticatedLayer = () => {
     getRemindersForReactNative();
     const currentDate: any = new Date();
     initCalendar(currentDate);
-  }, []);
+  },        []);
 
   useEffect(() => {
     const currentDate: Date = new Date();
     initCalendar(currentDate);
-  }, [calendarView]);
+  },        [calendarView]);
 
   const initCalendar = (date: any) => {
     const calendarDaysNew = getCalendarDays(calendarView, date, null, true);
@@ -511,8 +522,7 @@ const AuthenticatedLayer = () => {
     if (eventsToImport.length > 2) {
       history.push('/calendar/events/import/ics');
     }
-  }, [eventsToImport]);
-
+  },        [eventsToImport]);
 
   return !isAppStarting ? (
     <div className={'app_wrapper'}>
@@ -566,12 +576,12 @@ const AuthenticatedLayer = () => {
 
         <Route exact path={'/calendar/new'}>
           <Modal>
-            <NewCalendar />
+            <NewCalendar/>
           </Modal>
         </Route>
         <Route exact path={'/calendar/edit/:id'}>
           <Modal>
-            <EditCalendar />
+            <EditCalendar/>
           </Modal>
         </Route>
 

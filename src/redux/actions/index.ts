@@ -16,6 +16,12 @@ export const setPassword = (password: string) => {
         payload: password
     }
 }
+export const setTimezones = (timezones: string[]) => {
+    return {
+        type: 'SET_TIMEZONES',
+        payload: timezones
+    }
+}
 export const addWeek = (rangeFromInit: Date) => {
     return {
         type: 'ADD_WEEK'

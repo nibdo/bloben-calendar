@@ -29,9 +29,11 @@ import password from './password';
 import defaultCalendar from './defaultCalendar';
 import eventsToImport from './eventsToImport';
 import isAndroidApp from './isAndroidApp';
+import timezones from './timezones';
 
 export const allReducers: any = combineReducers({
     isAndroidApp,
+    timezones,
     pgpKeys,
     defaultCalendar,
     password,

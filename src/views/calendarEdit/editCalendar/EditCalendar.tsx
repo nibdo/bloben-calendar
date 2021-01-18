@@ -28,7 +28,7 @@ const EditCalendar = () => {
     StateReducer,
     Utils.initialState
   );
-  const { name, color, reminders } = calendarState;
+  const { name, color, reminders, timezone } = calendarState;
   const history = useHistory();
   const params: any = useParams();
   const { id } = params;
@@ -55,6 +55,8 @@ const EditCalendar = () => {
     for (const [key, value] of Object.entries(thisCalendar)) {
       if (key === 'reminders' && !value) {
         setLocalState(key, 'simple', []);
+      } else if (key === 'timezone' && !value) {
+        setLocalState(key, 'simple', 'device')
       } else {
         setLocalState(key, 'simple', value);
       }
@@ -82,6 +84,9 @@ const EditCalendar = () => {
   const selectColor = (colorValue: any) => {
     setLocalState('color', 'simple', colorValue);
   };
+
+  const selectTimezone = (timezoneValue: string) =>
+      setLocalState('timezone', 'simple', timezoneValue)
 
   const addNotificationCalendar = (item: any) => {
     addNotification(item, setLocalState, reminders);
@@ -126,10 +131,13 @@ const EditCalendar = () => {
       selectColor={selectColor}
       saveCalendar={saveCalendar}
       reminders={reminders}
+      timezone={timezone}
       addNotification={addNotificationCalendar}
       removeNotification={removeNotificationCalendar}
       deleteCalendar={deleteCalendar}
       calendarId={params.id}
+      isNewCalendar={false}
+      selectTimezone={selectTimezone}
     />
   );
 };

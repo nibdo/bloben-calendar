@@ -14,6 +14,30 @@ import { Input } from '../../../bloben-package/components/input/Input';
 import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
 import { Context } from '../../../bloben-package/context/store';
 import { parseCssDark } from '../../../bloben-common/utils/common';
+import Modal from '../../../bloben-package/components/modal/Modal';
+import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
+
+interface ITimezoneRowProps {
+  timezone: string;
+  openTimezoneModal: any;
+  isDark: boolean;
+}
+const TimezoneRow = (props: ITimezoneRowProps) => {
+  const { timezone, isDark, openTimezoneModal } = props;
+
+  return (
+      <ButtonBase className={parseCssDark('event_detail__row', isDark)} onClick={openTimezoneModal}>
+        <div className={'event_detail__container--icon'}>
+          <EvaIcons.Globe
+              className={'svg-icon calendar-content-svg'}
+          />
+        </div>
+        <p className={parseCssDark('event_detail__input', isDark)}>
+          {timezone === 'device' ? 'Device timezone' : timezone}
+        </p>
+      </ButtonBase>
+  );
+};
 
 interface ICalendarColorProps {
   color: any;
@@ -62,6 +86,10 @@ interface ICalendarContentViewProps {
   calendarId?: string;
   addNotification?: any;
   removeNotification?: any;
+  openTimezoneModal: any;
+  timezoneModalIsOpen: boolean;
+  selectTimezone: any;
+  timezone: string;
 }
 const CalendarContentView = (props: ICalendarContentViewProps) => {
   const {
@@ -76,6 +104,10 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
     calendarId,
     addNotification,
     removeNotification,
+    openTimezoneModal,
+    timezoneModalIsOpen,
+    selectTimezone,
+    timezone
   } = props;
 
   const { name, color } = calendarState;
@@ -124,12 +156,21 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
             toggleColorModal(true);
           }}
         />
+        <TimezoneRow timezone={timezone} openTimezoneModal={openTimezoneModal} isDark={isDark}/>
         {/*<NotificationSettings*/}
         {/*  notifications={reminders}*/}
         {/*  addNotification={addNotification}*/}
         {/*  removeNotification={removeNotification}*/}
         {/*/>*/}
       </div>
+      {timezoneModalIsOpen
+          ? <Modal>
+            <TimeZonePicker
+                selectTimezone={selectTimezone}
+                onClose={() => openTimezoneModal(false)}/>
+            </Modal>
+          : null
+      }
       <ModalSmall
         isOpen={colorModalIsOpen}
         handleClose={() => toggleColorModal(false)}
@@ -142,6 +183,7 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
 
 interface ICalendarContentProps {
   selectColor: any;
+  timezone: string;
   addNotification: any;
   removeNotification: any;
   deleteCalendar?: any;
@@ -150,6 +192,8 @@ interface ICalendarContentProps {
   saveCalendar: any;
   handleChange: any;
   reminders: any;
+  isNewCalendar: boolean;
+  selectTimezone: any;
 }
 const CalendarContent = (props: ICalendarContentProps) => {
   const {
@@ -161,9 +205,13 @@ const CalendarContent = (props: ICalendarContentProps) => {
     calendarState,
     saveCalendar,
     handleChange,
+    timezone,
+    isNewCalendar,
+    selectTimezone
   } = props;
 
   const [colorModalIsOpen, openColorModal] = useState(false);
+  const [timezoneModalIsOpen, openTimezoneModal] = useState(false);
 
   const history = useHistory();
 
@@ -193,6 +241,10 @@ const CalendarContent = (props: ICalendarContentProps) => {
       calendarState={calendarState}
       saveCalendar={saveCalendar}
       handleChange={handleChange}
+      openTimezoneModal={openTimezoneModal}
+      timezoneModalIsOpen={timezoneModalIsOpen}
+      selectTimezone={selectTimezone}
+      timezone={timezone}
     />
   );
 };

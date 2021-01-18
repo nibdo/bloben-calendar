@@ -1,8 +1,11 @@
 import { v4 } from 'uuid';
 import { TCalendarNotificationType } from '../../../types/types';
-import { parseDateToString, parseToDate } from '../../../components/calendarView/calendar-common';
+import {
+  parseDateToString,
+  parseToDate,
+} from '../../../components/calendarView/calendar-common';
 import Crypto from '../../../bloben-package/utils/encryption';
-import OpenPgp from "../../../bloben-package/utils/OpenPgp";
+import OpenPgp from '../../../bloben-package/utils/OpenPgp';
 
 export type CalendarsStateType = 'calendars';
 export const CALENDARS_STATE: string = 'calendars';
@@ -20,18 +23,19 @@ export type CalendarPropsForEncryption = {
 export type CalendarBodyToSend = {
   id: string;
   data: string;
+  timezone: string;
   color: string;
   createdAt: string;
   updatedAt: string;
   isShared: boolean;
   isPublic: boolean;
   reminders: string | null;
-}
+};
 
 type iCalDataType = {
   address: string;
   lastSyncAt: Date;
-}
+};
 
 export type CalendarStateType = {
   id: string;
@@ -52,6 +56,7 @@ export default class CalendarStateEntity {
   id: string;
   name: string;
   color: string;
+  timezone: string;
   reminders: TCalendarNotificationType[];
   iCalData: iCalDataType | null = null;
   createdAt: Date;
@@ -69,8 +74,11 @@ export default class CalendarStateEntity {
     this.reminders = data.reminders;
     this.isShared = data.isShared;
     this.isPublic = data.isPublic;
+    this.timezone = data.timezone;
     this.createdAt = data.createdAt ? parseToDate(data.createdAt) : new Date();
-    this.updatedAt = data.updatedAt ? parseToDate(data.updatedAt) : this.createdAt;
+    this.updatedAt = data.updatedAt
+      ? parseToDate(data.updatedAt)
+      : this.createdAt;
     this.isLocal = !isNotNew;
     this.isSynced = isNotNew;
 
@@ -82,10 +90,11 @@ export default class CalendarStateEntity {
     }
   }
 
-  public getStoreObj = () => {
-    return {
+  public getStoreObj = () =>
+    ({
       id: this.id,
       name: this.name,
+      timezone: this.timezone,
       color: this.color,
       reminders: this.reminders,
       createdAt: parseToDate(this.createdAt),
@@ -94,62 +103,67 @@ export default class CalendarStateEntity {
       isPublic: this.isPublic,
       isLocal: false,
       isSynced: true,
-    }
-  }
+    });
 
   /**
    * Get only private parts of event for encryption
    */
-  public getCalendarPropsForEncryption = (): CalendarPropsForEncryption =>
-      ({
-        name: this.name,
-      })
+  public getCalendarPropsForEncryption = (): CalendarPropsForEncryption => ({
+    name: this.name,
+  });
 
   /**
    * Encrypt calendar with password
    * @param password
    */
   public encryptCalendar = async (password: string): Promise<string> =>
-      Crypto.encrypt(this.getCalendarPropsForEncryption(), password)
+    Crypto.encrypt(this.getCalendarPropsForEncryption(), password);
 
-    /**
-     *
-     * @param cryptoPassword
-     */
-  public formatBodyToSend = async (cryptoPassword: string): Promise<CalendarBodyToSend> =>
-      (
-          {
-            id: this.id,
-            color: this.color,
-            data: await this.encryptCalendar(cryptoPassword),
-            createdAt: parseDateToString(this.createdAt),
-            updatedAt: parseDateToString(this.updatedAt),
-            isShared: this.isShared,
-            isPublic: this.isPublic,
-            reminders: this.reminders && this.reminders.length > 0
-                ? JSON.stringify(this.reminders)
-                : null,
-          }
-      )
-  public formatBodyToSendPgp = async (publicKey: string): Promise<CalendarBodyToSend> =>
-      (
-          {
-            id: this.id,
-            color: this.color,
-            data: await OpenPgp.encrypt(publicKey, this.getCalendarPropsForEncryption()),
-            createdAt: parseDateToString(this.createdAt),
-            updatedAt: parseDateToString(this.updatedAt),
-            isShared: this.isShared,
-            isPublic: this.isPublic,
-            reminders: this.reminders && this.reminders.length > 0
-                ? JSON.stringify(this.reminders)
-                : null,
-          }
-      )
-  public static flagAsSynced = (calendar: CalendarStateEntity): CalendarStateEntity => {
+  /**
+   *
+   * @param cryptoPassword
+   */
+  public formatBodyToSend = async (
+    cryptoPassword: string
+  ): Promise<CalendarBodyToSend> => ({
+    id: this.id,
+    color: this.color,
+    data: await this.encryptCalendar(cryptoPassword),
+    timezone: this.timezone,
+    createdAt: parseDateToString(this.createdAt),
+    updatedAt: parseDateToString(this.updatedAt),
+    isShared: this.isShared,
+    isPublic: this.isPublic,
+    reminders:
+      this.reminders && this.reminders.length > 0
+        ? JSON.stringify(this.reminders)
+        : null,
+  });
+  public formatBodyToSendPgp = async (
+    publicKey: string
+  ): Promise<CalendarBodyToSend> => ({
+    id: this.id,
+    color: this.color,
+    data: await OpenPgp.encrypt(
+      publicKey,
+      this.getCalendarPropsForEncryption()
+    ),
+    timezone: this.timezone,
+    createdAt: parseDateToString(this.createdAt),
+    updatedAt: parseDateToString(this.updatedAt),
+    isShared: this.isShared,
+    isPublic: this.isPublic,
+    reminders:
+      this.reminders && this.reminders.length > 0
+        ? JSON.stringify(this.reminders)
+        : null,
+  });
+  public static flagAsSynced = (
+    calendar: CalendarStateEntity
+  ): CalendarStateEntity => {
     calendar.isSynced = true;
     calendar.isLocal = false;
 
     return calendar;
-  }
+  };
 }
