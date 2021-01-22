@@ -6,6 +6,8 @@ import {
 } from '../../../components/calendarView/calendar-common';
 import Crypto from '../../../bloben-package/utils/encryption';
 import OpenPgp from '../../../bloben-package/utils/OpenPgp';
+import { DateTime } from 'luxon';
+import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
 
 export type CalendarsStateType = 'calendars';
 export const CALENDARS_STATE: string = 'calendars';
@@ -34,7 +36,7 @@ export type CalendarBodyToSend = {
 
 type iCalDataType = {
   address: string;
-  lastSyncAt: Date;
+  lastSyncAt: string;
 };
 
 export type CalendarStateType = {
@@ -43,9 +45,9 @@ export type CalendarStateType = {
   color: string;
   reminders: TCalendarNotificationType[];
   iCalData: iCalDataType | null;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
   isPublic: boolean;
   isShared: boolean;
   isLocal: boolean;
@@ -59,8 +61,8 @@ export default class CalendarStateEntity {
   timezone: string;
   reminders: TCalendarNotificationType[];
   iCalData: iCalDataType | null = null;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: string;
+  updatedAt: string;
   isPublic: boolean = false;
   isShared: boolean = false;
   isLocal: boolean;
@@ -75,9 +77,9 @@ export default class CalendarStateEntity {
     this.isShared = data.isShared;
     this.isPublic = data.isPublic;
     this.timezone = data.timezone;
-    this.createdAt = data.createdAt ? parseToDate(data.createdAt) : new Date();
+    this.createdAt = data.createdAt ? data.createdAt : DateTime.local().toString();
     this.updatedAt = data.updatedAt
-      ? parseToDate(data.updatedAt)
+      ? data.updatedAt
       : this.createdAt;
     this.isLocal = !isNotNew;
     this.isSynced = isNotNew;
@@ -97,8 +99,8 @@ export default class CalendarStateEntity {
       timezone: this.timezone,
       color: this.color,
       reminders: this.reminders,
-      createdAt: parseToDate(this.createdAt),
-      updatedAt: parseToDate(this.updatedAt),
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
       isShared: this.isShared,
       isPublic: this.isPublic,
       isLocal: false,
@@ -130,8 +132,8 @@ export default class CalendarStateEntity {
     color: this.color,
     data: await this.encryptCalendar(cryptoPassword),
     timezone: this.timezone,
-    createdAt: parseDateToString(this.createdAt),
-    updatedAt: parseDateToString(this.updatedAt),
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
     isShared: this.isShared,
     isPublic: this.isPublic,
     reminders:
@@ -149,8 +151,8 @@ export default class CalendarStateEntity {
       this.getCalendarPropsForEncryption()
     ),
     timezone: this.timezone,
-    createdAt: parseDateToString(this.createdAt),
-    updatedAt: parseDateToString(this.updatedAt),
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
     isShared: this.isShared,
     isPublic: this.isPublic,
     reminders:

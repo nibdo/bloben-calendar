@@ -7,24 +7,18 @@ import {
   isBefore,
   parseISO,
 } from 'date-fns';
+import { DateTime } from 'luxon';
 
 /**
  * Get time from clicked on timetable
  *
  * @param newEventTime
  */
-export const calculateNewEventTime = (newEventTime: any): Date => {
+export const calculateNewEventTime = (newEventTime: any): DateTime => {
   // Get date of new event
-  const selectedDate: Date = newEventTime.day;
+  const selectedDate: any = newEventTime.day;
 
-  return new Date(
-    getYear(selectedDate),
-    getMonth(selectedDate),
-    getDate(selectedDate),
-    newEventTime.hour,
-    0,
-    0
-  );
+  return selectedDate.set({ hour: newEventTime.hour, minute: 0, second: 0})
 };
 
 /**

@@ -5,7 +5,7 @@ import { useHistory } from 'react-router';
 import EvaIcons from 'bloben-common/components/eva-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
-import { setCalendarView, setSelectedDate } from '../../redux/actions';
+import { setCalendarDays, setCalendarView, setSelectedDate } from '../../redux/actions';
 import {
   HEADER_HEIGHT_BASE,
   parseEventColor,
@@ -15,6 +15,7 @@ import DatePicker from '../../bloben-package/components/datePicker/DatePicker';
 import { HeightHook } from '../../bloben-common/utils/layout';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import { Context } from '../../bloben-package/context/store';
+import { DateTime } from 'luxon';
 
 interface IDrawerItemProps {
   icon?: any;
@@ -231,7 +232,7 @@ const CalendarDrawer = (props: ICalendarDrawerProps) => {
   const { handleClose, initCalendar } = props;
 
   const dispatch: Dispatch = useDispatch();
-  const selectedDate: Date = useSelector((state: any) => state.selectedDate);
+  const selectedDate: DateTime = useSelector((state: any) => state.selectedDate);
 
   const [store] = useContext(Context);
   const { isMobile, isDark } = store;
@@ -245,7 +246,7 @@ const CalendarDrawer = (props: ICalendarDrawerProps) => {
     }
   };
 
-  const selectDate = (date: Date): void => {
+  const selectDate = (date: DateTime): void => {
     initCalendar(date);
     dispatch(setSelectedDate(date));
   };
@@ -267,6 +268,7 @@ const CalendarDrawer = (props: ICalendarDrawerProps) => {
       {!isMobile ? <DrawerSeparator /> : null}
       {!isMobile ? (
         <DatePicker
+            keyPrefix={'drawer_calendar'}
           selectDate={selectDate}
           selectedDate={selectedDate}
           width={214}

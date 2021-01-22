@@ -1,6 +1,6 @@
 import { addWeeks, subWeeks } from 'date-fns';
 
-const rangeToReducer = (state: Date = new Date (), action: any) => {
+const rangeToReducer = (state: any = null, action: any) => {
     switch (action.type) {
         case 'ADD_WEEK':
             return addWeeks(state, 1)

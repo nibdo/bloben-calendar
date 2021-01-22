@@ -15,6 +15,8 @@ import { useHistory } from 'react-router';
 import Slider from 'react-slick';
 import { parseCssDark } from '../../../bloben-common/utils/common';
 import { Context } from '../../../bloben-package/context/store';
+import { DateTime } from 'luxon';
+import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
 
 interface IEventProps {
   isDark: boolean;
@@ -66,7 +68,7 @@ const Event = (props: IEventProps) => {
 
   return (
     <ButtonBase
-      color='primary' //Dragging func {...panResponder.panHandlers}
+      color="primary" //Dragging func {...panResponder.panHandlers}
       style={style}
       onClick={handleEventSelect}
     >
@@ -84,15 +86,17 @@ interface IOneDayProps {
   height: number;
   data: any;
   borderClass: string;
-  day: any,
+  day: any;
 }
 const OneDay = (props: IOneDayProps) => {
-  const {height, data, borderClass, day} = props;
-  const selectedDate: Date = useSelector((state: any) => state.selectedDate);
+  const { height, data, borderClass, day } = props;
+  const selectedDate: DateTime = useSelector(
+    (state: any) => state.selectedDate
+  );
 
   const [store] = useContext(Context);
 
-  const {isDark} = store;
+  const { isDark } = store;
 
   const renderEvents = (dataset: any) => {
     const tableWidth: any = '90%';
@@ -163,7 +167,7 @@ const OneDay = (props: IOneDayProps) => {
     }
   };
 
-  const renderDate = (date: Date) => {
+  const renderDate = (date: DateTime) => {
     const dateBoxToday: any = {
       height: 20,
       width: 20,
@@ -181,29 +185,25 @@ const OneDay = (props: IOneDayProps) => {
       display: 'flex',
     };
 
-    if (isToday(date)) {
+    if (LuxonHelper.isToday(date)) {
       return (
         <div
           style={dateBoxToday}
           className={parseCssDark('month__color_circle', isDark)}
         >
-          <p className={parseCssDark('month__day-today', isDark)}>
-            {getDate(date)}
-          </p>
+          <p className={parseCssDark('month__day-today', isDark)}>{date.day}</p>
         </div>
       );
-    } else if (isSameMonth(date, selectedDate)) {
+    } else if (date.hasSame(selectedDate, 'month')) {
       return (
         <div style={dateBox}>
-          <p className={parseCssDark('month__day', isDark)}>{getDate(date)}</p>
+          <p className={parseCssDark('month__day', isDark)}> {date.day}</p>
         </div>
       );
     } else {
       return (
         <div style={dateBox}>
-          <p className={parseCssDark('month__day-past', isDark)}>
-            {getDate(date)}
-          </p>
+          <p className={parseCssDark('month__day-past', isDark)}>{date.day}</p>
         </div>
       );
     }
@@ -234,8 +234,49 @@ const OneDay = (props: IOneDayProps) => {
   );
 };
 
+const renderOneDay = (
+  data: any,
+  prefix: string,
+  tableHeight: number,
+  events: any,
+  isDark: boolean
+) =>
+  data.map((day: any, index: any) => {
+    let borderClass;
+    if (index < 7) {
+      if (index === 6) {
+        borderClass = 'month_view__border--bottom';
+      } else {
+        borderClass = 'month_view__border--bottom--right';
+      }
+    } else if (index < 35) {
+      if (index === 13 || index === 20 || index === 27 || index === 34) {
+        borderClass = 'month_view__border--bottom';
+      } else {
+        borderClass = 'month_view__border--bottom--right';
+      }
+    } else {
+      if (index === 41) {
+        borderClass = 'month_view__border';
+      } else {
+        borderClass = 'month_view__border--right';
+      }
+    }
+    const formattedDayString: string = formatTimestampToDate(day);
+
+    return (
+      <OneDay
+        key={`${prefix}-${formattedDayString}`}
+        height={tableHeight}
+        borderClass={isDark ? `${borderClass}--dark` : borderClass}
+        day={day}
+        data={events ? events[formattedDayString] : []}
+      />
+    );
+  });
+
 const MonthViewContainer = (props: any) => {
-  const { selectedDate, daysNum, getNewCalendarDays } = props;
+  const {  daysNum, getNewCalendarDays } = props;
   const width: any = WidthHook();
   const height: number = HeightHook();
   const isMobile: boolean = useSelector((state: any) => state.isMobile);
@@ -252,48 +293,32 @@ const MonthViewContainer = (props: any) => {
     width: isMobile ? width : width - CALENDAR_DRAWER_DESKTOP_WIDTH,
     height: tableHeight,
   };
-  const renderOneDay = (data: any) =>
-    data.map((day: any, index: any) => {
-      let borderClass;
-      if (index < 7) {
-        if (index === 6) {
-          borderClass = 'month_view__border--bottom';
-        } else {
-          borderClass = 'month_view__border--bottom--right';
-        }
-      } else if (index < 35) {
-        if (index === 13 || index === 20 || index === 27 || index === 34) {
-          borderClass = 'month_view__border--bottom';
-        } else {
-          borderClass = 'month_view__border--bottom--right';
-        }
-      } else {
-        if (index === 41) {
-          borderClass = 'month_view__border';
-        } else {
-          borderClass = 'month_view__border--right';
-        }
-      }
-      const formattedDayString: string = formatTimestampToDate(day);
 
-      return (
-        <OneDay
-          key={day}
-          height={tableHeight}
-          borderClass={isDark ? `${borderClass}--dark` : borderClass}
-          day={day}
-          data={events ? events[formattedDayString] : []}
-        />
-      );
-    });
-  const days0: any = renderOneDay(calendarDays[0]);
-  const days1: any = renderOneDay(
-    calendarDays[isMobile ? 1 : calendarDaysCurrentIndex]
+  const days0: any = renderOneDay(
+    calendarDays[0],
+    'month0',
+    tableHeight,
+    events,
+    isDark
   );
-  const days2: any = renderOneDay(calendarDays[2]);
+  const days1: any = renderOneDay(
+    calendarDays[isMobile ? 1 : calendarDaysCurrentIndex],
+    'month1',
+    tableHeight,
+    events,
+    isDark
+  );
+  const days2: any = renderOneDay(
+    calendarDays[2],
+    'month2',
+    tableHeight,
+    events,
+    isDark
+  );
 
   const sliderSettings: any = {
     dots: false,
+    touchThreshold: 5,
     infinite: true,
     speed: 250,
     slidesToShow: 1,
@@ -311,7 +336,7 @@ const MonthViewContainer = (props: any) => {
   return isMobile ? (
     <Slider {...sliderSettings}>
       <div className={'full-screen'} id={'calendar'}>
-        <CalendarHeader index={0} daysNum={daysNum}/>
+        <CalendarHeader index={0} daysNum={daysNum} />
         <div className={'month_view__container'} style={daysWrapper}>
           {days0}
         </div>
@@ -339,7 +364,6 @@ const MonthViewContainer = (props: any) => {
   );
 };
 
-const MonthView = (props: any) =>
-  <MonthViewContainer {...props} />;
+const MonthView = (props: any) => <MonthViewContainer {...props} />;
 
 export default MonthView;

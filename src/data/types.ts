@@ -3,6 +3,8 @@ export type EventResultDTO = {
     data: string;
     startAt: string;
     endAt: string;
+    timezoneStart: string;
+    timezoneEnd: string;
     calendarId: string;
     color: string;
     repeat: boolean;

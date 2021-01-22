@@ -35,6 +35,10 @@ import { parseCssDark } from '../../../bloben-common/utils/common';
 import BottomSheet from 'bottom-sheet-react';
 import { Context } from '../../../bloben-package/context/store';
 import MyMenu from '../../../bloben-package/components/myMenu/MyMenu';
+import TimezoneRow from '../../../bloben-package/components/timezoneRow/TimezoneRow';
+import Modal from '../../../bloben-package/components/modal/Modal';
+import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
+import { DateTime } from 'luxon';
 
 const repeatOptions: any = [
   { label: 'No repeat', value: 'none' },
@@ -87,12 +91,12 @@ const parseFreqInterval = (freq: string, interval: any): string => {
   }
 };
 
-const parseRepeatTill = (until: Date, count: any): string => {
+const parseRepeatTill = (until: DateTime, count: any): string => {
   if (count) {
     return `for ${count} time${count === 1 ? '' : 's'}`;
   }
 
-  return `until ${formatDate(until, DATE_MONTH_YEAR_FORMAT)}`;
+  return `until ${until.toFormat(DATE_MONTH_YEAR_FORMAT)}`;
 };
 
 /**
@@ -103,7 +107,7 @@ const parseRRuleText = (rRule: any) => {
   const { freq, interval, until, count } = rRule;
 
   const isInfinite: boolean = !(
-    (until && isBefore(until, MAX_REPEAT_UNTIL)) ||
+    (until && until.before(MAX_REPEAT_UNTIL)) ||
     count
   );
 
@@ -197,7 +201,7 @@ interface IDateFromProps {
   openDateFrom: any;
   openTimeFrom: any;
   isStartDateValid?: boolean;
-  startDate: Date;
+  startDate: DateTime;
   allDay: boolean;
 }
 const DateFrom = (props: IDateFromProps) => {
@@ -224,7 +228,7 @@ const DateFrom = (props: IDateFromProps) => {
               !isStartDateValid ? 'date-error' : ''
             }`}
           >
-            {formatDate(startDate, DATE_FORMAT)}
+            {startDate.toFormat(DATE_FORMAT)}
           </p>
           <p
             className={`${parseCssDark(
@@ -232,7 +236,7 @@ const DateFrom = (props: IDateFromProps) => {
               isDark
             )} ${!isStartDateValid ? 'date-error' : ''}`}
           >
-            ({formatDate(startDate, WEEK_DAY_FORMAT_SHORT)})
+            ({startDate.toFormat(DATE_FORMAT)})
           </p>
         </ButtonBase>
         {!allDay ? (
@@ -245,7 +249,7 @@ const DateFrom = (props: IDateFromProps) => {
                 !isStartDateValid ? 'date-error' : ''
               }`}
             >
-              {formatDate(startDate, TIME_FORMAT)}
+              ({startDate.toFormat(TIME_FORMAT)})
             </p>
           </ButtonBase>
         ) : null}
@@ -258,7 +262,7 @@ interface IDateTillProps {
   openDateTill: any;
   openTimeTill: any;
   isStartDateValid?: boolean;
-  endDate: Date;
+  endDate: DateTime;
   allDay: boolean;
 }
 const DateTill = (props: IDateTillProps) => {
@@ -285,7 +289,7 @@ const DateTill = (props: IDateTillProps) => {
               !isStartDateValid ? 'date-error' : ''
             }`}
           >
-            {formatDate(endDate, DATE_FORMAT)}
+            {endDate.toFormat(DATE_FORMAT)}
           </p>
           <p
             className={`${parseCssDark(
@@ -293,7 +297,7 @@ const DateTill = (props: IDateTillProps) => {
               isDark
             )} ${!isStartDateValid ? 'date-error' : ''}`}
           >
-            ({formatDate(endDate, WEEK_DAY_FORMAT_SHORT)})
+            ({endDate.toFormat(WEEK_DAY_FORMAT_SHORT)})
           </p>
         </ButtonBase>
         {!allDay ? (
@@ -306,7 +310,7 @@ const DateTill = (props: IDateTillProps) => {
                 !isStartDateValid ? 'date-error' : ''
               }`}
             >
-              {formatDate(endDate, TIME_FORMAT)}
+              {endDate.toFormat(TIME_FORMAT)}
             </p>
           </ButtonBase>
         ) : null}
@@ -501,7 +505,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
     if (value === 'date') {
       setRRule('count', null);
       // TODO default date until
-      setRRule('until', addYears(new Date(), 1));
+      setRRule('until', DateTime.local().plus({years: 1}));
       setRepeatTillValue('date');
     } else if (value === 'count') {
       setRRule('count', 7);
@@ -619,7 +623,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
           <RepeatValueButton
             style={{ width: 100 }}
             label={'Date'}
-            value={format(until, 'dd.MM.yyyy')}
+            value={until.toFormat('dd.MM.yyyy')}
             handleClick={() => openDateTill(true)}
           />
         ) : null}
@@ -817,8 +821,8 @@ interface IEventDetailProps {
   handleChange: any;
   calendar: any;
   location: string;
-  startDate: Date;
-  endDate: Date;
+  startDate: DateTime;
+  endDate: DateTime;
   isRepeated: boolean;
   isStartDateValid?: any;
   notes: string;
@@ -833,6 +837,8 @@ interface IEventDetailProps {
   handleScroll: any;
   handleChangeDateFrom: any;
   handleChangeDateTill: any;
+  timezoneStart: string;
+  setStartTimezone: any;
 }
 const EventDetail = (props: IEventDetailProps) => {
   const [isDateFromVisible, openDateFrom] = useState(false);
@@ -840,6 +846,7 @@ const EventDetail = (props: IEventDetailProps) => {
   const [isDateTillVisible, openDateTill] = useState(false);
   const [isTimeTillVisible, openTimeTill] = useState(false);
   const [coordinates, setCoordinates] = useState({ x: null, y: null });
+  const [timezoneModalIsOpen, openTimezoneModal] = useState(false);
 
   const height: any = HeightHook();
   const width: number = WidthHook();
@@ -868,6 +875,8 @@ const EventDetail = (props: IEventDetailProps) => {
     handleScroll,
     handleChangeDateFrom,
     handleChangeDateTill,
+    timezoneStart,
+    setStartTimezone
   } = props;
 
   /**
@@ -934,6 +943,7 @@ const EventDetail = (props: IEventDetailProps) => {
         }}
       />
       <AllDay allDay={allDay} setForm={setForm} />
+      {!allDay ? <TimezoneRow timezone={timezoneStart} openTimezoneModal={ () => openTimezoneModal(true)}/> : null }
       <Repeat
         setForm={setForm}
         isRepeated={isRepeated}
@@ -965,6 +975,7 @@ const EventDetail = (props: IEventDetailProps) => {
         >
           {isDateFromVisible && startDate ? (
             <DatePicker
+                keyPrefix={'dateFrom'}
               width={isMobile ? width - 48 : 250}
               sideMargin={24}
               height={(height / 6) * 3}
@@ -981,6 +992,7 @@ const EventDetail = (props: IEventDetailProps) => {
           ) : null}
           {isDateTillVisible ? (
             <DatePicker
+                keyPrefix={'dateTill'}
               width={isMobile ? width - 48 : 250}
               sideMargin={24}
               height={(height / 6) * 2}
@@ -995,8 +1007,17 @@ const EventDetail = (props: IEventDetailProps) => {
               selectedDate={endDate}
             />
           ) : null}
+
         </BottomSheetDropdownSwitcher>
       ) : null}
+      {timezoneModalIsOpen
+          ? <Modal>
+            <TimeZonePicker
+                selectTimezone={setStartTimezone}
+                onClose={() => openTimezoneModal(false)}/>
+          </Modal>
+          : null
+      }
     </div>
   );
 };

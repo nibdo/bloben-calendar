@@ -15,6 +15,8 @@ import { useHistory } from 'react-router';
 import { HeightHook } from '../../../bloben-common/utils/layout';
 import { Context } from '../../../bloben-package/context/store';
 import { parseCssDark } from '../../../bloben-common/utils/common';
+import { DateTime } from 'luxon';
+import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
 
 interface IMonthTitleProps {
   isDark: boolean;
@@ -87,7 +89,7 @@ const AgendaEvent = (props: IAgendaEventProps) => {
   return (
     <div
       className={'agenda-item__wrapper'}
-      id={format(startAt, 'MMMM')}
+      id={startAt.format('MMMM')}
       onClick={handleEventClick}
     >
       <div
@@ -110,11 +112,11 @@ const AgendaEvent = (props: IAgendaEventProps) => {
               className={`agenda__day-container${isDateToday ? '-today' : ''}`}
             >
               <p className={parseCssDark(`agenda__day-text${isDateToday ? '-today' : ''}`, isDark)}>
-                {format(startAt, 'd')}
+                {startAt.format('d')}
               </p>
             </div>
             <div className={'agenda__day-container-small'}>
-              <p className={parseCssDark('agenda__day-text-small', isDark)}>{format(startAt, 'iii')}</p>
+              <p className={parseCssDark('agenda__day-text-small', isDark)}>{startAt.format('iii')}</p>
             </div>
           </div>
         ) : null}
@@ -122,7 +124,7 @@ const AgendaEvent = (props: IAgendaEventProps) => {
       <div className={'agenda-item__container'} style={itemStyle}>
         <p className={parseCssDark('agenda-item__title', isDark)}>{text}</p>
         <p className={'agenda-item__hours'}>
-          {format(startAt, 'hh:mm')}- {format(endAt, 'hh:mm')}
+          {startAt.format('hh:mm')}- {endAt.format('hh:mm')}
         </p>
       </div>
     </div>
@@ -185,7 +187,7 @@ export const renderAgendaEvents = (
 ) => {
   // TODO handle multi day events
 
-  let prevMonth: Date | null = null;
+  let prevMonth: DateTime | null = null;
 
   let hasEventsForToday: boolean = false;
   let scrollOffsetFinished: boolean = false;
@@ -211,12 +213,12 @@ export const renderAgendaEvents = (
     // const { id, startAt, endDate, scrollToSet } = item;
     const item: any = data[keyName];
 
-    const dateObj: Date = parseStringToDate(keyName);
-    const thisMonth: any = getMonth(dateObj);
+    const dateObj: DateTime = DateTime.fromFormat(keyName, 'dd-mm-yyyy')
+    const thisMonth: any = dateObj.month;
 
     const isNewMonth: boolean = thisMonth !== prevMonth;
-    const isDateToday: boolean = isToday(dateObj);
-    const isAfterToday: boolean = isAfter(new Date(), dateObj);
+    const isDateToday: boolean = LuxonHelper.isToday(dateObj);
+    const isAfterToday: boolean = DateTime.local().startOf('day') < dateObj.startOf('day');
 
     if (!scrollOffsetFinished && !hasEventsForToday && isAfterToday) {
       scrollOffsetFinished = true;
@@ -248,7 +250,7 @@ export const renderAgendaEvents = (
         return (
             <div>
               {isNewMonth ? (
-                  <MonthTitle title={format(dateObj, 'MMMM')} isDark={isDark} />
+                  <MonthTitle title={dateObj.toFormat('MMMM')} isDark={isDark} />
               ) : null}
               <AgendaComponent
                   key={dateObj.toString()}
@@ -271,7 +273,7 @@ export const renderAgendaEvents = (
       return (
         <div>
           {isNewMonth ? (
-            <MonthTitle title={format(dateObj, 'MMMM')} isDark={isDark} />
+              <MonthTitle title={dateObj.toFormat('MMMM')} isDark={isDark} />
           ) : null}
           <AgendaComponent
             key={dateObj.toString()}

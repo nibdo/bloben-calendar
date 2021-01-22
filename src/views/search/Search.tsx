@@ -15,6 +15,7 @@ import { Input } from '../../bloben-package/components/input/Input';
 import { Context } from '../../bloben-package/context/store';
 import { useHistory } from 'react-router-dom';
 import { parseCssDark } from '../../bloben-common/utils/common';
+import { DateTime } from 'luxon';
 
 const SearchImage = () => (
   <div className={'search_empty__wrapper'}>
@@ -190,7 +191,7 @@ const SearchView = (props: ISearchViewProps) => {
 
 const Search = () => {
   const allEvents: any = useSelector((state: any) => state.allEvents);
-  const eventsLastSynced: Date = useSelector(
+  const eventsLastSynced: any = useSelector(
     (state: any) => state.eventsLastSynced
   );
 
@@ -211,7 +212,7 @@ const Search = () => {
    */
   useEffect(() => {
     sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
-      lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null,
+      lastSync: eventsLastSynced ? eventsLastSynced.toString() : null,
     });
   },        []);
 

@@ -22,7 +22,7 @@ import WebsocketHandler from '../utils/websocket';
 import {
   setCalendarDays,
   setCalendarDaysCurrentIndex,
-  setDefaultCalendar,
+  setDefaultCalendar, setDefaultTimezone,
   setIsAppStarting,
   setIsFirstLogin,
   setRangeFrom,
@@ -68,6 +68,8 @@ import EditCalendar from '../views/calendarEdit/editCalendar/EditCalendar';
 import Calendar from '../views/calendar/Calendar';
 import Notifications from '../bloben-package/views/notifications/Notifications';
 import GeneralApi from '../bloben-common/api/general.api';
+import { DatetimeParser } from '../bloben-package/utils/datetimeParser';
+import { DateTime } from 'luxon';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -90,14 +92,14 @@ const AuthenticatedLayer = () => {
   const calendarDaysCurrentIndex: any = useSelector(
     (state: any) => state.calendarDaysCurrentIndex
   );
-  const rangeTo: Date = useSelector((state: any) => state.rangeTo);
+  const rangeTo: string = useSelector((state: any) => state.rangeTo);
   const eventsToImport: any = useSelector((state: any) => state.eventsToImport);
   const isAppStarting: boolean = useSelector(
     (state: any) => state.isAppStarting
   );
-  const selectedDate: Date = useSelector((state: any) => state.selectedDate);
+  const selectedDate: string = useSelector((state: any) => state.selectedDate);
 
-  const eventsLastSynced: Date = useSelector(
+  const eventsLastSynced: any = useSelector(
     (state: any) => state.eventsLastSynced
   );
 
@@ -117,9 +119,10 @@ const AuthenticatedLayer = () => {
     []
   );
 
-  const loadDefaultCalendar = async () => {
+  const loadCalendarSettings = async () => {
     const settings: any = await CalendarApi.getCalendarSettings();
 
+    dispatch(setDefaultTimezone(settings.defaultTimezone));
     dispatch(setDefaultCalendar(settings.defaultCalendar));
   }
 
@@ -141,7 +144,7 @@ const AuthenticatedLayer = () => {
       initTimezones()
 
       // Load app settings
-      loadDefaultCalendar()
+      loadCalendarSettings()
     }
   };
 
@@ -203,18 +206,18 @@ const AuthenticatedLayer = () => {
         setTimeout(() => {
           handleFirstLogin();
 
-          const currentDate: Date = new Date();
-          const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
-          const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
+          const currentDate: DateTime = DateTime.local();
+          const rangeFromInit: string = getDayTimeStart(currentDate.minus({ days: 7 }));
+          const rangeToInit: string = getDayTimeEnd(currentDate.plus({ days: 14 }));
 
           sendWebsocketMessage(WEBSOCKET_GET_NOTIFICATIONS);
           sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS);
           sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
-            lastSync: eventsLastSynced ? eventsLastSynced.toISOString() : null,
+            lastSync: eventsLastSynced ? eventsLastSynced: null,
           });
           sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
-            rangeFrom: formatISO(rangeFromInit),
-            rangeTo: formatISO(rangeToInit),
+            rangeFrom: rangeFromInit,
+            rangeTo: rangeToInit,
           });
           dispatch(setIsAppStarting(false));
           // Send all event and calendar ids to server to check if they exist
@@ -258,20 +261,18 @@ const AuthenticatedLayer = () => {
   const initLoad = () => {
     connectToWs();
 
-    if (!defaultCalendar) {
-      loadDefaultCalendar();
-    }
+    loadCalendarSettings();
 
     if (!checkIfIsSafari()) {
       setServiceWorkerLister();
       subscribeToPush();
     }
 
-    const currentDate: Date = nullTimeInDate(new Date());
+    const currentDate: DateTime = nullTimeInDate(DateTime.local());
 
     // Set init date range
-    const rangeFromInit: Date = getDayTimeStart(subDays(currentDate, 7));
-    const rangeToInit: Date = getDayTimeEnd(addDays(currentDate, 14));
+    const rangeFromInit: string = getDayTimeStart(currentDate.minus({ days: 7 }));
+    const rangeToInit: string = getDayTimeEnd(currentDate.plus({ days: 14 }));
 
     dispatch(setRangeFrom(rangeFromInit));
     dispatch(setRangeTo(rangeToInit));
@@ -318,17 +319,21 @@ const AuthenticatedLayer = () => {
     initLoad();
 
     getRemindersForReactNative();
-    const currentDate: any = new Date();
+    const currentDate: any = DateTime.local();
     initCalendar(currentDate);
   },        []);
 
   useEffect(() => {
-    const currentDate: Date = new Date();
+    const currentDate: DateTime = DateTime.local();
     initCalendar(currentDate);
   },        [calendarView]);
 
   const initCalendar = (date: any) => {
     const calendarDaysNew = getCalendarDays(calendarView, date, null, true);
+
+    console.log('calendarDaysNew,', calendarDaysNew.length)
+    const testA: any = calendarDaysNew.map((item: any) => item.toString())
+    console.log('test a', testA)
 
     const calendarDaysPrevNew = getCalendarDays(
       calendarView,
@@ -483,10 +488,10 @@ const AuthenticatedLayer = () => {
     );
 
     // Set range for fetch new events
-    const rangeFromFetch: Date = getDayTimeStart(
+    const rangeFromFetch: string = getDayTimeStart(
       getArrayStart(newCalendarDays[nextIndex])
     );
-    const rangeToFetch: Date = getDayTimeEnd(
+    const rangeToFetch: string = getDayTimeEnd(
       getArrayEnd(newCalendarDays[nextIndex])
     );
 
@@ -498,19 +503,19 @@ const AuthenticatedLayer = () => {
     }
 
     sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
-      rangeFrom: formatISO(rangeFromFetch),
-      rangeTo: formatISO(rangeToFetch),
+      rangeFrom: rangeFromFetch,
+      rangeTo: rangeToFetch,
     });
   };
 
   const requestEvents = (): void => {
-    const newRangeTo: Date = addMonths(rangeTo, 2);
+    const newRangeTo: string = DateTime.fromISO(rangeTo).plus({ months: 2}).toString();
     dispatch(setRangeFrom(rangeTo));
     dispatch(setRangeTo(newRangeTo));
 
     sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
-      rangeFrom: formatISO(rangeTo),
-      rangeTo: formatISO(newRangeTo),
+      rangeFrom: rangeTo,
+      rangeTo: newRangeTo,
     });
   };
 
@@ -560,18 +565,18 @@ const AuthenticatedLayer = () => {
         </Route>
 
         <Route path={'/calendar'}>
-          {(calendarDays &&
-            selectedDate &&
-            calendarDays.length > 0 &&
-            calendars.length > 0) ||
-          (selectedDate &&
-            calendarView === 'agenda' &&
-            calendars.length > 0) ? (
-            <Calendar
-              getNewCalendarDays={getNewCalendarDays}
-              initCalendar={initCalendar}
-            />
-          ) : null}
+            {(calendarDays &&
+              selectedDate &&
+              calendarDays.length > 0 &&
+              calendars.length > 0) ||
+            (selectedDate &&
+              calendarView === 'agenda' &&
+              calendars.length > 0) ? (
+              <Calendar
+                getNewCalendarDays={getNewCalendarDays}
+                initCalendar={initCalendar}
+              />
+            ) : null}
         </Route>
 
         <Route exact path={'/calendar/new'}>

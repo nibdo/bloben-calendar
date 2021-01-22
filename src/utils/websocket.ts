@@ -27,6 +27,8 @@ import { isBefore, parseISO } from 'date-fns';
 import CalendarStateEntity from '../data/entities/state/calendar.entity';
 import OpenPgp, { PgpKeys } from '../bloben-package/utils/OpenPgp';
 import { LocalForage } from '../bloben-package/utils/LocalForage';
+import LuxonHelper from '../bloben-package/utils/LuxonHelper';
+import { DateTime } from 'luxon';
 
 // Message constants
 const WEBSOCKET_EVENT_MESSAGE: WebsocketMessageType = 'event';
@@ -118,7 +120,6 @@ const WebsocketHandler = {
    * @param messageObj
    */
   handleNotificationSync: async (messageObj: any) => {
-    console.log('AA NOTIF BB', messageObj)
     const action: WebsocketCrudAction = messageObj.action;
     // Filter actions
     switch (action) {
@@ -176,8 +177,7 @@ const WebsocketHandler = {
 
     // Get calendar from server if not found or if it is older
     if (
-      !calendarInState ||
-      isBefore(calendarInState.updatedAt, parseISO(updatedAt))
+      !calendarInState || LuxonHelper.isBefore(calendarInState.updatedAt, updatedAt)
     ) {
       // Construct request event body
       sendWebsocketMessage(WEBSOCKET_GET_ONE_CALENDAR, { id });
@@ -240,8 +240,7 @@ const WebsocketHandler = {
     const eventInState: EventStateEntity | null = await findInEvents(id);
     // Get event from server if not found, if needed to fetch all occurrences or is older
     if (
-      !eventInState ||
-      isBefore(eventInState.updatedAt, parseISO(updatedAt))
+      !eventInState || LuxonHelper.isBefore(eventInState.updatedAt, updatedAt)
     ) {
       // Construct request event body
       const requestEventDataById: GetEventWebsocketByIdDTO = {
@@ -339,6 +338,7 @@ const WebsocketHandler = {
                                                     clonedCalendar.id === id ? calendar : clonedCalendar
         );
 
+        console.log('newState', newState)
         reduxStore.dispatch(setCalendars(newState));
         // TODO calendar and event color update
       }
