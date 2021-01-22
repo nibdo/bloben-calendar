@@ -17,7 +17,9 @@ import {
 import EventStateEntity from '../data/entities/state/event.entity';
 import { setAllEvents, setCalendars, setEvents } from '../redux/actions';
 import { formatTimestampToDate } from '../components/calendarView/calendar-common';
-
+import { DateTime } from 'luxon';
+// @ts-ignore
+import Interval from 'luxon/src/interval.js';
 export const mapTags = (tags: any) => {
   const tagsObj: any = {};
 
@@ -145,7 +147,7 @@ export const handleEventReduxUpdate = async (
       stateClone[getDateKey(prevItem)]
     );
     // Save updated version
-    stateClone[newItem.getDateKey()].push(newItem);
+    stateClone[newItem.getDateKey()].push(newItem.getReduxStateObj());
   }
 
   reduxStore.dispatch(setEvents(stateClone));
@@ -214,13 +216,13 @@ export const removeNotification = (
   setState('reminders', notificationsFiltered);
 };
 
-export const nullTimeInDate = (date: Date): Date =>
-  new Date(getYear(date), getMonth(date), getDate(date), 0, 0, 0);
+export const nullTimeInDate = (date: DateTime): DateTime =>
+  date.set({ hour: 0, minute: 0, second: 0 });
 
-export const getDayTimeStart = (date: Date): Date =>
-  new Date(getYear(date), getMonth(date), getDate(date), 0, 0, 0);
-export const getDayTimeEnd = (date: Date): Date =>
-  new Date(getYear(date), getMonth(date), getDate(date), 23, 59, 59);
+export const getDayTimeStart = (date: DateTime): string =>
+  date.set({ hour: 0, minute: 0, second: 0 }).toString();
+export const getDayTimeEnd = (date: DateTime): string =>
+  date.set({ hour: 23, minute: 59, second: 59 }).toString();
 
 const deleteAllCalendarEvents = (calendarId: string, events: any) => {
   const eventsObj: any = Object.entries(events);
@@ -261,7 +263,7 @@ export const getEventAndCalendarIds = (): any => {
   const calendars: any[] = stateCloneCalendars.map((item: any) => {
     const { id, updatedAt } = item;
 
-    return { id, updatedAt: formatISO(updatedAt) };
+    return { id, updatedAt };
   });
   const events: any[] = getEventsList();
 
@@ -282,7 +284,7 @@ export const mapEventsToDates = (events: EventStateEntity[]): any => {
   // Sort events
   const sortedEvents: EventStateEntity[] = events.sort(
     (a: EventStateEntity, b: EventStateEntity) =>
-      getUnixTime(a.startAt) - getUnixTime(b.startAt)
+      DateTime.fromISO(a.startAt).millisecond - DateTime.fromISO(b.startAt).millisecond
   );
 
   for (const event of sortedEvents) {
@@ -336,28 +338,29 @@ export const parseStartAtDateForNotification = (date: Date): string => {
   return `Event starts in ${daysBetween} days`;
 };
 
-export const checkOverlappingEvents = (firstDate: any, secondDate: any) =>
-  areIntervalsOverlapping(
-    {
-      start: firstDate.startAt,
-      end: firstDate.endAt,
-    },
-    {
-      start: secondDate.startAt,
-      end: secondDate.endAt,
-    }
+export const checkOverlappingEvents = (firstDate: any, secondDate: any) => {
+  const startAtFirst: DateTime = DateTime.fromISO(firstDate.startAt);
+  const endAtFirst: DateTime = DateTime.fromISO(firstDate.endAt);
+
+  return   Interval({ start: startAtFirst, end: endAtFirst }).overlaps(
+      Interval({ start: DateTime.fromISO(secondDate.startAt), end: DateTime.fromISO(secondDate.endAt) })
   );
+}
+
 
 export const createMultiDayClone = (event: EventStateEntity) => {
   const data: any = [];
 
-  const daysBetween: number = differenceInCalendarDays(
-    event.endAt,
-    event.startAt
-  );
+  const daysBetween: number | undefined = DateTime.fromISO(event.endAt)
+    .diff(DateTime.fromISO(event.startAt), 'days')
+    .toObject().days;
+
+  if (!daysBetween) {
+    return data;
+  }
 
   for (let i = 1; i <= daysBetween; i++) {
-    const dateRef: any = addDays(event.startAt, i);
+    const dateRef: any = DateTime.fromISO(event.startAt).plus({ days: i });
 
     data.push(formatTimestampToDate(dateRef));
   }

@@ -15,6 +15,8 @@ import { useSelector } from 'react-redux';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import { checkOverlappingEvents } from '../../utils/common';
 import { Context } from '../../bloben-package/context/store';
+import { DateTime } from 'luxon';
+import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
 
 const renderEvents = (
   props: any,
@@ -32,7 +34,7 @@ const renderEvents = (
       .filter(
         (item: any) =>
           !item.allDay &&
-          differenceInCalendarDays(item.endAt, item.startAt) === 0
+            DateTime.fromISO(item.endAt).diff(DateTime.fromISO(item.startAt), 'days').toObject().days === 0
       )
       .map((event: any) => {
         let width = 1; //Full width
@@ -43,7 +45,7 @@ const renderEvents = (
           if (event.id !== item2.id && !item2.allDay) {
             if (
               checkOverlappingEvents(event, item2) &&
-              differenceInCalendarDays(item2.endAt, item2.startAt) === 0
+                DateTime.fromISO(item2.endAt).diff(DateTime.fromISO(item2.startAt), 'days').toObject().days === 0
             ) {
               width = width + 1; //add width for every overlapping item
               offsetCount.push(item2.id); // set offset for positioning
@@ -66,20 +68,10 @@ const renderEvents = (
 
         const calendarColor: string = event.color;
 
-        const offsetTop: any =
-          differenceInMinutes(
-            event.startAt,
-            new Date(
-              getYear(event.startAt),
-              getMonth(event.startAt),
-              getDate(event.startAt),
-              0,
-              0,
-              0
-            )
-          ) / 1.5;
+        // @ts-ignore
+        const offsetTop: any = DateTime.fromISO(event.startAt).diff(DateTime.fromISO(event.startAt).set({ hour: 0, minute: 0, second: 0})).toObject().minutes / 1.5;
         const eventHeight: any =
-          differenceInMinutes(event.endAt, event.startAt) / 1.5;
+          event.endAt.diff(event.startAt, 'minutes').toObject().minutes / 1.5;
         const eventWidth: any = tableWidth / width - 1; ///event.width.toString() + "%"
         //event.left
         // Current status: events is displayed in wrong place
@@ -156,7 +148,7 @@ const OneDay = (props: IOneDayProps) => {
     position: 'relative',
     flexDirection: 'column',
   };
-  const isToday: any = isSameDay(day, new Date());
+  const isToday: any = LuxonHelper.isToday(day);
   const isFirstDay: any = index === 0;
   const dataForDay: any = data;
 
@@ -167,13 +159,10 @@ const OneDay = (props: IOneDayProps) => {
     isDark,
     calendars
   );
-  const dateNow: any = new Date();
+  const dateNow: any = DateTime.local();
 
-  const nowPosition: number =
-    differenceInMinutes(
-      dateNow,
-      new Date(getYear(dateNow), getMonth(dateNow), getDate(dateNow), 0, 0, 0)
-    ) / 1.5;
+
+  const nowPosition: number = dateNow.diff(DateTime.local().set({ hour: 0, minute: 0, second: 0}), 'minutes').toObject().minutes / 1.5
 
   useEffect(() => {
     if (isToday) {

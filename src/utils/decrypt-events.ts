@@ -13,6 +13,7 @@ import { EventResultDTO } from '../data/types';
 import eventsLastSynced from '../redux/reducers/eventsLastSynced';
 import { logger } from 'bloben-common/utils/common';
 import OpenPgp, { PgpKeys } from '../bloben-package/utils/OpenPgp';
+import { DateTime } from 'luxon';
 
 const decryptEvent = async (
   cryptoPassword: string,
@@ -132,7 +133,8 @@ export const decryptAllEvents = async (data: any): Promise<void> => {
     reduxStore.dispatch(setAllEvents(result));
   }
 
-  reduxStore.dispatch(setEventsLastSync(new Date()));
+  const dateLastSync: string = DateTime.local().toString();
+  reduxStore.dispatch(setEventsLastSync(dateLastSync));
 };
 
 export const decryptEvents = async (data: any): Promise<void> => {
@@ -173,6 +175,7 @@ export const decryptEvents = async (data: any): Promise<void> => {
     } else {
       decryptedData = await Crypto.decrypt(eventResultDTO.data, cryptoPassword);
     }
+
 
     const finalForm: any = {
       ...eventResultDTO,

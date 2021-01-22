@@ -16,28 +16,8 @@ import { Context } from '../../../bloben-package/context/store';
 import { parseCssDark } from '../../../bloben-common/utils/common';
 import Modal from '../../../bloben-package/components/modal/Modal';
 import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
+import TimezoneRow from '../../../bloben-package/components/timezoneRow/TimezoneRow';
 
-interface ITimezoneRowProps {
-  timezone: string;
-  openTimezoneModal: any;
-  isDark: boolean;
-}
-const TimezoneRow = (props: ITimezoneRowProps) => {
-  const { timezone, isDark, openTimezoneModal } = props;
-
-  return (
-      <ButtonBase className={parseCssDark('event_detail__row', isDark)} onClick={openTimezoneModal}>
-        <div className={'event_detail__container--icon'}>
-          <EvaIcons.Globe
-              className={'svg-icon calendar-content-svg'}
-          />
-        </div>
-        <p className={parseCssDark('event_detail__input', isDark)}>
-          {timezone === 'device' ? 'Device timezone' : timezone}
-        </p>
-      </ButtonBase>
-  );
-};
 
 interface ICalendarColorProps {
   color: any;
@@ -156,7 +136,7 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
             toggleColorModal(true);
           }}
         />
-        <TimezoneRow timezone={timezone} openTimezoneModal={openTimezoneModal} isDark={isDark}/>
+        <TimezoneRow timezone={timezone} openTimezoneModal={openTimezoneModal} />
         {/*<NotificationSettings*/}
         {/*  notifications={reminders}*/}
         {/*  addNotification={addNotification}*/}

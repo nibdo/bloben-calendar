@@ -25,6 +25,7 @@ import CalendarNavbar from '../../components/calendarNavbar/CalendarNavbar';
 import { Context } from '../../bloben-package/context/store';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import Notifications from '../../bloben-package/views/notifications/Notifications';
+import { DateTime } from 'luxon';
 
 interface ICalendarTypeProps {
   getNewCalendarDays: any;
@@ -77,12 +78,9 @@ const CalendarType = (props: ICalendarTypeProps) => {
       ) : null}
       {calendarView === 'month' ? (
         <MonthView
-          selectedDate={selectedDate}
-          calendarDays={calendarDays}
           daysNum={calendarDays.length}
           openNewEvent={openNewEvent}
           data={events}
-          calendars={calendars}
           getNewCalendarDays={getNewCalendarDays}
         />
       ) : null}
@@ -123,7 +121,8 @@ const CalendarView = (props: ICalendarViewProps) => {
   const [headerTitle, setHeaderTitle] = useState('');
 
   const calendarView: any = useSelector((state: any) => state.calendarView);
-  const selectedDate: any = useSelector((state: any) => state.selectedDate);
+  const selectedDate: DateTime = useSelector((state: any) => state.selectedDate);
+
   const events: any = useSelector((state: any) => state.events);
 
   const isAgenda: boolean = calendarView === 'agenda';
@@ -131,15 +130,16 @@ const CalendarView = (props: ICalendarViewProps) => {
   const changeHeaderTitle = (value: string) => {
     setHeaderTitle(value);
   };
+
   useEffect(() => {
     if (!isAgenda) {
-      const headerDate: string = format(selectedDate, 'MMMM');
+      const headerDate: string = selectedDate.toFormat('MMMM');
       setHeaderTitle(headerDate);
     }
   }, []);
   useEffect(() => {
     if (!isAgenda) {
-      const headerDate: string = format(selectedDate, 'MMMM');
+      const headerDate: string = selectedDate.toFormat('MMMM');
       setHeaderTitle(headerDate);
     }
   }, [selectedDate]);
@@ -211,7 +211,7 @@ const CalendarView = (props: ICalendarViewProps) => {
               handleRightClick={toggleSettingsOpen}
             />
           ) : null}
-          {isDrawerOpen ? (
+          {isDrawerOpen && isMobile ? (
             <BottomSheet
               {...props}
               backdropClassName={isDark ? 'bottom-sheet__backdrop--dark' : ''}

@@ -1,4 +1,5 @@
-const selectedDate = (state: Date = new Date(), action: any) => {
+
+const selectedDate = (state: any = null, action: any) => {
     switch (action.type) {
         case 'SET_SELECTED_DATE':
             return action.payload;

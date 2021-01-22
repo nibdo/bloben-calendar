@@ -11,19 +11,20 @@ import { useSelector } from 'react-redux';
 import _ from 'lodash';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import { Context } from '../../bloben-package/context/store';
+import { DateTime } from 'luxon';
 
 const renderOneDay = (
-  calendarDays: Date[],
+  calendarDays: DateTime[],
   daysNum: number,
   showNewEvent: any,
   events: any
 ) =>
-  calendarDays.map((day: Date, index: number) => {
+  calendarDays.map((day: DateTime, index: number) => {
     const formattedDayString: string = formatTimestampToDate(day);
 
     return (
       <OneDay
-        key={day.toISOString()}
+        key={day.toString()}
         day={day}
         index={index}
         data={events ? events[formattedDayString] : []}
@@ -71,7 +72,7 @@ const CalendarBody = (props: ICalendarBodyProps) => {
   const [store] = useContext(Context);
   const { isMobile } = store;
 
-  const calendarDays: Date[][] = useSelector(
+  const calendarDays: DateTime[][] = useSelector(
     (state: any) => state.calendarDays
   );
   const calendarBodyWidth: number = useSelector(
@@ -98,6 +99,7 @@ const CalendarBody = (props: ICalendarBodyProps) => {
     width: calendarBodyWidth,
     height: calendarBodyHeight,
   };
+
 
   /**
    * Adjust scroll position for all screens

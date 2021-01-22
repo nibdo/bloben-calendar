@@ -1,3 +1,5 @@
+import { DateTime } from 'luxon';
+
 export const setPgpKeys = (pgpKeys: any) => {
     return {
         type: 'SET_PGP_KEYS',
@@ -22,7 +24,13 @@ export const setTimezones = (timezones: string[]) => {
         payload: timezones
     }
 }
-export const addWeek = (rangeFromInit: Date) => {
+export const setDefaultTimezone = (timezone: string) => {
+    return {
+        type: 'SET_DEFAULT_TIMEZONE',
+        payload: timezone
+    }
+}
+export const addWeek = (rangeFromInit: string) => {
     return {
         type: 'ADD_WEEK'
     }
@@ -33,14 +41,14 @@ export const subWeek = () => {
     }
 }
 
-export const setRangeFrom = (d: Date) => {
+export const setRangeFrom = (d: string) => {
     return {
         type: 'SET_RANGE_FROM',
         payload: d,
     }
 }
 
-export const setRangeTo = (d: Date) => {
+export const setRangeTo = (d: string) => {
     return {
         type: 'SET_RANGE_TO',
         payload: d,

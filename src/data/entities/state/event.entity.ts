@@ -1,36 +1,43 @@
+/* tslint:disable:no-magic-numbers */
 import { v4 } from 'uuid';
 import { formatISO, isSameDay, parseISO } from 'date-fns';
 import Crypto from '../../../bloben-package/utils/encryption';
 import { TCalendarNotificationType } from '../../../types/types';
 import {
-    formatTimestampToDate, parseDateToString,
-    parseToDate
+  formatTimestampToDate,
+  parseDateToString,
+  parseToDate,
 } from '../../../components/calendarView/calendar-common';
 import OpenPgp, { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
+import { DatetimeParser } from '../../../bloben-package/utils/datetimeParser';
+import { DateTime } from 'luxon';
+import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
 
 export type EventsStateType = 'events';
 export const EVENTS_STATE: string = 'events';
-export const MAX_REPEAT_UNTIL: Date = new Date(2060, 12, 30)
+export const MAX_REPEAT_UNTIL: Date = new Date(2060, 12, 30);
 export const INFINITE_COUNT: number = 50000;
-export const RRULE_DATE_PROPS: string [] = ['dtstart', 'dtend', 'until'];
+export const RRULE_DATE_PROPS: string[] = ['dtstart', 'dtend', 'until'];
 
 export type EventStateType = {
   id: string;
   calendarId: string;
   text: string;
-  startAt: Date;
-  endAt: Date;
+  startAt: string;
+  endAt: string;
   allDay: boolean;
-  timeZone: string;
+  timezoneStart: string;
+  timezoneEnd: string;
   isRepeated: boolean;
   location: string;
   notes: string;
   rRule: string | null;
   reminders: TCalendarNotificationType[] | string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null;
   color: string | null;
+  calendarTimezone: string;
   // ICS specific
   externalId: string | null;
   // App state
@@ -38,11 +45,11 @@ export type EventStateType = {
   isSynced: boolean;
 };
 export type rRuleOriginal = {
-    freq: string;
-    wkst: string;
-    count: number | null;
-    until: Date | null;
-    interval: number;
+  freq: string;
+  wkst: string;
+  count: number | null;
+  until: string | null;
+  interval: number;
 };
 export type rRule = {
   freq: string;
@@ -72,6 +79,8 @@ export type EventBodyToSend = {
   data: string;
   startAt: string;
   endAt: string;
+  timezoneStart: string;
+  timezoneEnd: string;
   allDay: boolean;
   createdAt: string;
   updatedAt: string;
@@ -79,256 +88,270 @@ export type EventBodyToSend = {
   rRule: rRule | null;
   reminders: TCalendarNotificationType[] | string;
   externalId: string | null;
-}
+};
 
 export default class EventStateEntity {
   id: string;
   calendarId: string;
   text: string;
-  startAt: Date;
-  endAt: Date;
+  startAt: string;
+  endAt: string;
   allDay: boolean;
   isMultiDay: boolean;
-  timeZone: string;
+  timezoneStart: string;
+  timezoneEnd: string;
   isRepeated: boolean;
   location: string;
   color: string | null;
+  calendarTimezone: string;
   notes: string;
   rRule: rRule | null;
   reminders: TCalendarNotificationType[] | string;
-  createdAt: Date;
-  updatedAt: Date;
-  deletedAt: Date | null = null;
+  createdAt: string;
+  updatedAt: string;
+  deletedAt: string | null = null;
   externalId: string | null;
   isLocal: boolean;
   isSynced: boolean;
 
-  constructor(data: any, rRule?: rRuleOriginal) {
-      const isNotNew: boolean = data.id;
-      const isIcs: boolean = data.isIcs;
+  constructor(data: any, rRuleData?: rRuleOriginal) {
+    const isNotNew: boolean = data.id;
+    const isIcs: boolean = data.isIcs;
 
-      this.id = isNotNew ? data.id : v4();
-      this.calendarId = data.calendarId;
-      this.text = data.text;
-      this.startAt = parseToDate(data.startAt);
-      this.endAt = parseToDate(data.endAt);
-      this.allDay = data.allDay;
-      this.isMultiDay = !isSameDay(parseToDate(data.startAt), parseToDate(data.endAt));
-      this.timeZone = 'local';
-      this.isRepeated = isNotNew ? data.isRepeated : data.isRepeated;
-      this.location = data.location;
-      this.notes = data.notes;
-      this.color = data.color ? data.color : null;
-      this.rRule = data.rRule ? this.parseRRuleFromString(data.rRule) : this.parseRRule(rRule ? rRule : null);
-      this.reminders = typeof data.reminders === 'string' ? JSON.parse(data.reminders) : data.reminders;
-      this.createdAt = data.createdAt ? parseToDate(data.createdAt) : new Date();
-      this.updatedAt = isNotNew ? new Date() : this.createdAt;
-      this.deletedAt = data.deletedAt ? data.deletedAt : null;
-      this.isLocal = !isNotNew;
-      this.isSynced = isNotNew;
-      this.externalId = isIcs ? data.externalId : null;
+    this.id = isNotNew ? data.id : v4();
+    this.calendarId = data.calendarId;
+    this.text = data.text;
+    this.startAt = DatetimeParser(data.startAt, data.timezoneStart);
+    this.timezoneStart = data.timezoneStart;
+    this.endAt = DatetimeParser(data.endAt, data.timezoneEnd);
+    this.timezoneEnd = data.timezoneEnd;
+    this.allDay = data.allDay;
+    this.isMultiDay = !LuxonHelper.isSameDay(data.startAt, data.endAt);
+    this.isRepeated = isNotNew ? data.isRepeated : data.isRepeated;
+    this.location = data.location;
+    this.notes = data.notes;
+    this.color = data.color ? data.color : null;
+    this.calendarTimezone = data.calendarTimezone;
+    this.rRule = data.rRule
+      ? this.parseRRuleFromString(data.rRule)
+      : this.parseRRule(rRuleData ? rRuleData : null);
+    this.reminders =
+      typeof data.reminders === 'string'
+        ? JSON.parse(data.reminders)
+        : data.reminders;
+    this.createdAt = data.createdAt ? data.createdAt : DateTime.local().toString();
+    this.updatedAt = isNotNew ? DateTime.local().toString() : this.createdAt;
+    this.deletedAt = data.deletedAt ? data.deletedAt : null;
+    this.isLocal = !isNotNew;
+    this.isSynced = isNotNew;
+    this.externalId = isIcs ? data.externalId : null;
   }
-
-  public createFromEncrypted = (encryptedEvent: any, decryptedData: any) => {
-      this.id = encryptedEvent.id
-      this.calendarId = encryptedEvent.calendarId;
-      this.text = decryptedData.text;
-      this.startAt = parseToDate(encryptedEvent.startAt);
-      this.endAt = parseToDate(encryptedEvent.endAt);
-      this.allDay = encryptedEvent.allDay;
-      this.isMultiDay = !isSameDay(parseToDate(encryptedEvent.startAt), parseToDate(encryptedEvent.endAt));
-      this.isRepeated = encryptedEvent.isRepeated;
-      this.location = decryptedData.location;
-      this.color = encryptedEvent.color;
-      this.notes = decryptedData.notes;
-      this.rRule = encryptedEvent.rRule;
-      this.reminders = encryptedEvent.reminders;
-      this.createdAt = parseToDate(encryptedEvent.createdAt);
-      this.updatedAt = parseToDate(encryptedEvent.updatedAt);
-      this.isLocal = false;
-      this.isSynced = true;
-  }
-
-    /**
-   * Get only private parts of event for encryption
-   */
-  public getReduxStateObj = (): any =>
-      ({
-        id: this.id,
-        calendarId: this.calendarId,
-        text: this.text,
-        startAt: this.startAt,
-        endAt: this.endAt,
-        timeZone: this.timeZone,
-        allDay: this.allDay,
-        isMultiDay: this.isMultiDay,
-        isRepeated: this.isRepeated,
-        rRule: this.rRule,
-        color: this.color,
-        location: this.location,
-        notes: this.notes,
-        reminders: this.reminders,
-        createdAt: this.createdAt,
-        updatedAt: this.updatedAt,
-        deletedAt: this.deletedAt,
-        isLocal: this.isLocal,
-        isSynced: this.isSynced,
-      })
-
-  public static flagAsSynced = (event: EventStateEntity): EventStateEntity => {
-      event.isSynced = true;
-      event.isLocal = false;
-
-      return event;
-    }
-
-  public delete = (): void => {
-      this.deletedAt = new Date();
-    }
 
   /**
    * Get only private parts of event for encryption
    */
-  public getEventPropsForEncryption = (): EventPropsForEncryption =>
-    ({
-      text: this.text,
-      location: this.location,
-      notes: this.notes,
-    })
+  public getReduxStateObj = (): any => ({
+    id: this.id,
+    calendarId: this.calendarId,
+    text: this.text,
+    startAt: this.startAt,
+    endAt: this.endAt,
+    timezoneStart: this.timezoneStart,
+    timezoneEnd: this.timezoneEnd,
+    allDay: this.allDay,
+    isMultiDay: this.isMultiDay,
+    isRepeated: this.isRepeated,
+    rRule: this.rRule,
+    color: this.color,
+    calendarTimezone: this.calendarTimezone,
+    location: this.location,
+    notes: this.notes,
+    reminders: this.reminders,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+    deletedAt: this.deletedAt,
+    isLocal: this.isLocal,
+    isSynced: this.isSynced,
+  });
+
+  public static flagAsSynced = (event: EventStateEntity): EventStateEntity => {
+    event.isSynced = true;
+    event.isLocal = false;
+
+    return event;
+  };
+
+  public delete = (): void => {
+    this.deletedAt = DateTime.local().toString();
+  };
+
+  /**
+   * Get only private parts of event for encryption
+   */
+  public getEventPropsForEncryption = (): EventPropsForEncryption => ({
+    text: this.text,
+    location: this.location,
+    notes: this.notes,
+  });
 
   private parseRRule = (data: rRuleOriginal | null): rRule | null => {
-      if (!data || data && data.freq === 'NONE' || data && data.freq === 'none') {
-          return null;
-      }
-
-      const {freq, wkst, count, until, interval} = data;
-
-      // Need to format Date to Zulu ISO string for PG parser in database
-
-      return {
-            freq: freq.toUpperCase(),
-            wkst,
-            count: count ? count : null,
-            until: until ? until.toISOString() : null,
-            interval,
-            dtstart: this.startAt.toISOString(),
-            dtend: this.endAt.toISOString(),
-        }
+    if (
+      !data ||
+      (data && data.freq === 'NONE') ||
+      (data && data.freq === 'none')
+    ) {
+      return null;
     }
+
+    const { freq, wkst, count, until, interval } = data;
+
+    // Need to format Date to Zulu ISO string for PG parser in database
+
+    return {
+      freq: freq.toUpperCase(),
+      wkst,
+      count: count ? count : null,
+      until: until ? until.toString() : null,
+      interval,
+      dtstart: this.startAt.toString(),
+      dtend: this.endAt.toString(),
+    };
+  };
 
   /**
    * Set rRule in string format
    * @param data
    */
   public setRRule = (data: rRuleOriginal): string | null => {
-      if (!data || data && data.freq === 'NONE' || data && data.freq === 'none') {
-          return null;
-      }
+    if (
+      !data ||
+      (data && data.freq === 'NONE') ||
+      (data && data.freq === 'none')
+    ) {
+      return null;
+    }
 
-      const rRuleParsed: rRule | null = this.parseRRule(data);
+    const rRuleParsed: rRule | null = this.parseRRule(data);
 
-      if (!rRuleParsed) {
-          return null;
-      }
+    if (!rRuleParsed) {
+      return null;
+    }
 
-      const {freq, wkst, count, until, interval, dtstart, dtend} = rRuleParsed;
+    const { freq, wkst, count, until, interval, dtstart, dtend } = rRuleParsed;
 
-      return `DTSTART:${dtstart}
-    RRULE:FREQ=${freq};${interval ? `INTERVAL=${interval};` : ''}${!count && !until ? `UNTIL=${until}` : ''}${count ? `COUNT=${count}` : ''}${until ? `UNTIL=${until}` : ''}`
-  }
+    return `DTSTART:${dtstart}
+    RRULE:FREQ=${freq};${interval ? `INTERVAL=${interval};` : ''}${
+      !count && !until ? `UNTIL=${until}` : ''
+    }${count ? `COUNT=${count}` : ''}${until ? `UNTIL=${until}` : ''}`;
+  };
 
   public parseRRuleFromString = (rRuleString: string): rRule => {
-      const rRuleObj: any = {
-          freq: '',
-          wkst: '',
-          count: null,
-          until: null,
-          interval: null,
-          dtstart: '',
-          dtend: '',
-      };
+    const rRuleObj: any = {
+      freq: '',
+      wkst: '',
+      count: null,
+      until: null,
+      interval: null,
+      dtstart: '',
+      dtend: '',
+    };
 
-      const delimiter: string = ';';
-      const hasInterval: boolean = rRuleString.indexOf('INTERVAL') !== -1;
-      const hasCount: boolean = rRuleString.indexOf('COUNT') !== -1;
-      const hasUntil: boolean = rRuleString.indexOf('UNTIL') !== -1;
+    const delimiter: string = ';';
+    const hasInterval: boolean = rRuleString.indexOf('INTERVAL') !== -1;
+    const hasCount: boolean = rRuleString.indexOf('COUNT') !== -1;
+    const hasUntil: boolean = rRuleString.indexOf('UNTIL') !== -1;
 
-      const freq: string = rRuleString.slice(rRuleString.indexOf('FREQ=') + 'FREQ='.length, rRuleString.indexOf(delimiter));
-      rRuleObj.freq = freq;
+    const freq: string = rRuleString.slice(
+      rRuleString.indexOf('FREQ=') + 'FREQ='.length,
+      rRuleString.indexOf(delimiter)
+    );
+    rRuleObj.freq = freq;
 
-      // Get rest of string
-      let rawString: string = rRuleString.slice(rRuleString.indexOf(freq) + freq.length + 1);
+    // Get rest of string
+    let rawString: string = rRuleString.slice(
+      rRuleString.indexOf(freq) + freq.length + 1
+    );
 
-      if (hasInterval) {
-         const interval: string = rawString.slice(
-             rawString.indexOf('INTERVAL=') + 'INTERVAL='.length,
-             rawString.indexOf(delimiter));
-         rRuleObj.interval = Number(interval);
-         rawString = rawString.slice(rawString.indexOf(interval) + interval.length + 1)
-      }
+    if (hasInterval) {
+      const interval: string = rawString.slice(
+        rawString.indexOf('INTERVAL=') + 'INTERVAL='.length,
+        rawString.indexOf(delimiter)
+      );
+      rRuleObj.interval = Number(interval);
+      rawString = rawString.slice(
+        rawString.indexOf(interval) + interval.length + 1
+      );
+    }
 
-      if (hasCount) {
-          const count: string = rawString.slice(
-              rawString.indexOf('COUNT=') + 'COUNT='.length);
-          rRuleObj.count = Number(count);
-      }
+    if (hasCount) {
+      const count: string = rawString.slice(
+        rawString.indexOf('COUNT=') + 'COUNT='.length
+      );
+      rRuleObj.count = Number(count);
+    }
 
-      if (hasUntil) {
-          rRuleObj.until = rawString.slice(
-              rawString.indexOf('UNTIL=') + 'UNTIL='.length);
-      }
+    if (hasUntil) {
+      rRuleObj.until = rawString.slice(
+        rawString.indexOf('UNTIL=') + 'UNTIL='.length
+      );
+    }
 
-      return rRuleObj;
-  }
+    return rRuleObj;
+  };
 
-  public getDateKey = (): string =>
-      formatTimestampToDate(this.startAt);
+  public getDateKey = (): string => formatTimestampToDate(this.startAt);
 
   /**
    * Encrypt event with password
    * @param password
    */
   public encryptEvent = async (password: string): Promise<string> =>
-    Crypto.encrypt(this.getEventPropsForEncryption(), password)
+    Crypto.encrypt(this.getEventPropsForEncryption(), password);
 
-  public formatBodyToSend = async (password: string): Promise<EventBodyToSend> =>
-      (
-          {
-              id: this.id,
-              calendarId: this.calendarId,
-              data: await this.encryptEvent(password),
-              startAt: parseDateToString(this.startAt),
-              endAt: parseDateToString(this.endAt),
-              allDay: this.allDay,
-              createdAt: parseDateToString(this.createdAt),
-              updatedAt: parseDateToString(this.updatedAt),
-              isRepeated: this.isRepeated,
-              rRule: this.rRule,
-              reminders: this.reminders,
-              externalId: this.externalId,
-          }
-      )
+  public formatBodyToSend = async (
+    password: string
+  ): Promise<EventBodyToSend> => ({
+    id: this.id,
+    calendarId: this.calendarId,
+    data: await this.encryptEvent(password),
+    startAt: this.startAt,
+    endAt: this.endAt,
+    timezoneStart: this.timezoneStart,
+    timezoneEnd: this.timezoneEnd,
+    allDay: this.allDay,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt,
+    isRepeated: this.isRepeated,
+    rRule: this.rRule,
+    reminders: this.reminders,
+    externalId: this.externalId,
+  });
 
-  public formatBodyToSendOpenPgp = async (pgpKeys: PgpKeys): Promise<EventBodyToSend> => {
-        const data: any = await OpenPgp.encrypt(pgpKeys.publicKey, this.getEventPropsForEncryption());
+  public formatBodyToSendOpenPgp = async (
+    pgpKeys: PgpKeys
+  ): Promise<EventBodyToSend> => {
+    const data: any = await OpenPgp.encrypt(
+      pgpKeys.publicKey,
+      this.getEventPropsForEncryption()
+    );
 
-        return   (
-            {
-                id: this.id,
-                calendarId: this.calendarId,
-                data,
-                startAt: parseDateToString(this.startAt),
-                endAt: parseDateToString(this.endAt),
-                allDay: this.allDay,
-                createdAt: parseDateToString(this.createdAt),
-                updatedAt: parseDateToString(this.updatedAt),
-                isRepeated: this.isRepeated,
-                rRule: this.rRule,
-                reminders: this.reminders,
-                externalId: this.externalId,
-            }
-        )
-    }
+    return {
+      id: this.id,
+      calendarId: this.calendarId,
+      data,
+      startAt: this.startAt,
+      endAt: this.endAt,
+      timezoneStart: this.timezoneStart,
+      timezoneEnd: this.timezoneEnd,
+      allDay: this.allDay,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      isRepeated: this.isRepeated,
+      rRule: this.rRule,
+      reminders: this.reminders,
+      externalId: this.externalId,
+    };
+  };
 
   static async enhance(stateItem: any, localItem: any) {
     const stateItemEnhanced: any = { ...stateItem };

@@ -28,6 +28,9 @@ import { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
 import _ from 'lodash';
 import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
 import { Context } from '../../../bloben-package/context/store';
+import { DatetimeParser } from '../../../bloben-package/utils/datetimeParser';
+import { DateTime } from 'luxon';
+import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
 
 const initialFormState: any = {
   prevItem: {},
@@ -40,13 +43,16 @@ const initialFormState: any = {
   type: 'events',
   timezone: 'device',
   allDay: false,
-  startAt: new Date(),
+  startAt: DateTime.local(),
+  timezoneStart: 'device',
   endAt: addHours(new Date(), 1),
+  timezoneEnd: 'device',
   isRepeated: false,
   reminders: [],
   createdAt: null,
   updatedAt: null,
   color: '',
+  calendarTimezone: '',
 };
 const initialState: any = {
   modalIsOpen: false,
@@ -119,7 +125,11 @@ const EditEvent = (props: IEditEventProps) => {
       // Set event data
       for (const [key, value] of Object.entries(eventItem)) {
         if (key !== 'rRule') {
-          setForm(key, value);
+         if (key === 'timezoneStart' && !value || key === 'timezoneEnd' && !value) {
+           setForm(key, 'device');
+          } else {
+           setForm(key, value);
+         }
         }
       }
 
@@ -145,6 +155,7 @@ const EditEvent = (props: IEditEventProps) => {
     endAt,
     isRepeated,
     reminders,
+    timezoneStart,
   } = form;
 
   /**
@@ -182,12 +193,13 @@ const EditEvent = (props: IEditEventProps) => {
     if (!newEventTime) {
       return;
     }
-    const dateFromNewEvent: Date = newEventTime.day
+    const dateFromNewEvent: DateTime = newEventTime.day
       ? calculateNewEventTime(newEventTime)
-      : addHours(new Date(), 1);
-    const dateTill: Date = addHours(dateFromNewEvent, 1);
-    setForm('startAt', dateFromNewEvent);
-    setForm('endAt', dateTill);
+      : DateTime.local().plus({ hours: 1})
+    const dateTill: DateTime = dateFromNewEvent.plus({ hours: 1});
+    setForm('startAt', DatetimeParser(dateFromNewEvent, timezoneStart));
+    setForm('endAt', DatetimeParser(dateTill, timezoneStart));
+
   };
 
   // useEffect(() => {
@@ -241,6 +253,11 @@ const EditEvent = (props: IEditEventProps) => {
     removeNotification(item, setForm, reminders);
   };
 
+  const setStartTimezone = (value: string) => {
+    setForm('timezoneStart', value);
+    setForm('timezoneEnd', value);
+  }
+
   /**
    * Validate event interval
    * @param changedDate
@@ -253,11 +270,11 @@ const EditEvent = (props: IEditEventProps) => {
     endAtDate: any
   ): boolean => {
     if (changedDate === 'startAt') {
-      if (isBefore(endAtDate, startAtDate)) {
+      if (LuxonHelper.isBefore(endAtDate, startAtDate)) {
         return false;
       }
     } else if (changedDate === 'endAt') {
-      if (isBefore(endAtDate, startAtDate)) {
+      if (LuxonHelper.isBefore(endAtDate, startAtDate)) {
         return false;
       }
     }
@@ -268,11 +285,13 @@ const EditEvent = (props: IEditEventProps) => {
    * Validate startAt date before change
    * @param dateValue
    */
-  const handleChangeDateFrom = (dateValue: Date) => {
+  const handleChangeDateFrom = (dateValue: DateTime) => {
     const isDateValid: boolean = validateDate('startAt', dateValue, endAt);
 
     if (isDateValid) {
-      setForm('startAt', dateValue);
+      // setForm('startAt', dateValue);
+      setForm('startAt', DatetimeParser(dateValue, timezoneStart));
+
     } else {
       setContext('showSnackbar', {
         text: 'Error: Starting date before event end.',
@@ -283,10 +302,12 @@ const EditEvent = (props: IEditEventProps) => {
    * Validate endAt date before change
    * @param dateValue
    */
-  const handleChangeDateTill = (dateValue: Date) => {
+  const handleChangeDateTill = (dateValue: DateTime) => {
     const isDateValid: boolean = validateDate('endAt', startAt, dateValue);
     if (isDateValid) {
-      setForm('endAt', dateValue);
+      // setForm('endAt', dateValue);
+      setForm('endAt', DatetimeParser(dateValue, timezoneStart));
+
     } else {
       setContext('showSnackbar', {
         text: 'Error: Ending date before event start.',
@@ -391,6 +412,8 @@ const EditEvent = (props: IEditEventProps) => {
           reminders={reminders}
           addNotification={addNotificationEvent}
           removeNotification={removeNotificationEvent}
+          timezoneStart={timezoneStart}
+          setStartTimezone={setStartTimezone}
         />
       ) : (
         <div />

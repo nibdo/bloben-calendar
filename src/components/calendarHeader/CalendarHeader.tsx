@@ -21,6 +21,8 @@ import { parseCssDark } from '../../bloben-common/utils/common';
 import { useHistory } from 'react-router-dom';
 import { checkOverlappingEvents } from '../../utils/common';
 import { Context } from '../../bloben-package/context/store';
+import { DateTime } from 'luxon';
+import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
 
 interface IEventHeaderProps {
   calendarColor: string;
@@ -79,6 +81,7 @@ const DaysText = (props: IDaysTextProps) => {
   const calendarBodyWidth: number = useSelector(
     (state: any) => state.calendarBodyWidth
   );
+  const calendarDays: string = useSelector((state: any) => state.calendarDays);
 
   const [store] = useContext(Context);
   const { isMobile } = store;
@@ -106,13 +109,13 @@ const DaysText = (props: IDaysTextProps) => {
       ));
     }
 
-    return days.map((day: Date) => (
+    return days.map((day: DateTime) => (
       <div
         key={day.toString()}
         className={'header_calendar_days__col'}
         style={dayTextColumnWidth}
       >
-        <p className={'header_calendar_days__text'}>{format(day, 'EEE')}</p>
+        <p className={'header_calendar_days__text'}>{day.toFormat('EEE')}</p>
       </div>
     ));
   };
@@ -140,7 +143,7 @@ const DaysNumeric = (props: IDaysNumericProps) => {
   const { isDark } = store;
 
   const calendarDays: any = useSelector((state: any) => state.calendarDays);
-  const selectedDate: Date = useSelector((state: any) => state.selectedDate);
+  const selectedDate: DateTime = useSelector((state: any) => state.selectedDate);
   const calendarView: string = useSelector((state: any) => state.calendarView);
 
   const calendarBodyWidth: number = useSelector(
@@ -155,14 +158,14 @@ const DaysNumeric = (props: IDaysNumericProps) => {
   };
 
   const renderNumericDays = () =>
-    calendarDays[index].map((day: Date) => {
-      const isDayToday: boolean = isToday(day);
+    calendarDays[index].map((day: DateTime) => {
+      const isDayToday: boolean = LuxonHelper.isToday(day);
       const isSelected: boolean =
-        isSameDay(day, selectedDate) && calendarView === 'day' && !isDayToday;
+        LuxonHelper.isSameDay(day, selectedDate) && calendarView === 'day' && !isDayToday;
 
       return (
         <div
-          key={formatISO(day)}
+          key={day.toString()}
           className={'header_calendar_days__col'}
           style={dayTextColumnWidth}
         >
@@ -176,7 +179,7 @@ const DaysNumeric = (props: IDaysNumericProps) => {
                 isDayToday || isSelected ? '-today' : ''
               }${isDark ? '-dark' : ''}`}
             >
-              {getDate(day)}
+              {day.day}
             </p>
           </div>
         </div>
@@ -259,7 +262,7 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
         .filter(
           (item: any) =>
             item.allDay ||
-            differenceInCalendarDays(item.endAt, item.startAt) > 0
+            item.endAt.diff(item.startAt, 'days').toObject().days > 0
         )
         .map((event: any) => {
           let width = 1; //Full width
@@ -270,7 +273,7 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
             if (
               event.id !== item2.id &&
               (item2.allDay ||
-                differenceInCalendarDays(item2.endAt, item2.startAt) > 0)
+                  item2.endAt.diff(item2.startAt, 'days').toObject().days > 0)
             ) {
               if (checkOverlappingEvents(event, item2)) {
                 width = width + 1; //add width for every overlapping item
@@ -346,7 +349,7 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
     const headerEvents: any = renderEvents(calendarBodyWidth, dataForDay);
 
     return (
-      <div key={day} style={todayDay}>
+      <div key={day.toString()} style={todayDay}>
         <div
           style={{
             width: column,

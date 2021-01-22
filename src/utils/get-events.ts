@@ -43,14 +43,14 @@ const preloadWeekData = async (
   const dateEnd: Date = getDayEnd(customRangeTo ? customRangeTo : dateNow);
 
   const dateNowInWeek: number = getISODay(dateStart);
-  const rangeFrom: string = formatISO(subDays(
+  const rangeFrom: string = subDays(
     dateStart,
     DAYS_IN_WEEK - dateNowInWeek
-  ));
-  const rangeTo: string = formatISO(addDays(
+  ).toISOString();
+  const rangeTo: string = addDays(
     dateEnd,
     DAYS_IN_WEEK - dateNowInWeek + DAYS_IN_WEEK + 1
-  ));
+  ).toISOString();
 
   const dateStart2: Date = getDayStart(new Date(rangeFrom));
 
@@ -63,10 +63,10 @@ const preloadWeekData = async (
 
 const fetchEvents = async (rangeFrom: any, rangeTo: any) => {
   const rangeFromParsed: string = isDate(rangeFrom)
-    ? formatISO(rangeFrom)
+    ? rangeFrom.toISOString()
     : rangeFrom;
   const rangeToParsed: string = isDate(rangeTo)
-    ? formatISO(rangeTo)
+    ? rangeTo.toISOString()
     : rangeTo;
 
   const serverData: any = await CalendarApi.getEvents(
@@ -96,7 +96,7 @@ export const getEvents = async (
   const cryptoPassword: any = store.cryptoPassword;
 
   const data: any = await CalendarApi.getEvents(
-      `?rangeFrom=${formatISO(rangeStart)}&rangeTo=${formatISO(rangeTo)}`
+      `?rangeFrom=${rangeStart.toISOString()}&rangeTo=${rangeTo.toISOString()}`
   );
 
   const eventsResult: any = {};

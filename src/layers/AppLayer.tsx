@@ -10,10 +10,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   setCalendarBodyHeight,
   setCalendarBodyWidth,
-  setDefaultCalendar,
+  setDefaultCalendar, setEventsLastSync,
   setEventsToImport,
   setIsAppStarting,
-  setIsMobile,
+  setIsMobile, setSelectedDate,
 } from '../redux/actions';
 import {
   CALENDAR_DRAWER_DESKTOP_WIDTH,
@@ -30,6 +30,7 @@ import CalendarApi from '../api/calendar';
 // @ts-ignore
 import Modal from '../bloben-package/components/modal';
 import { logger } from 'bloben-common/utils/common';
+import { DateTime } from 'luxon';
 
 // Init webworker for better openpgp performance outside main thread
 openpgp.initWorker({ path: 'openpgp.worker.js' });
@@ -51,6 +52,10 @@ const AppLayer = (props: any) => {
   const isAppStarting: boolean = useSelector(
     (state: any) => state.isAppStarting
   );
+  const eventsLastSynced: any = useSelector(
+      (state: any) => state.eventsLastSynced
+  );
+  const selectedDate: any = useSelector((state: any) => state.selectedDate);
   const isDark: boolean = useSelector((state: any) => state.isDark);
   const username: string = useSelector((state: any) => state.username);
   const isLogged: boolean = useSelector((state: any) => state.isLogged);
@@ -65,6 +70,8 @@ const AppLayer = (props: any) => {
    * Set mobile/desktop layout
    */
   useEffect(() => {
+
+
     // tslint:disable-next-line:no-magic-numbers
     if (width < MOBILE_MAX_WIDTH) {
       dispatch(setIsMobile(true));
@@ -133,6 +140,20 @@ const AppLayer = (props: any) => {
     initApp();
   }, []);
 
+  // Init DateTime redux dates selected date
+  useEffect(() => {
+    // if (!selectedDate || !selectedDate.isValid) {
+    //   dispatch(setSelectedDate(DateTime.local()))
+    // }
+    // if (!eventsLastSynced?.isValid) {
+    //   dispatch(setEventsLastSync(null))
+    // }
+
+    if (!selectedDate || !selectedDate.isValid) {
+      dispatch(setSelectedDate(DateTime.local()))
+    }
+  }, [])
+
   // Verify authentication
   const isAuthenticated: boolean =
     isLogged &&
@@ -157,7 +178,7 @@ const AppLayer = (props: any) => {
 
   return (
     <div className={`root-wrapper${isDark ? '-dark' : ''}`}>
-      {isAuthenticated ? (
+      {isAuthenticated && selectedDate.isValid ? (
         <AuthenticatedLayer
         />
       ) : (

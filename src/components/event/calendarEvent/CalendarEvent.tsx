@@ -271,7 +271,7 @@ const CalendarEvent = (props: ICalendarEventProps) => {
     width: eventWidth,
     borderWidth: 1,
     borderColor: colorCode,
-    opacity: isFuture(parseISO(event.endAt)) ? 1 : 1, //0.4,
+    opacity: 1, //0.4,
     backgroundColor: colorCode,
     top: props.offsetTop,
     left: props.offsetLeft,

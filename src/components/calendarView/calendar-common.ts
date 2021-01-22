@@ -1,3 +1,4 @@
+/* tslint:disable:no-magic-numbers */
 import {
   addDays, addMonths,
   format, formatISO,
@@ -9,6 +10,8 @@ import {
 } from 'date-fns';
 import { reduxStore } from '../../bloben-package/layers/ReduxLayer';
 import { setSelectedDate } from '../../redux/actions';
+import { DateTime } from 'luxon';
+import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
 
 const ONE_DAY: number = 1;
 const THREE_DAYS: number = 3;
@@ -22,8 +25,8 @@ export const HEADER_HEIGHT_EXTENDER: number = 166;
 export const NAVBAR_HEIGHT_BASE: number = 50;
 export const CALENDAR_DRAWER_DESKTOP_WIDTH: number = 247;
 
-export const formatTimestampToDate = (dateObj: Date) =>
-   format(dateObj, 'dd-MM-yyyy')
+export const formatTimestampToDate = (dateObj: any): string =>
+    dateObj.isValid ? dateObj.toFormat('dd-MM-yyyy') : DateTime.fromISO(dateObj).toFormat('dd-MM-yyyy')
 
 export const formatIsoStringDate = (stringDate: string) =>
 
@@ -109,15 +112,15 @@ export const calendarColors: any = {
 
 export const daysText = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
-const getOneDay = (date: Date, isGoingForward?: boolean | null): Date[] => {
-  let refDate: Date;
+const getOneDay = (date: DateTime, isGoingForward?: boolean | null): DateTime[] => {
+  let refDate: DateTime;
 
   if (isGoingForward === null) {
     refDate = date;
   } else if (isGoingForward) {
-    refDate = addDays(date, 1)
+    refDate = date.plus({ days: 1});
   } else {
-    refDate = subDays(date, 1)
+    refDate = date.minus({ days: 1 })
   }
 
   // Set state
@@ -126,84 +129,85 @@ const getOneDay = (date: Date, isGoingForward?: boolean | null): Date[] => {
   return [refDate];
 }
 
-const getMonthDays = (refDate: Date, isGoingForward?: boolean | null, isCurrent?: boolean) => {
-  const FIVE_WEEKS_DAYS_COUNT: number = 35;
-
+export const getMonthDays = (date: DateTime, isGoingForward?: boolean | null, isCurrent?: boolean) => {
+  const FIVE_WEEKS_DAYS_COUNT: number = 36;
   // Get reference date for calculating new month
-  // const refDate: any = isGoingForward ? addDays(date, 15) : subDays(date, 15)
 
-  // Get last week of previous month
-  const lastDayOfPrevMonth: Date = lastDayOfMonth(subMonths(refDate, 1));
-  const lastWeekOfPrevMonth: Date[] = getWeekDays(lastDayOfPrevMonth)
-
-  // Get first week of next month
-  const nextMonth: Date = addMonths(refDate, 1);
-  const firstDayOfNextMonth: Date = new Date(getYear(nextMonth), getMonth(nextMonth), 1);
-  const firstWeekOfNextMonth: Date[] = getWeekDays(firstDayOfNextMonth)
+  const refDate: DateTime = isGoingForward === null ? date : isGoingForward ? date.plus({ days: 15}) : date.minus({ days: 15 })
 
   // Get first week of current month
-  const firstDayOfCurrentMonth: Date = new Date(getYear(refDate), getMonth(refDate), 1);
-  const firstWeekOfCurrentMonth: Date[] = getWeekDays(firstDayOfCurrentMonth)
+  const firstDayOfCurrentMonth: DateTime = LuxonHelper.getFirstDayOfMonth(date);
+
+  const firstWeekOfCurrentMonth: DateTime[] = getWeekDays(firstDayOfCurrentMonth)
+
+  const monthDays: DateTime[] = firstWeekOfCurrentMonth;
+
+  // Add missing days to month view
+  for (let i = 1; i < FIVE_WEEKS_DAYS_COUNT; i += 1) {
+    const day: DateTime = firstWeekOfCurrentMonth[6].plus({ days: i });
+    monthDays.push(day);
+  }
 
   // Set state
   if (isCurrent) {
-    reduxStore.dispatch(setSelectedDate(firstWeekOfCurrentMonth[6]));
-  }
-
-  const monthDays: Date[] = firstWeekOfCurrentMonth;
-
-  // Add missing days to month view
-  for (let i = 0; i < FIVE_WEEKS_DAYS_COUNT; i += 1) {
-    monthDays.push(addDays(firstWeekOfCurrentMonth[firstWeekOfCurrentMonth.length - 1], 1));
+    reduxStore.dispatch(setSelectedDate(monthDays[15]));
   }
 
   return monthDays;
 };
 
-export const getWeekDays = (date: Date, isGoingForward?: boolean | null): Date[] => {
+export const getWeekDays = (date: DateTime, isGoingForward?: boolean | null): DateTime[] => {
 
   // Get reference date for calculating new week
   const dateForNewWeek: any = isGoingForward !== null
-      ? isGoingForward ? addDays(date, 1)
-          : subDays(date, 1)
+      ? isGoingForward ? date.plus({ days: 1 })
+          : date.minus({ days: 1})
       : date;
 
   // Set state
-  reduxStore.dispatch(setSelectedDate(dateForNewWeek));
+  if (reduxStore.getState().calendarView !== 'month') {
+    reduxStore.dispatch(setSelectedDate(dateForNewWeek));
+  }
 
   const days = [];
-  const dayInWeek = getDay(dateForNewWeek);
-  const startDate = subDays(dateForNewWeek, dayInWeek - 1);
+  const dayInWeek = dateForNewWeek.weekday;
+  const startDate = dateForNewWeek.minus({ days: dayInWeek - 1});
 
-  if (dayInWeek === 0) {
-    for (let i = 6; i > 0; i--) {
-      days.push(subDays(dateForNewWeek, i));
+  if (reduxStore.getState().calendarView === 'monthAAA') {
+    if (dayInWeek === 0) {
+      for (let i = 6; i > 0; i--) {
+        days.push(dateForNewWeek.minus({days: i}));
+      }
+      days.push(dateForNewWeek);
+    } else {
+      days.push(startDate);
+      for (let i = 0; i < 7; i++) {
+        days.push(startDate.plus({days: i}));
+      }
     }
-    days.push(dateForNewWeek);
   } else {
-    days.push(startDate);
-    for (let i = 1; i < 7; i++) {
-      days.push(addDays(startDate, i));
+    for (let i = 0; i < 7; i++) {
+      days.push(startDate.plus({ days: i }));
     }
   }
 
   return days;
 };
 
-export const getThreeDays = (date: Date, isGoingForward?: boolean | null): Date[] => {
+export const getThreeDays = (date: DateTime, isGoingForward?: boolean | null): DateTime[] => {
   const days = [];
 
   if (isGoingForward === null) {
     for (let i = 0; i <= 2; i++) {
-      days.push(addDays(date, i));
+      days.push(date.plus({ days: i }))
     }
   } else if (isGoingForward) {
     for (let i = 1; i <= 3; i++) {
-      days.push(addDays(date, i));
+      days.push(date.plus({ days: i }))
     }
   } else {
     for (let i = 3; i > 0; i--) {
-      days.push(subDays(date, i));
+      days.push(date.minus({ days: i }))
     }
   }
 
@@ -215,10 +219,10 @@ export const getThreeDays = (date: Date, isGoingForward?: boolean | null): Date[
 
 export const getCalendarDays = (
   calendarView: string,
-  date: any,
+  date: DateTime,
   isGoingForward?: boolean | null,
   isCurrent?: boolean
-): Date[] => {
+): DateTime[] => {
   switch (calendarView) {
     case 'week':
       return getWeekDays(date, isGoingForward);
@@ -229,7 +233,7 @@ export const getCalendarDays = (
     case 'month':
       return getMonthDays(date, isGoingForward, isCurrent);
     default:
-      return getMonthDays(date, isGoingForward, isCurrent);
+      return getWeekDays(date, isGoingForward);
   }
 
 };
@@ -247,18 +251,14 @@ export const getDaysNum = (calendarView: string): number => {
   }
 };
 
-export const parseStringToDate = (stringDate: string): Date => {
+export const parseStringToDate = (stringDate: string): DateTime => {
   const dateArray: any = stringDate.split('-');
 
   const year: number = Number(dateArray[2]);
   const month: number = Number(dateArray[1]);
   const day: number = Number(dateArray[0]);
 
-  return new Date(
-      year,
-      month - 1,
-      day
-  );
+  return DateTime.local().set({ year, month, day})
 };
 
 export const mapCalendarColors = (calendars: any) => {
@@ -275,11 +275,12 @@ export const mapCalendarColors = (calendars: any) => {
   return result;
 };
 
-export const parseToDate = (item: string | Date): Date =>
-    typeof item === 'string' ? parseISO(item) : item;
+export const parseToDate = (item: string | DateTime): DateTime =>
+    typeof item === 'string' ? DateTime.fromISO(item) : item;
 
-export const parseDateToString = (item: string | Date): string =>
-    typeof item === 'string' ? item : formatISO(item);
+
+export const parseDateToString = (item: string | DateTime): string =>
+    typeof item === 'string' ? item : item.toString();
 
 export const checkIfSwipingForward = (oldIndex: number, newIndex: number): boolean =>
     oldIndex === 0 && newIndex === 1
