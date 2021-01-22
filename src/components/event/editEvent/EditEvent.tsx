@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useState, useContext } from 'react';
-import { addHours, isBefore, parseISO } from 'date-fns';
+import { addHours, parseISO } from 'date-fns';
 import { formReducer, stateReducer } from 'utils/reducer/baseReducer';
 import EventDetail from '../eventDetail/EventDetail';
 import EventStateEntity, {
@@ -43,9 +43,9 @@ const initialFormState: any = {
   type: 'events',
   timezone: 'device',
   allDay: false,
-  startAt: DateTime.local(),
+  startAt: DateTime.local().toString(),
   timezoneStart: 'device',
-  endAt: addHours(new Date(), 1),
+  endAt: DateTime.local().plus({ hours: 1}).toString(),
   timezoneEnd: 'device',
   isRepeated: false,
   reminders: [],
@@ -148,7 +148,6 @@ const EditEvent = (props: IEditEventProps) => {
     text,
     location,
     notes,
-    date,
     calendarId,
     allDay,
     startAt,
@@ -199,7 +198,6 @@ const EditEvent = (props: IEditEventProps) => {
     const dateTill: DateTime = dateFromNewEvent.plus({ hours: 1});
     setForm('startAt', DatetimeParser(dateFromNewEvent, timezoneStart));
     setForm('endAt', DatetimeParser(dateTill, timezoneStart));
-
   };
 
   // useEffect(() => {
@@ -334,11 +332,13 @@ const EditEvent = (props: IEditEventProps) => {
         ? await newEvent.formatBodyToSendOpenPgp(pgpKeys)
         : await newEvent.formatBodyToSend(cryptoPassword);
 
+    console.log('bodyToSend', bodyToSend)
     // Different handling for new event and edited event
     if (isNewEvent) {
       // Get only simple object
       const simpleObj: any = newEvent.getReduxStateObj();
 
+      console.log('simpleObj', simpleObj)
       // Save to redux store
       dispatch(mergeEvent(simpleObj));
 

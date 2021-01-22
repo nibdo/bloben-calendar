@@ -270,7 +270,7 @@ const CalendarDrawer = (props: ICalendarDrawerProps) => {
         <DatePicker
             keyPrefix={'drawer_calendar'}
           selectDate={selectDate}
-          selectedDate={selectedDate}
+          selectedDate={selectedDate.toString()}
           width={214}
           sideMargin={14}
         />

@@ -262,7 +262,8 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
         .filter(
           (item: any) =>
             item.allDay ||
-            item.endAt.diff(item.startAt, 'days').toObject().days > 0
+              // @ts-ignore
+            DateTime.fromISO(item.endAt).diff(DateTime.fromISO(item.startAt), 'days').toObject().days > 0
         )
         .map((event: any) => {
           let width = 1; //Full width
@@ -273,7 +274,8 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
             if (
               event.id !== item2.id &&
               (item2.allDay ||
-                  item2.endAt.diff(item2.startAt, 'days').toObject().days > 0)
+                  // @ts-ignore
+                  DateTime.fromISO(item2.endAt).diff(DateTime.fromISO(item2.startAt), 'days').toObject().days > 0)
             ) {
               if (checkOverlappingEvents(event, item2)) {
                 width = width + 1; //add width for every overlapping item

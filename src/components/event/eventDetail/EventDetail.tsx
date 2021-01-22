@@ -8,7 +8,6 @@ import MySwitch from 'components/Switch';
 
 import PickerModal from '../../../bloben-package/components/pickerModal/PickerModal';
 import { HeightHook, WidthHook } from '../../../bloben-common/utils/layout';
-import { addYears, format, isBefore } from 'date-fns';
 import Dropdown from '../../../bloben-package/components/dropdown/Dropdown';
 import { ButtonBase } from '@material-ui/core';
 import {
@@ -20,8 +19,7 @@ import TimePicker from '../../../bloben-package/components/timePicker/TimePicker
 import {
   DATE_FORMAT,
   DATE_MONTH_YEAR_FORMAT,
-  formatDate,
-  TIME_FORMAT,
+  TIME_FORMAT, WEEK_DAY_FORMAT_MEDIUM,
   WEEK_DAY_FORMAT_SHORT,
 } from '../../../bloben-package/utils/date';
 import EvaIcons from '../../../bloben-common/components/eva-icons';
@@ -201,7 +199,7 @@ interface IDateFromProps {
   openDateFrom: any;
   openTimeFrom: any;
   isStartDateValid?: boolean;
-  startDate: DateTime;
+  startDate: string;
   allDay: boolean;
 }
 const DateFrom = (props: IDateFromProps) => {
@@ -228,7 +226,7 @@ const DateFrom = (props: IDateFromProps) => {
               !isStartDateValid ? 'date-error' : ''
             }`}
           >
-            {startDate.toFormat(DATE_FORMAT)}
+            {DateTime.fromISO(startDate).toFormat(DATE_FORMAT)}
           </p>
           <p
             className={`${parseCssDark(
@@ -236,7 +234,7 @@ const DateFrom = (props: IDateFromProps) => {
               isDark
             )} ${!isStartDateValid ? 'date-error' : ''}`}
           >
-            ({startDate.toFormat(DATE_FORMAT)})
+            ({DateTime.fromISO(startDate).toFormat(WEEK_DAY_FORMAT_MEDIUM)})
           </p>
         </ButtonBase>
         {!allDay ? (
@@ -249,7 +247,7 @@ const DateFrom = (props: IDateFromProps) => {
                 !isStartDateValid ? 'date-error' : ''
               }`}
             >
-              ({startDate.toFormat(TIME_FORMAT)})
+              {DateTime.fromISO(startDate).toFormat(TIME_FORMAT)}
             </p>
           </ButtonBase>
         ) : null}
@@ -262,7 +260,7 @@ interface IDateTillProps {
   openDateTill: any;
   openTimeTill: any;
   isStartDateValid?: boolean;
-  endDate: DateTime;
+  endDate: string;
   allDay: boolean;
 }
 const DateTill = (props: IDateTillProps) => {
@@ -289,7 +287,7 @@ const DateTill = (props: IDateTillProps) => {
               !isStartDateValid ? 'date-error' : ''
             }`}
           >
-            {endDate.toFormat(DATE_FORMAT)}
+            {DateTime.fromISO(endDate).toFormat(DATE_FORMAT)}
           </p>
           <p
             className={`${parseCssDark(
@@ -297,7 +295,7 @@ const DateTill = (props: IDateTillProps) => {
               isDark
             )} ${!isStartDateValid ? 'date-error' : ''}`}
           >
-            ({endDate.toFormat(WEEK_DAY_FORMAT_SHORT)})
+            ({DateTime.fromISO(endDate).toFormat(WEEK_DAY_FORMAT_MEDIUM)})
           </p>
         </ButtonBase>
         {!allDay ? (
@@ -310,7 +308,7 @@ const DateTill = (props: IDateTillProps) => {
                 !isStartDateValid ? 'date-error' : ''
               }`}
             >
-              {endDate.toFormat(TIME_FORMAT)}
+              {DateTime.fromISO(endDate).toFormat(TIME_FORMAT)}
             </p>
           </ButtonBase>
         ) : null}
@@ -821,8 +819,8 @@ interface IEventDetailProps {
   handleChange: any;
   calendar: any;
   location: string;
-  startDate: DateTime;
-  endDate: DateTime;
+  startDate: string;
+  endDate: string;
   isRepeated: boolean;
   isStartDateValid?: any;
   notes: string;

@@ -230,7 +230,6 @@ const AuthenticatedLayer = () => {
 
         // Receive automatic updates from server
         stompClient.subscribe('/user/sync', (message: any) => {
-          console.log(message.body)
           WebsocketHandler.handleSyncGeneral(message);
         });
         stompClient.subscribe('/user/events', (message: any) => {

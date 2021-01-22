@@ -26,7 +26,7 @@
     "@types/sockjs-client": "^1.1.1",
     "@types/uuid": "^7.0.3",
     "axios": "^0.19.2",
-    "bottom-sheet-react": "^0.1.22",
+    "bottom-sheet-react": "^0.1.23",
     "crypto-js": "^4.0.0",
     "date-fns": "^2.9.0",
     "date-fns-tz": "^1.0.12",
