@@ -331,9 +331,7 @@ const AuthenticatedLayer = () => {
   const initCalendar = (date: any) => {
     const calendarDaysNew = getCalendarDays(calendarView, date, null, true);
 
-    console.log('calendarDaysNew,', calendarDaysNew.length)
     const testA: any = calendarDaysNew.map((item: any) => item.toString())
-    console.log('test a', testA)
 
     const calendarDaysPrevNew = getCalendarDays(
       calendarView,

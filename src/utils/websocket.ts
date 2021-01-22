@@ -338,7 +338,6 @@ const WebsocketHandler = {
                                                     clonedCalendar.id === id ? calendar : clonedCalendar
         );
 
-        console.log('newState', newState)
         reduxStore.dispatch(setCalendars(newState));
         // TODO calendar and event color update
       }
