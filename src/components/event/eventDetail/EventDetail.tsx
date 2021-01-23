@@ -122,9 +122,10 @@ interface ICalendarProps {
   calendar: any;
   coordinates: any;
   setCoordinates: any;
+  selectCalendar: any;
 }
 export const Calendar = (props: ICalendarProps) => {
-  const { setForm, calendar, coordinates, setCoordinates } = props;
+  const { setForm, calendar, coordinates, setCoordinates, selectCalendar } = props;
 
   const [anchor, setAnchor] = useState(null);
   const [isOpen, openMenu] = useState(false);
@@ -145,7 +146,8 @@ export const Calendar = (props: ICalendarProps) => {
     setAnchor(null);
   };
   const selectOption = (item: any) => {
-    setForm('calendarId', item.id);
+    selectCalendar(item);
+    // setForm('calendarId', item.id);
     handleMenuClose();
   };
 
@@ -843,6 +845,7 @@ interface IEventDetailProps {
   handleChangeDateTill: any;
   timezoneStart: string;
   setStartTimezone: any;
+  selectCalendar: any;
 }
 const EventDetail = (props: IEventDetailProps) => {
   const [isDateFromVisible, openDateFrom] = useState(false);
@@ -880,7 +883,8 @@ const EventDetail = (props: IEventDetailProps) => {
     handleChangeDateFrom,
     handleChangeDateTill,
     timezoneStart,
-    setStartTimezone
+    setStartTimezone,
+    selectCalendar
   } = props;
 
   /**
@@ -924,6 +928,7 @@ const EventDetail = (props: IEventDetailProps) => {
         setForm={setForm}
         coordinates={coordinates}
         setCoordinates={setCoordinates}
+        selectCalendar={selectCalendar}
       />
       <DateFrom
         startDate={startDate}

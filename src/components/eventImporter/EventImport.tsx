@@ -64,6 +64,7 @@ interface IImportedEventsProps {
   changeCalendar: any;
   coordinates: any;
   setCoordinates: any;
+  selectCalendar: any;
 }
 const ImportedEvents = (props: IImportedEventsProps) => {
   const {
@@ -74,6 +75,7 @@ const ImportedEvents = (props: IImportedEventsProps) => {
     changeCalendar,
     coordinates,
     setCoordinates,
+    selectCalendar
   } = props;
 
   return (
@@ -96,6 +98,7 @@ const ImportedEvents = (props: IImportedEventsProps) => {
           setForm={changeCalendar}
           coordinates={coordinates}
           setCoordinates={setCoordinates}
+          selectCalendar={selectCalendar}
         />
         <Results results={data} />
       </div>
@@ -173,6 +176,10 @@ const EventImport = () => {
     setData(result);
   };
 
+  const selectCalendar = (calendarObj: any) => {
+    setCalendar(calendarObj.id)
+  }
+
   const changeCalendar = async (itemName: string, calendarId: string) => {
     const calendarSelected: any = await findInArrayById(calendars, calendarId);
 
@@ -229,6 +236,7 @@ const EventImport = () => {
       coordinates={coordinates}
       setCoordinates={setCoordinates}
       calendar={calendar}
+      selectCalendar={selectCalendar}
     />
   ) : null;
 };

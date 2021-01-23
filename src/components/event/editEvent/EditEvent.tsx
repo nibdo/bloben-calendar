@@ -129,14 +129,7 @@ const EditEvent = (props: IEditEventProps) => {
       // Set event data
       for (const [key, value] of Object.entries(eventItem)) {
         if (key !== 'rRule') {
-          if (
-            (key === 'timezoneStart' && !value) ||
-            (key === 'timezoneEnd' && !value)
-          ) {
-            setForm(key, 'device');
-          } else {
             setForm(key, value);
-          }
         }
       }
 
@@ -168,24 +161,26 @@ const EditEvent = (props: IEditEventProps) => {
    * Find calendar by calendarId
    * Set color event and default reminders for this calendar if event has none
    */
-  const setThisCalendar = async () => {
+  const loadCalendar = async () => {
     const thisCalendar: any = await findInArrayById(calendars, calendarId);
 
     if (!thisCalendar) {
       return;
     }
     setForm('color', thisCalendar.color);
-    setForm('timezoneStart', thisCalendar.timezone);
-    setForm('timezoneEnd', thisCalendar.timezone);
-
+    if (isNewEvent) {
+      setForm('timezoneStart', thisCalendar.timezone);
+      setForm('timezoneEnd', thisCalendar.timezone);
+    }
     setCalendar(thisCalendar);
+
     if ((!reminders || reminders.length === 0) && thisCalendar.reminders) {
       setForm('reminders', thisCalendar.reminders);
     }
   };
 
   useEffect(() => {
-    setThisCalendar();
+    loadCalendar();
   }, [calendarId !== null, calendarId]);
 
   const handleClose = () => {
@@ -195,9 +190,18 @@ const EditEvent = (props: IEditEventProps) => {
   /**
    * Set date time for new event
    */
-  const initNewEventOnMount = () => {
+  const initNewEventOnMount = async () => {
     setForm('calendarId', calendars[0].id);
     setDefaultReminder(defaultReminder, setForm);
+
+    const thisCalendar: any = await findInArrayById(calendars, calendarId);
+
+    if (!thisCalendar) {
+      return;
+    }
+    setForm('color', thisCalendar.color);
+    setForm('timezoneStart', thisCalendar.timezone);
+    setForm('timezoneEnd', thisCalendar.timezone);
 
     if (!newEventTime) {
       return;
@@ -206,8 +210,8 @@ const EditEvent = (props: IEditEventProps) => {
       ? calculateNewEventTime(newEventTime)
       : DateTime.local().plus({ hours: 1 });
     const dateTill: DateTime = dateFromNewEvent.plus({ hours: 1 });
-    setForm('startAt', DatetimeParser(dateFromNewEvent, timezoneStart));
-    setForm('endAt', DatetimeParser(dateTill, timezoneStart));
+    setForm('startAt', DatetimeParser(dateFromNewEvent, thisCalendar.timezone));
+    setForm('endAt', DatetimeParser(dateTill, thisCalendar.timezone));
   };
 
   // useEffect(() => {
@@ -324,11 +328,20 @@ const EditEvent = (props: IEditEventProps) => {
   const handleChange = (event: any) => {
     const target = event.target;
     const name = target.name;
-    setForm(name, event.target.value);
+    const value: any = event.target.value;
+
+    if (name === 'timezoneStart' || name === 'timezoneEnd') {
+      setForm('startAt', DatetimeParser(startAt, value));
+      setForm('endAt', DatetimeParser(endAt, value));
+    }
+
+    setForm(name, value);
   };
 
   const selectCalendar = (calendarObj: any) => {
-    setForm('calendar', calendarObj);
+    setForm('startAt', DatetimeParser(startAt, calendarObj.timezone));
+    setForm('endAt', DatetimeParser(endAt, calendarObj.timezone));
+    setForm('calendarId', calendarObj.id);
   };
 
   const saveEvent = async () => {
@@ -424,6 +437,7 @@ const EditEvent = (props: IEditEventProps) => {
           removeNotification={removeNotificationEvent}
           timezoneStart={timezoneStart}
           setStartTimezone={setStartTimezone}
+          selectCalendar={selectCalendar}
         />
       ) : (
         <div />

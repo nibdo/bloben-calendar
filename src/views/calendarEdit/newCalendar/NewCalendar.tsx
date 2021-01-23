@@ -1,4 +1,4 @@
-import React, { useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useHistory } from 'react-router';
 import StateReducer from '../../../utils/state-reducer';
 import Utils from '../CalendarEdit.utils';
@@ -12,6 +12,7 @@ import { addCalendar } from '../../../redux/actions';
 import { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
 import CalendarContent from '../calendarContent/CalendarContent';
 import EditCalendar from '../editCalendar/EditCalendar';
+import { getLocalTimezone } from '../../../bloben-package/utils/common';
 
 const NewCalendar = () => {
   const [calendarState, dispatchState]: any = useReducer(
@@ -50,6 +51,10 @@ const NewCalendar = () => {
   const removeNotificationCalendar = (item: any) => {
     removeNotification(item, setLocalState, reminders);
   };
+
+  useEffect(() => {
+    setLocalState('timezone', 'simple', getLocalTimezone())
+  },[])
 
   const saveCalendar = async () => {
     const newCalendar: CalendarStateEntity = new CalendarStateEntity(calendarState);
