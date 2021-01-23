@@ -1,6 +1,7 @@
 # Change log
 - **upcoming** \
-  timezones for calendars and events, support for floating events \
+  timezones for calendars and events, \
+  floating events with fixed time, \
   notifications for shared events
 - **0.2.9** \
   fix dark theme for mobiles
