@@ -168,6 +168,9 @@ const EditEvent = (props: IEditEventProps) => {
       return;
     }
     setForm('color', thisCalendar.color);
+    setForm('timezoneStart', thisCalendar.timezone);
+    setForm('timezoneEnd', thisCalendar.timezone);
+
     setCalendar(thisCalendar);
     if ((!reminders || reminders.length === 0) && thisCalendar.reminders) {
       setForm('reminders', thisCalendar.reminders);
@@ -332,13 +335,11 @@ const EditEvent = (props: IEditEventProps) => {
         ? await newEvent.formatBodyToSendOpenPgp(pgpKeys)
         : await newEvent.formatBodyToSend(cryptoPassword);
 
-    console.log('bodyToSend', bodyToSend)
     // Different handling for new event and edited event
     if (isNewEvent) {
       // Get only simple object
       const simpleObj: any = newEvent.getReduxStateObj();
 
-      console.log('simpleObj', simpleObj)
       // Save to redux store
       dispatch(mergeEvent(simpleObj));
 

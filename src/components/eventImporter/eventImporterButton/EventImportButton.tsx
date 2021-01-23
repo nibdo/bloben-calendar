@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import './EventImportButton.scss';
-import '../../calendarSettings/CalendarSettings.scss';
+import '../../settingsCalendar/SettingsCalendar.scss';
 import { ButtonBase } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 

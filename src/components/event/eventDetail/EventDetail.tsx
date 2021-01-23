@@ -37,6 +37,7 @@ import TimezoneRow from '../../../bloben-package/components/timezoneRow/Timezone
 import Modal from '../../../bloben-package/components/modal/Modal';
 import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
 import { DateTime } from 'luxon';
+import { DatetimeParser, parseToDateTime } from '../../../bloben-package/utils/datetimeParser';
 
 const repeatOptions: any = [
   { label: 'No repeat', value: 'none' },
@@ -201,6 +202,7 @@ interface IDateFromProps {
   isStartDateValid?: boolean;
   startDate: string;
   allDay: boolean;
+  timezoneStart: string;
 }
 const DateFrom = (props: IDateFromProps) => {
   const {
@@ -209,6 +211,7 @@ const DateFrom = (props: IDateFromProps) => {
     startDate,
     allDay,
     openTimeFrom,
+    timezoneStart
   } = props;
 
   const [store] = useContext(Context);
@@ -226,7 +229,7 @@ const DateFrom = (props: IDateFromProps) => {
               !isStartDateValid ? 'date-error' : ''
             }`}
           >
-            {DateTime.fromISO(startDate).toFormat(DATE_FORMAT)}
+            {parseToDateTime(startDate, timezoneStart).toFormat(DATE_FORMAT)}
           </p>
           <p
             className={`${parseCssDark(
@@ -234,7 +237,7 @@ const DateFrom = (props: IDateFromProps) => {
               isDark
             )} ${!isStartDateValid ? 'date-error' : ''}`}
           >
-            ({DateTime.fromISO(startDate).toFormat(WEEK_DAY_FORMAT_MEDIUM)})
+            ({parseToDateTime(startDate, timezoneStart).toFormat(WEEK_DAY_FORMAT_MEDIUM)})
           </p>
         </ButtonBase>
         {!allDay ? (
@@ -247,7 +250,7 @@ const DateFrom = (props: IDateFromProps) => {
                 !isStartDateValid ? 'date-error' : ''
               }`}
             >
-              {DateTime.fromISO(startDate).toFormat(TIME_FORMAT)}
+              {parseToDateTime(startDate, timezoneStart).toFormat(TIME_FORMAT)}
             </p>
           </ButtonBase>
         ) : null}
@@ -262,6 +265,7 @@ interface IDateTillProps {
   isStartDateValid?: boolean;
   endDate: string;
   allDay: boolean;
+  timezoneStart: string;
 }
 const DateTill = (props: IDateTillProps) => {
   const {
@@ -270,6 +274,7 @@ const DateTill = (props: IDateTillProps) => {
     endDate,
     allDay,
     openTimeTill,
+    timezoneStart
   } = props;
 
   const [store] = useContext(Context);
@@ -287,7 +292,7 @@ const DateTill = (props: IDateTillProps) => {
               !isStartDateValid ? 'date-error' : ''
             }`}
           >
-            {DateTime.fromISO(endDate).toFormat(DATE_FORMAT)}
+            {parseToDateTime(endDate, timezoneStart).toFormat(DATE_FORMAT)}
           </p>
           <p
             className={`${parseCssDark(
@@ -295,7 +300,7 @@ const DateTill = (props: IDateTillProps) => {
               isDark
             )} ${!isStartDateValid ? 'date-error' : ''}`}
           >
-            ({DateTime.fromISO(endDate).toFormat(WEEK_DAY_FORMAT_MEDIUM)})
+            ({parseToDateTime(endDate, timezoneStart).toFormat(WEEK_DAY_FORMAT_MEDIUM)})
           </p>
         </ButtonBase>
         {!allDay ? (
@@ -308,7 +313,7 @@ const DateTill = (props: IDateTillProps) => {
                 !isStartDateValid ? 'date-error' : ''
               }`}
             >
-              {DateTime.fromISO(endDate).toFormat(TIME_FORMAT)}
+              {parseToDateTime(endDate, timezoneStart).toFormat(TIME_FORMAT)}
             </p>
           </ButtonBase>
         ) : null}
@@ -419,6 +424,7 @@ export const RepeatValueDropDown = (props: IRepeatValueDropdownProps) => {
           values={values}
           onClick={handleSelect}
           variant={'simple'}
+          className={'dropdown__align-bottom'}
       />
     </div>
   );
@@ -929,6 +935,7 @@ const EventDetail = (props: IEventDetailProps) => {
           openTimeFrom(true);
         }}
         isStartDateValid={isStartDateValid}
+        timezoneStart={timezoneStart}
       />
       <DateTill
         endDate={endDate}
@@ -939,6 +946,7 @@ const EventDetail = (props: IEventDetailProps) => {
         openTimeTill={() => {
           openTimeTill(true);
         }}
+        timezoneStart={timezoneStart}
       />
       <AllDay allDay={allDay} setForm={setForm} />
       {!allDay ? <TimezoneRow timezone={timezoneStart} openTimezoneModal={ () => openTimezoneModal(true)}/> : null }
@@ -986,6 +994,7 @@ const EventDetail = (props: IEventDetailProps) => {
               width={isMobile ? width - 48 : 60}
               selectTime={handleChangeDateFrom}
               selectedDate={startDate}
+              timezone={timezoneStart}
             />
           ) : null}
           {isDateTillVisible ? (
@@ -1003,6 +1012,7 @@ const EventDetail = (props: IEventDetailProps) => {
               width={isMobile ? width - 48 : 60}
               selectTime={handleChangeDateTill}
               selectedDate={endDate}
+              timezone={timezoneStart}
             />
           ) : null}
 

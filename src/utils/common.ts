@@ -342,8 +342,8 @@ export const checkOverlappingEvents = (firstDate: any, secondDate: any) => {
   const startAtFirst: DateTime = DateTime.fromISO(firstDate.startAt);
   const endAtFirst: DateTime = DateTime.fromISO(firstDate.endAt);
 
-  return   Interval({ start: startAtFirst, end: endAtFirst }).overlaps(
-      Interval({ start: DateTime.fromISO(secondDate.startAt), end: DateTime.fromISO(secondDate.endAt) })
+  return  new Interval({ start: startAtFirst, end: endAtFirst }).overlaps(
+      new Interval({ start: DateTime.fromISO(secondDate.startAt), end: DateTime.fromISO(secondDate.endAt) })
   );
 }
 

@@ -21,13 +21,13 @@ import Settings from '../views/settings/Settings';
 import WebsocketHandler from '../utils/websocket';
 import {
   setCalendarDays,
-  setCalendarDaysCurrentIndex,
+  setCalendarDaysCurrentIndex, setCalendarSettings,
   setDefaultCalendar, setDefaultTimezone,
   setIsAppStarting,
   setIsFirstLogin,
   setRangeFrom,
   setRangeTo,
-  setSelectedDate, setTimezones,
+  setSelectedDate, setTimezones, updateTimezoneSetting,
 } from '../redux/actions';
 import {
   getArrayEnd,
@@ -51,7 +51,7 @@ import Axios from '../bloben-common/utils/axios';
 import Search from '../views/search/Search';
 import IntroScreen from '../views/introScreen/IntroScreen';
 import {
-  findInArrayById,
+  findInArrayById, getLocalTimezone,
   sendMessageToReactNative,
 } from 'bloben-package/utils/common';
 import { checkIfIsSafari, logger } from 'bloben-common/utils/common';
@@ -70,6 +70,7 @@ import Notifications from '../bloben-package/views/notifications/Notifications';
 import GeneralApi from '../bloben-common/api/general.api';
 import { DatetimeParser } from '../bloben-package/utils/datetimeParser';
 import { DateTime } from 'luxon';
+import { ICalendarSettings } from '../types/types';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -82,7 +83,7 @@ const AuthenticatedLayer = () => {
   const [store] = useContext(Context);
   const { isReactNative, isMobile } = store;
 
-  const defaultCalendar: string = useSelector((state: any) => state.defaultCalendar);
+  const calendarSettings: ICalendarSettings = useSelector((state: any) => state.calendarSettings);
   const calendars: any = useSelector((state: any) => state.calendars);
   const events: any = useSelector((state: any) => state.events);
   const isFirstLogin: boolean = useSelector((state: any) => state.isFirstLogin);
@@ -119,11 +120,25 @@ const AuthenticatedLayer = () => {
     []
   );
 
+  /**
+   * Load calendar settings
+   */
   const loadCalendarSettings = async () => {
-    const settings: any = await CalendarApi.getCalendarSettings();
+    const settings: ICalendarSettings = await CalendarApi.getCalendarSettings();
 
-    dispatch(setDefaultTimezone(settings.defaultTimezone));
-    dispatch(setDefaultCalendar(settings.defaultCalendar));
+    dispatch(setCalendarSettings(settings));
+
+    dispatch(setDefaultCalendar(settings.defaultCalendar.id));
+
+    // Handle auto update timezone
+    if (settings.autoUpdateTimezone) {
+      const timezone: string = getLocalTimezone()
+      dispatch(setDefaultTimezone(timezone));
+
+      await CalendarApi.updateSettings({ timezone });
+
+      dispatch(updateTimezoneSetting(timezone));
+    }
   }
 
   const initTimezones = async () => {

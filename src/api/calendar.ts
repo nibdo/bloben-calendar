@@ -1,10 +1,13 @@
 import Axios from 'bloben-common/utils/axios';
 import { CALENDAR_URL } from '../bloben-common/globals/url';
 import { stompClient } from '../layers/AuthenticatedLayer';
+import { AxiosResponse } from 'axios';
 
 export const APP_API_PREFIX: string = '/calendar-app';
 export const API_GET_CALENDAR_SETTINGS: string = 'settings';
 export const API_GET_SCHEDULED_REMINDERS: string = 'scheduled-reminders';
+export const API_SET_TIMEZONE: string = 'settings/timezone';
+export const API_UPDATE_SETTINGS: string = 'settings';
 
 export const WEBSOCKET_GET_ONE_EVENT: string = '/app/events/get/one'
 export const WEBSOCKET_GET_ALL_EVENTS: string = '/app/events/get/all'
@@ -40,6 +43,12 @@ const CalendarApi = {
     }
 
     return
+  },
+  setTimezone: async (timezone: string) => {
+    await Axios.patch(`${APP_API_PREFIX}/${API_SET_TIMEZONE}`, {timezone})
+  },
+  updateSettings: async (data: any): Promise<AxiosResponse> => {
+    return Axios.patch(`${APP_API_PREFIX}/${API_UPDATE_SETTINGS}`, data)
   },
   getScheduledReminders: async () => {
     const result: any = await Axios.get(`${APP_API_PREFIX}/${API_GET_SCHEDULED_REMINDERS}`);

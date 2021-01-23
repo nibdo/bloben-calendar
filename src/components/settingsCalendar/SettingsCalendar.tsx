@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import './CalendarSettings.scss';
+import './SettingsCalendar.scss';
 import { ButtonBase } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router';
 import { Context } from '../../bloben-package/context/store';
@@ -62,7 +62,7 @@ const CalendarSettingsView = (props: ICalendarSettingsViewProps) => {
 interface ICalendarSettingsProps {
   handleClose: any;
 }
-const CalendarSettings = (props: ICalendarSettingsProps) => {
+const SettingsCalendar = (props: ICalendarSettingsProps) => {
   const { handleClose } = props;
 
   const history = useHistory();
@@ -79,4 +79,4 @@ const CalendarSettings = (props: ICalendarSettingsProps) => {
   );
 };
 
-export default CalendarSettings;
+export default SettingsCalendar;

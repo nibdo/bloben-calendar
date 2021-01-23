@@ -44,6 +44,10 @@
   height: 20px;
   fill: $gray;
 }
+.settings__icon-hidden {
+  @extend .settings__icon;
+  fill: transparent !important;
+}
 .settings__icon-dark {
   @extend .settings__icon;
   fill: $ICON_GRAY_DARK;

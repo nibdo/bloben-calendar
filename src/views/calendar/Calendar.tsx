@@ -14,7 +14,7 @@ import { format } from 'date-fns';
 import CalendarDrawer from '../../components/calendarDrawer/CalendarDrawer';
 import MonthView from '../../components/calendarView/monthView/MonthView';
 import Agenda from '../../components/calendarView/agenda/Agenda';
-import CalendarSettings from '../../components/calendarSettings/CalendarSettings';
+import SettingsCalendar from '../../components/settingsCalendar/SettingsCalendar';
 import { useDispatch, useSelector } from 'react-redux';
 import EditEvent from '../../components/event/editEvent/EditEvent';
 import CalendarDesktopNavigation from '../../components/CalendarDesktopNavigation/calendar-desktop-navigation';
@@ -231,7 +231,7 @@ const CalendarView = (props: ICalendarViewProps) => {
               isExpandable={false}
               onClose={() => toggleSettingsOpen(false)}
             >
-              <CalendarSettings
+              <SettingsCalendar
                   handleClose={() => toggleSettingsOpen(false)}
               />
             </BottomSheet>

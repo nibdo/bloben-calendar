@@ -17,6 +17,7 @@ import { checkOverlappingEvents } from '../../utils/common';
 import { Context } from '../../bloben-package/context/store';
 import { DateTime } from 'luxon';
 import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
+import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
 
 const renderEvents = (
   props: any,
@@ -34,7 +35,10 @@ const renderEvents = (
       .filter(
         (item: any) =>
           !item.allDay &&
-            DateTime.fromISO(item.endAt).diff(DateTime.fromISO(item.startAt), 'days').toObject().days === 0
+          // @ts-ignore
+            parseToDateTime(item.endAt, item.timezoneStart)
+            .diff(parseToDateTime(item.startAt, item.timezoneStart), 'days')
+            .toObject().days < 1
       )
       .map((event: any) => {
         let width = 1; //Full width
@@ -45,7 +49,10 @@ const renderEvents = (
           if (event.id !== item2.id && !item2.allDay) {
             if (
               checkOverlappingEvents(event, item2) &&
-                DateTime.fromISO(item2.endAt).diff(DateTime.fromISO(item2.startAt), 'days').toObject().days === 0
+              // @ts-ignore
+                parseToDateTime(item2.endAt, item2.timezoneStart)
+                .diff(parseToDateTime(item2.startAt, item2.timezoneStart), 'days')
+                .toObject().days < 1
             ) {
               width = width + 1; //add width for every overlapping item
               offsetCount.push(item2.id); // set offset for positioning
@@ -68,10 +75,23 @@ const renderEvents = (
 
         const calendarColor: string = event.color;
 
-        // @ts-ignore
-        const offsetTop: any = DateTime.fromISO(event.startAt).diff(DateTime.fromISO(event.startAt).set({ hour: 0, minute: 0, second: 0})).toObject().minutes / 1.5;
+        const offsetTop: any =
+          // @ts-ignore
+          parseToDateTime(event.startAt, event.timezoneStart)
+            .diff(
+                parseToDateTime(event.startAt, event.timezoneStart).set({
+                hour: 0,
+                minute: 0,
+                second: 0,
+              }), 'minutes'
+            )
+            .toObject().minutes / 1.5;
+
         const eventHeight: any =
-          event.endAt.diff(event.startAt, 'minutes').toObject().minutes / 1.5;
+          // @ts-ignore
+          parseToDateTime(event.endAt, event.timezoneStart)
+            .diff(parseToDateTime(event.startAt, event.timezoneStart), 'minutes')
+            .toObject().minutes / 1.5;
         const eventWidth: any = tableWidth / width - 1; ///event.width.toString() + "%"
         //event.left
         // Current status: events is displayed in wrong place
@@ -161,8 +181,10 @@ const OneDay = (props: IOneDayProps) => {
   );
   const dateNow: any = DateTime.local();
 
-
-  const nowPosition: number = dateNow.diff(DateTime.local().set({ hour: 0, minute: 0, second: 0}), 'minutes').toObject().minutes / 1.5
+  const nowPosition: number =
+    dateNow
+      .diff(DateTime.local().set({ hour: 0, minute: 0, second: 0 }), 'minutes')
+      .toObject().minutes / 1.5;
 
   useEffect(() => {
     if (isToday) {
@@ -188,10 +210,7 @@ const OneDay = (props: IOneDayProps) => {
       {dataForDay && dataForDay.length > 0 ? eventNodes : null}
 
       {isToday ? (
-        <TimeNowLine
-          daysNum={daysNum}
-          nowPosition={nowPosition}
-        />
+        <TimeNowLine daysNum={daysNum} nowPosition={nowPosition} />
       ) : null}
     </div>
   );

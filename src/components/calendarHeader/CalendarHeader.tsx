@@ -23,6 +23,7 @@ import { checkOverlappingEvents } from '../../utils/common';
 import { Context } from '../../bloben-package/context/store';
 import { DateTime } from 'luxon';
 import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
+import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
 
 interface IEventHeaderProps {
   calendarColor: string;
@@ -263,7 +264,7 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
           (item: any) =>
             item.allDay ||
               // @ts-ignore
-            DateTime.fromISO(item.endAt).diff(DateTime.fromISO(item.startAt), 'days').toObject().days > 0
+              parseToDateTime(item.endAt, item.timezoneStart).diff(parseToDateTime(item.startAt, item.timezoneStart), 'days').toObject().days >= 1
         )
         .map((event: any) => {
           let width = 1; //Full width
@@ -275,7 +276,7 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
               event.id !== item2.id &&
               (item2.allDay ||
                   // @ts-ignore
-                  DateTime.fromISO(item2.endAt).diff(DateTime.fromISO(item2.startAt), 'days').toObject().days > 0)
+                  parseToDateTime(item2.endAt, item2.timezoneStart).diff(parseToDateTime(item2.startAt, item2.timezoneStart), 'days').toObject().days >= 1)
             ) {
               if (checkOverlappingEvents(event, item2)) {
                 width = width + 1; //add width for every overlapping item

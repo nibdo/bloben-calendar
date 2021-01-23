@@ -16,6 +16,7 @@ import SettingsSecurity
 import Modal from '../../bloben-package/components/modal/Modal';
 import HeaderModal from '../../bloben-package/components/headerModal/HeaderModal';
 import { Context } from '../../bloben-package/context/store';
+import SettingsCalendar from './settingsCalendar/SettingsCalendar';
 
 const SettingsRouter = () =>
   (
@@ -25,6 +26,11 @@ const SettingsRouter = () =>
           <SettingsAccount />
         </Modal>
       </Route>
+        <Route path={'/settings/calendar'}>
+            <Modal >
+                <SettingsCalendar />
+            </Modal>
+        </Route>
       <Route path={'/settings/appearance'}>
         <Modal >
           <Appearance />
@@ -53,6 +59,9 @@ const SettingsRouterDesktop = () => {
                     <Route path={'/settings/account'}>
                         <SettingsAccount />
                     </Route>
+                <Route path={'/settings/calendar'}>
+                    <SettingsCalendar />
+                </Route>
                     <Route path={'/settings/appearance'}>
                         <Appearance />
                     </Route>
@@ -96,6 +105,16 @@ const SettingsBaseView = () => {
                         title={'Account'}
                         link={'account'}
                         description={'Delete account'}
+                    />
+                    <SettingsItem
+                        icon={
+                            <EvaIcons.Calendar
+                                className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}
+                            />
+                        }
+                        title={'Calendar'}
+                        link={'calendar'}
+                        description={'Timezones'}
                     />
                     <SettingsItem
                         icon={

@@ -1,4 +1,5 @@
 import { DateTime } from 'luxon';
+import { ICalendarSettings } from '../../types/types';
 
 export const setPgpKeys = (pgpKeys: any) => {
     return {
@@ -28,6 +29,24 @@ export const setDefaultTimezone = (timezone: string) => {
     return {
         type: 'SET_DEFAULT_TIMEZONE',
         payload: timezone
+    }
+}
+export const setCalendarSettings = (data: ICalendarSettings) => {
+    return {
+        type: 'SET_CALENDAR_SETTINGS',
+        payload: data
+    }
+}
+export const updateTimezoneSetting = (data: string) => {
+    return {
+        type: 'UPDATE_TIMEZONE_SETTING',
+        payload: data
+    }
+}
+export const updateAutoUpdateTimezoneSetting = (data: boolean) => {
+    return {
+        type: 'UPDATE_AUTO_UPDATE_TIMEZONE_SETTING',
+        payload: data
     }
 }
 export const addWeek = (rangeFromInit: string) => {

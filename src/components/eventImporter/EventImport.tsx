@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './EventImport.scss';
-import '../calendarSettings/CalendarSettings.scss';
+import '../settingsCalendar/SettingsCalendar.scss';
 import IcsParser from '../../utils/IcsParser';
 import { useDispatch, useSelector } from 'react-redux';
 import { HeightHook } from '../../bloben-common/utils/layout';

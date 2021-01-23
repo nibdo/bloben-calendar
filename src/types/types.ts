@@ -75,3 +75,10 @@ export type TCryptoPasswordObject = {
   pinAttempts: number;
   pinCode: number | null;
 }
+
+export interface ICalendarSettings {
+  defaultCalendar: any;
+  defaultTimezone: string;
+  autoUpdateTimezone: boolean;
+  updatedAt: string;
+}
