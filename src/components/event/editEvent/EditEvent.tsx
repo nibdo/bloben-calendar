@@ -31,6 +31,7 @@ import { Context } from '../../../bloben-package/context/store';
 import { DatetimeParser } from '../../../bloben-package/utils/datetimeParser';
 import { DateTime } from 'luxon';
 import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
+import { ICalendarSettings } from '../../../types/types';
 
 const initialFormState: any = {
   prevItem: {},
@@ -45,7 +46,7 @@ const initialFormState: any = {
   allDay: false,
   startAt: DateTime.local().toString(),
   timezoneStart: 'device',
-  endAt: DateTime.local().plus({ hours: 1}).toString(),
+  endAt: DateTime.local().plus({ hours: 1 }).toString(),
   timezoneEnd: 'device',
   isRepeated: false,
   reminders: [],
@@ -97,6 +98,9 @@ const EditEvent = (props: IEditEventProps) => {
   const calendars: any = useSelector((state: any) => state.calendars);
   const cryptoPassword: any = useSelector((state: any) => state.cryptoPassword);
   const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
+  const calendarSettings: ICalendarSettings = useSelector(
+    (state: any) => state.calendarSettings
+  );
 
   const [calendar, setCalendar] = useState(null);
   const [hasHeaderShadow, setHeaderShadow] = useState(false);
@@ -125,11 +129,14 @@ const EditEvent = (props: IEditEventProps) => {
       // Set event data
       for (const [key, value] of Object.entries(eventItem)) {
         if (key !== 'rRule') {
-         if (key === 'timezoneStart' && !value || key === 'timezoneEnd' && !value) {
-           setForm(key, 'device');
+          if (
+            (key === 'timezoneStart' && !value) ||
+            (key === 'timezoneEnd' && !value)
+          ) {
+            setForm(key, 'device');
           } else {
-           setForm(key, value);
-         }
+            setForm(key, value);
+          }
         }
       }
 
@@ -197,8 +204,8 @@ const EditEvent = (props: IEditEventProps) => {
     }
     const dateFromNewEvent: DateTime = newEventTime.day
       ? calculateNewEventTime(newEventTime)
-      : DateTime.local().plus({ hours: 1})
-    const dateTill: DateTime = dateFromNewEvent.plus({ hours: 1});
+      : DateTime.local().plus({ hours: 1 });
+    const dateTill: DateTime = dateFromNewEvent.plus({ hours: 1 });
     setForm('startAt', DatetimeParser(dateFromNewEvent, timezoneStart));
     setForm('endAt', DatetimeParser(dateTill, timezoneStart));
   };
@@ -257,7 +264,7 @@ const EditEvent = (props: IEditEventProps) => {
   const setStartTimezone = (value: string) => {
     setForm('timezoneStart', value);
     setForm('timezoneEnd', value);
-  }
+  };
 
   /**
    * Validate event interval
@@ -292,7 +299,6 @@ const EditEvent = (props: IEditEventProps) => {
     if (isDateValid) {
       // setForm('startAt', dateValue);
       setForm('startAt', DatetimeParser(dateValue, timezoneStart));
-
     } else {
       setContext('showSnackbar', {
         text: 'Error: Starting date before event end.',
@@ -308,7 +314,6 @@ const EditEvent = (props: IEditEventProps) => {
     if (isDateValid) {
       // setForm('endAt', dateValue);
       setForm('endAt', DatetimeParser(dateValue, timezoneStart));
-
     } else {
       setContext('showSnackbar', {
         text: 'Error: Ending date before event start.',
@@ -327,7 +332,11 @@ const EditEvent = (props: IEditEventProps) => {
   };
 
   const saveEvent = async () => {
-    const newEvent: EventStateEntity = new EventStateEntity(form, rRuleState);
+    const newEvent: EventStateEntity = new EventStateEntity(
+      form,
+      rRuleState,
+      calendarSettings.defaultTimezone
+    );
 
     // Encrypt data
     const bodyToSend: EventBodyToSend =

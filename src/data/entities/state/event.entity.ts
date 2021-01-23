@@ -114,16 +114,16 @@ export default class EventStateEntity {
   isLocal: boolean;
   isSynced: boolean;
 
-  constructor(data: any, rRuleData?: rRuleOriginal) {
+  constructor(data: any, rRuleData?: rRuleOriginal, deviceTimezone?: string) {
     const isNotNew: boolean = data.id;
     const isIcs: boolean = data.isIcs;
 
     this.id = isNotNew ? data.id : v4();
     this.calendarId = data.calendarId;
     this.text = data.text;
-    this.startAt = DatetimeParser(data.startAt, data.timezoneStart);
+    this.startAt = DatetimeParser(data.startAt, data.timezoneStart, deviceTimezone);
     this.timezoneStart = data.timezoneStart;
-    this.endAt = DatetimeParser(data.endAt, data.timezoneEnd);
+    this.endAt = DatetimeParser(data.endAt, data.timezoneEnd, deviceTimezone);
     this.timezoneEnd = data.timezoneEnd;
     this.allDay = data.allDay;
     this.isMultiDay = !LuxonHelper.isSameDay(data.startAt, data.endAt);

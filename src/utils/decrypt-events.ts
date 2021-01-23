@@ -14,10 +14,12 @@ import eventsLastSynced from '../redux/reducers/eventsLastSynced';
 import { logger } from 'bloben-common/utils/common';
 import OpenPgp, { PgpKeys } from '../bloben-package/utils/OpenPgp';
 import { DateTime } from 'luxon';
+import { ICalendarSettings } from '../types/types';
 
 const decryptEvent = async (
   cryptoPassword: string,
-  item: EventResultDTO
+  item: EventResultDTO,
+  defaultTimezone: string
 ): Promise<EventStateEntity> => {
   const eventResultDTO: EventResultDTO = item;
   const decryptedData: any = await Crypto.decrypt(
@@ -29,7 +31,7 @@ const decryptEvent = async (
     ...eventResultDTO,
     ...decryptedData,
   };
-  const newEvent: EventStateEntity = new EventStateEntity(finalForm);
+  const newEvent: EventStateEntity = new EventStateEntity(finalForm, undefined, defaultTimezone);
 
   return newEvent.getReduxStateObj();
 };
@@ -37,7 +39,8 @@ const decryptEvent = async (
 const decryptEventPgp = async (
   password: string,
   pgpKeys: PgpKeys,
-  item: EventResultDTO
+  item: EventResultDTO,
+  defaultTimezone: string
 ): Promise<EventStateEntity> => {
     const eventResultDTO: EventResultDTO = item;
     let decryptedData: any = await OpenPgp.decrypt(
@@ -52,7 +55,7 @@ const decryptEventPgp = async (
     ...eventResultDTO,
     ...decryptedData,
   };
-    const newEvent: EventStateEntity = new EventStateEntity(finalForm);
+    const newEvent: EventStateEntity = new EventStateEntity(finalForm, undefined, defaultTimezone);
 
     return newEvent.getReduxStateObj();
 };
@@ -62,6 +65,7 @@ export const decryptAllEvents = async (data: any): Promise<void> => {
   const cryptoPassword: any = store.cryptoPassword;
   const password: string = store.password;
   const pgpKeys: PgpKeys = store.pgpKeys;
+  const calendarSettings: ICalendarSettings = store.calendarSettings;
 
   let allEventsClone: any = cloneDeep(store.allEvents);
 
@@ -74,9 +78,9 @@ export const decryptAllEvents = async (data: any): Promise<void> => {
 
       if (!data[j].deletedAt) {
           if (pgpKeys && pgpKeys.publicKey) {
-              newItem = await decryptEventPgp(password, pgpKeys, data[j]);
+              newItem = await decryptEventPgp(password, pgpKeys, data[j], calendarSettings.defaultTimezone);
         } else {
-              newItem = await decryptEvent(cryptoPassword, data[j]);
+              newItem = await decryptEvent(cryptoPassword, data[j], calendarSettings.defaultTimezone);
           }
       }
 
@@ -120,10 +124,11 @@ export const decryptAllEvents = async (data: any): Promise<void> => {
                   simpleEventObj = await decryptEventPgp(
                       password,
                       pgpKeys,
-                      eventResultDTO
+                      eventResultDTO,
+                      calendarSettings.defaultTimezone
                   );
               } else {
-                  simpleEventObj = await decryptEvent(cryptoPassword, eventResultDTO);
+                  simpleEventObj = await decryptEvent(cryptoPassword, eventResultDTO, calendarSettings.defaultTimezone);
               }
               result.push(simpleEventObj);
           }
@@ -145,6 +150,7 @@ export const decryptEvents = async (data: any): Promise<void> => {
   const cryptoPassword: any = store.cryptoPassword;
   const password: string = store.password;
   const pgpKeys: PgpKeys = store.pgpKeys;
+  const calendarSettings: ICalendarSettings = store.calendarSettings;
 
   if (!data || data.length === 0) {
     return;
@@ -181,7 +187,7 @@ export const decryptEvents = async (data: any): Promise<void> => {
       ...eventResultDTO,
       ...decryptedData,
     };
-    const newEvent: EventStateEntity = new EventStateEntity(finalForm);
+    const newEvent: EventStateEntity = new EventStateEntity(finalForm, undefined, calendarSettings.defaultTimezone);
     const simpleEventObj: EventStateEntity = newEvent.getReduxStateObj();
 
     /**

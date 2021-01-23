@@ -18,13 +18,14 @@ import { Context } from '../../bloben-package/context/store';
 import { DateTime } from 'luxon';
 import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
 import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
+import { ICalendarSettings } from '../../types/types';
 
 const renderEvents = (
   props: any,
   dataset: any,
   baseWidth: number,
   isDark: any,
-  calendars: any
+  defaultTimezone: string
 ) => {
   let offsetCount: any = []; //Store every event id of overlapping items
   let offsetCountFinal: any; //Sort events by id number
@@ -77,9 +78,9 @@ const renderEvents = (
 
         const offsetTop: any =
           // @ts-ignore
-          parseToDateTime(event.startAt, event.timezoneStart)
+          parseToDateTime(event.startAt, event.timezoneStart, defaultTimezone)
             .diff(
-                parseToDateTime(event.startAt, event.timezoneStart).set({
+                parseToDateTime(event.startAt, event.timezoneStart, defaultTimezone).set({
                 hour: 0,
                 minute: 0,
                 second: 0,
@@ -149,6 +150,7 @@ const OneDay = (props: IOneDayProps) => {
   const [store] = useContext(Context);
   const { isDark } = store;
 
+  const calendarSettings: ICalendarSettings = useSelector((state: any) => state.calendarSettings);
   const calendars: any = useSelector((state: any) => state.calendars);
   const calendarBodyWidth: number = useSelector(
     (state: any) => state.calendarBodyWidth
@@ -177,7 +179,7 @@ const OneDay = (props: IOneDayProps) => {
     dataForDay,
     calendarBodyWidth,
     isDark,
-    calendars
+    calendarSettings.defaultTimezone
   );
   const dateNow: any = DateTime.local();
 
