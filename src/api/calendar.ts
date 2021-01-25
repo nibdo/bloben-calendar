@@ -17,6 +17,8 @@ export const WEBSOCKET_IMPORT_EVENTS: string = '/app/events/import';
 export const WEBSOCKET_UPDATE_EVENT: string = '/app/events/update';
 export const WEBSOCKET_DELETE_EVENT: string = '/app/events/delete';
 export const WEBSOCKET_SYNC_EVENTS: string = '/app/events/sync';
+export const WEBSOCKET_SYNC_TIMEZONES: string = '/app/events/timezone';
+export const WEBSOCKET_SYNC_TIMEZONES_CALENDARS: string = '/app/calendars/timezone';
 
 export const WEBSOCKET_GET_ALL_CALENDARS: string = '/app/calendars/get';
 export const WEBSOCKET_GET_ONE_CALENDAR: string = '/app/calendars/get/one';

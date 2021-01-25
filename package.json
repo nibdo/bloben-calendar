@@ -30,6 +30,7 @@
     "crypto-js": "^4.0.0",
     "date-fns": "^2.9.0",
     "date-fns-tz": "^1.0.12",
+    "ical-js-parser": "0.0.1-beta.2",
     "ical.js": "^1.4.0",
     "localforage": "^1.9.0",
     "lodash": "^4.17.20",

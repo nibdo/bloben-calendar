@@ -21,6 +21,7 @@ import {
 import { updateCalendar } from '../../../redux/actions';
 import { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
 import { logger } from '../../../bloben-common/utils/common';
+import { getLocalTimezone } from '../../../bloben-package/utils/common';
 
 const EditCalendar = () => {
   const dispatch = useDispatch();
@@ -56,7 +57,7 @@ const EditCalendar = () => {
       if (key === 'reminders' && !value) {
         setLocalState(key, 'simple', []);
       } else if (key === 'timezone' && !value) {
-        setLocalState(key, 'simple', 'device')
+        setLocalState(key, 'simple', getLocalTimezone())
       } else {
         setLocalState(key, 'simple', value);
       }

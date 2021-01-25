@@ -32,6 +32,7 @@ import { DatetimeParser } from '../../../bloben-package/utils/datetimeParser';
 import { DateTime } from 'luxon';
 import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
 import { ICalendarSettings } from '../../../types/types';
+import { getLocalTimezone } from '../../../bloben-package/utils/common';
 
 const initialFormState: any = {
   prevItem: {},
@@ -42,12 +43,12 @@ const initialFormState: any = {
   date: '',
   calendarId: null,
   type: 'events',
-  timezone: 'device',
+  timezone: null,
   allDay: false,
   startAt: DateTime.local().toString(),
-  timezoneStart: 'device',
+  timezoneStart: null,
   endAt: DateTime.local().plus({ hours: 1 }).toString(),
-  timezoneEnd: 'device',
+  timezoneEnd: null,
   isRepeated: false,
   reminders: [],
   createdAt: null,
@@ -169,8 +170,8 @@ const EditEvent = (props: IEditEventProps) => {
     }
     setForm('color', thisCalendar.color);
     if (isNewEvent) {
-      setForm('timezoneStart', thisCalendar.timezone);
-      setForm('timezoneEnd', thisCalendar.timezone);
+      setForm('timezoneStart', !thisCalendar.timezone || thisCalendar.timezone === 'device' ? getLocalTimezone() : thisCalendar.timezone);
+      setForm('timezoneEnd', !thisCalendar.timezone || thisCalendar.timezone === 'device' ? getLocalTimezone() : thisCalendar.timezone);
     }
     setCalendar(thisCalendar);
 
@@ -194,22 +195,24 @@ const EditEvent = (props: IEditEventProps) => {
     setForm('calendarId', calendars[0].id);
     setDefaultReminder(defaultReminder, setForm);
 
-    const thisCalendar: any = await findInArrayById(calendars, calendarId);
+    const thisCalendar: any = await findInArrayById(calendars, calendars[0].id);
 
     if (!thisCalendar) {
       return;
     }
     setForm('color', thisCalendar.color);
-    setForm('timezoneStart', thisCalendar.timezone);
-    setForm('timezoneEnd', thisCalendar.timezone);
+    setForm('timezoneStart', !thisCalendar.timezone || thisCalendar.timezone === 'device' ? getLocalTimezone() : thisCalendar.timezone);
+    setForm('timezoneEnd', !thisCalendar.timezone || thisCalendar.timezone === 'device' ? getLocalTimezone() : thisCalendar.timezone);
 
     if (!newEventTime) {
       return;
     }
+
     const dateFromNewEvent: DateTime = newEventTime.day
       ? calculateNewEventTime(newEventTime)
       : DateTime.local().plus({ hours: 1 });
     const dateTill: DateTime = dateFromNewEvent.plus({ hours: 1 });
+
     setForm('startAt', DatetimeParser(dateFromNewEvent, thisCalendar.timezone));
     setForm('endAt', DatetimeParser(dateTill, thisCalendar.timezone));
   };

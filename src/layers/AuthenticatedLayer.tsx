@@ -45,7 +45,7 @@ import CalendarApi, {
   WEBSOCKET_GET_ALL_EVENTS,
   WEBSOCKET_GET_EVENTS, WEBSOCKET_GET_NOTIFICATIONS,
   WEBSOCKET_SYNC_CALENDARS,
-  WEBSOCKET_SYNC_EVENTS,
+  WEBSOCKET_SYNC_EVENTS, WEBSOCKET_SYNC_TIMEZONES, WEBSOCKET_SYNC_TIMEZONES_CALENDARS,
 } from '../api/calendar';
 import Axios from '../bloben-common/utils/axios';
 import Search from '../views/search/Search';
@@ -128,17 +128,29 @@ const AuthenticatedLayer = () => {
 
     dispatch(setCalendarSettings(settings));
 
-    dispatch(setDefaultCalendar(settings.defaultCalendar.id));
+    dispatch(setDefaultCalendar(settings.defaultCalendar.id ? settings.defaultCalendar.id : settings.defaultCalendar));
 
+    // TODO revert after migration
     // Handle auto update timezone
-    if (settings.autoUpdateTimezone) {
+    // Temp solution for older accounts to set default timezone if missing
+
+    if (settings.autoUpdateTimezone || settings.defaultTimezone === 'device' || !settings.defaultTimezone) {
       const timezone: string = getLocalTimezone()
+
       dispatch(setDefaultTimezone(timezone));
 
       await CalendarApi.updateSettings({ timezone });
 
       dispatch(updateTimezoneSetting(timezone));
     }
+
+  }
+
+  const migrateTimezone =  () => {
+    const timezone: string = getLocalTimezone()
+
+    sendWebsocketMessage(WEBSOCKET_SYNC_TIMEZONES, { timezone });
+    sendWebsocketMessage(WEBSOCKET_SYNC_TIMEZONES_CALENDARS, { timezone });
   }
 
   const initTimezones = async () => {
@@ -225,6 +237,7 @@ const AuthenticatedLayer = () => {
           const rangeFromInit: string = getDayTimeStart(currentDate.minus({ days: 7 }));
           const rangeToInit: string = getDayTimeEnd(currentDate.plus({ days: 14 }));
 
+          migrateTimezone()
           sendWebsocketMessage(WEBSOCKET_GET_NOTIFICATIONS);
           sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS);
           sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {

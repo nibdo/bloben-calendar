@@ -3,7 +3,7 @@ export default {
     id: '',
     name: '',
     color: 'indigo',
-    timezone: 'device',
+    timezone: null,
     reminders: [],
     isShared: false,
     isPublic: false,
