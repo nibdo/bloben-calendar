@@ -25,7 +25,10 @@ import {
 import EvaIcons from '../../../bloben-common/components/eva-icons';
 import { useSelector } from 'react-redux';
 import NotificationSettings from '../../../bloben-package/components/notificationSettings/NotificationSettings';
-import { MAX_REPEAT_UNTIL } from '../../../data/entities/state/event.entity';
+import {
+  MAX_REPEAT_UNTIL,
+  MAX_REPEAT_UNTIL_STRING
+} from '../../../data/entities/state/event.entity';
 import DropdownWrapper from '../../../bloben-package/components/dropdownWrapper/DropdownWrapper';
 import BottomSheetDropdownSwitcher from '../../../bloben-package/components/bottomSheetDropdownSwitcher/BottomSheetDropdownSwitcher';
 import ModalSmall from '../../../bloben-package/components/modalSmall/ModalSmall';
@@ -38,6 +41,7 @@ import Modal from '../../../bloben-package/components/modal/Modal';
 import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
 import { DateTime } from 'luxon';
 import { DatetimeParser, parseToDateTime } from '../../../bloben-package/utils/datetimeParser';
+import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
 
 const repeatOptions: any = [
   { label: 'No repeat', value: 'none' },
@@ -106,7 +110,7 @@ const parseRRuleText = (rRule: any) => {
   const { freq, interval, until, count } = rRule;
 
   const isInfinite: boolean = !(
-    (until && until.before(MAX_REPEAT_UNTIL)) ||
+    (until && LuxonHelper.isBefore(until, MAX_REPEAT_UNTIL_STRING)) ||
     count
   );
 
@@ -536,7 +540,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
   };
 
   const selectDateUntil = (value: any) => {
-    setRRule('until', value);
+    setRRule('until', value.toString());
   };
 
   const handleSave = (): void => {
@@ -629,7 +633,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
           <RepeatValueButton
             style={{ width: 100 }}
             label={'Date'}
-            value={until.toFormat('dd.MM.yyyy')}
+            value={DateTime.fromISO(until).toFormat('dd.MM.yyyy')}
             handleClick={() => openDateTill(true)}
           />
         ) : null}

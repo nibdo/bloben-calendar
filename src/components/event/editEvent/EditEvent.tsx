@@ -130,7 +130,7 @@ const EditEvent = (props: IEditEventProps) => {
       // Set event data
       for (const [key, value] of Object.entries(eventItem)) {
         if (key !== 'rRule') {
-            setForm(key, value);
+          setForm(key, value);
         }
       }
 
@@ -170,8 +170,18 @@ const EditEvent = (props: IEditEventProps) => {
     }
     setForm('color', thisCalendar.color);
     if (isNewEvent) {
-      setForm('timezoneStart', !thisCalendar.timezone || thisCalendar.timezone === 'device' ? getLocalTimezone() : thisCalendar.timezone);
-      setForm('timezoneEnd', !thisCalendar.timezone || thisCalendar.timezone === 'device' ? getLocalTimezone() : thisCalendar.timezone);
+      setForm(
+        'timezoneStart',
+        !thisCalendar.timezone || thisCalendar.timezone === 'device'
+          ? getLocalTimezone()
+          : thisCalendar.timezone
+      );
+      setForm(
+        'timezoneEnd',
+        !thisCalendar.timezone || thisCalendar.timezone === 'device'
+          ? getLocalTimezone()
+          : thisCalendar.timezone
+      );
     }
     setCalendar(thisCalendar);
 
@@ -201,8 +211,18 @@ const EditEvent = (props: IEditEventProps) => {
       return;
     }
     setForm('color', thisCalendar.color);
-    setForm('timezoneStart', !thisCalendar.timezone || thisCalendar.timezone === 'device' ? getLocalTimezone() : thisCalendar.timezone);
-    setForm('timezoneEnd', !thisCalendar.timezone || thisCalendar.timezone === 'device' ? getLocalTimezone() : thisCalendar.timezone);
+    setForm(
+      'timezoneStart',
+      !thisCalendar.timezone || thisCalendar.timezone === 'device'
+        ? getLocalTimezone()
+        : thisCalendar.timezone
+    );
+    setForm(
+      'timezoneEnd',
+      !thisCalendar.timezone || thisCalendar.timezone === 'device'
+        ? getLocalTimezone()
+        : thisCalendar.timezone
+    );
 
     if (!newEventTime) {
       return;
@@ -284,14 +304,11 @@ const EditEvent = (props: IEditEventProps) => {
     startAtDate: any,
     endAtDate: any
   ): boolean => {
-    if (changedDate === 'startAt') {
-      if (LuxonHelper.isBefore(endAtDate, startAtDate)) {
-        return false;
-      }
-    } else if (changedDate === 'endAt') {
-      if (LuxonHelper.isBefore(endAtDate, startAtDate)) {
-        return false;
-      }
+    if (
+      LuxonHelper.isBeforeAny(endAtDate, startAtDate
+      )
+    ) {
+      return false;
     }
 
     return true;
@@ -300,7 +317,7 @@ const EditEvent = (props: IEditEventProps) => {
    * Validate startAt date before change
    * @param dateValue
    */
-  const handleChangeDateFrom = (dateValue: DateTime) => {
+  const handleChangeDateFrom = (dateValue: any) => {
     const isDateValid: boolean = validateDate('startAt', dateValue, endAt);
 
     if (isDateValid) {
@@ -316,10 +333,10 @@ const EditEvent = (props: IEditEventProps) => {
    * Validate endAt date before change
    * @param dateValue
    */
-  const handleChangeDateTill = (dateValue: DateTime) => {
+  const handleChangeDateTill = (dateValue: any) => {
     const isDateValid: boolean = validateDate('endAt', startAt, dateValue);
+
     if (isDateValid) {
-      // setForm('endAt', dateValue);
       setForm('endAt', DatetimeParser(dateValue, timezoneStart));
     } else {
       setContext('showSnackbar', {

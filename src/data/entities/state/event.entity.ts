@@ -16,6 +16,7 @@ import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
 export type EventsStateType = 'events';
 export const EVENTS_STATE: string = 'events';
 export const MAX_REPEAT_UNTIL: Date = new Date(2060, 12, 30);
+export const MAX_REPEAT_UNTIL_STRING: string = MAX_REPEAT_UNTIL.toISOString();
 export const INFINITE_COUNT: number = 50000;
 export const RRULE_DATE_PROPS: string[] = ['dtstart', 'dtend', 'until'];
 
@@ -211,10 +212,10 @@ export default class EventStateEntity {
       freq: freq.toUpperCase(),
       wkst,
       count: count ? count : null,
-      until: until ? until.toString() : null,
+      until: until ? LuxonHelper.toUtcString(until) : null,
       interval,
-      dtstart: this.startAt.toString(),
-      dtend: this.endAt.toString(),
+      dtstart: LuxonHelper.toUtcString(this.startAt),
+      dtend: LuxonHelper.toUtcString(this.endAt),
     };
   };
 
