@@ -1,8 +1,9 @@
 # Change log
-- **upcoming** \
+- **0.3.9** \
   timezones for calendars and events, \
+  option to automatic update for your local timezone,
   floating events with fixed time, \
-  notifications for shared events
+  fixed push notifications
 - **0.2.9** \
   fix dark theme for mobiles
 - **0.2.8** \
