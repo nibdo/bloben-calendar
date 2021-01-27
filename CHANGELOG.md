@@ -3,7 +3,8 @@
   timezones for calendars and events, \
   option to automatic update for your local timezone,
   floating events with fixed time, \
-  fixed push notifications
+  fixed push notifications, \
+  notifications for repeated events
 - **0.2.9** \
   fix dark theme for mobiles
 - **0.2.8** \
