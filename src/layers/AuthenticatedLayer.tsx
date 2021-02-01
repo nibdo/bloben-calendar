@@ -219,7 +219,7 @@ const AuthenticatedLayer = () => {
         sendWebsocketMessage(WEBSOCKET_SYNC_CALENDARS, data.calendars);
       }
 
-      if (events && events.length > 0) {
+      if (data.events && data.events.length > 0) {
         sendWebsocketMessage(WEBSOCKET_SYNC_EVENTS, data.events);
       }
     };
