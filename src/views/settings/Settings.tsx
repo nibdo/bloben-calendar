@@ -17,6 +17,9 @@ import Modal from '../../bloben-package/components/modal/Modal';
 import HeaderModal from '../../bloben-package/components/headerModal/HeaderModal';
 import { Context } from '../../bloben-package/context/store';
 import SettingsCalendar from './settingsCalendar/SettingsCalendar';
+import { exportData } from '../../utils/functions';
+import AccountApi from '../../bloben-package/api/account.api';
+import { AxiosResponse } from 'axios';
 
 const SettingsRouter = () =>
   (
@@ -86,6 +89,12 @@ const SettingsBaseView = () => {
     const handleLogOut = async (): Promise<void> =>
         logOut(dispatch);
 
+    const handleExport = async () => {
+        const response: AxiosResponse = await AccountApi.exportAll();
+
+        await exportData(response.data)
+    }
+
     return (
         <div className={`settings__wrapper_former${isDark ? '-dark' : ''}`}>
             {isMobile ? (
@@ -135,6 +144,15 @@ const SettingsBaseView = () => {
                         title={'Appearance'}
                         link={'appearance'}
                         description={'Theme'}
+                    />
+                    <SettingsItem
+                        onClick={handleExport}
+                        icon={
+                            <EvaIcons.Document
+                                className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}
+                            />
+                        }
+                        title={'Export data'}
                     />
                     {/*<SettingsItem*/}
                     {/*    icon={*/}

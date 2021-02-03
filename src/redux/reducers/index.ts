@@ -32,9 +32,11 @@ import isAndroidApp from './isAndroidApp';
 import timezones from './timezones';
 import defaultTimezone from './defaultTimezone';
 import calendarSettings from './calendarSettings';
+import warning from './warning';
 
 export const allReducers: any = combineReducers({
     isAndroidApp,
+                                                    warning,
     calendarSettings,
     timezones,
     defaultTimezone,

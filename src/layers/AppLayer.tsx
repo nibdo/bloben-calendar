@@ -91,13 +91,6 @@ const AppLayer = (props: any) => {
   }, [width, isAppStarting]);
 
 
-  useEffect(() => {
-    GeneralApi.sendVisit(
-      width < MOBILE_MAX_WIDTH,
-      (username !== null || username !== '') && username.length > 1
-    );
-  }, []);
-
   /*
    * First initialization of app
    * Try to load user from database or load remote with saved session
@@ -184,7 +177,7 @@ const AppLayer = (props: any) => {
       ) : (
         <AnonymView />
       )}
-      {isAppStarting ? <LoadingScreen /> : null}
+      {isAppStarting ? <LoadingScreen isDark={isDark} /> : null}
     </div>
   );
 };

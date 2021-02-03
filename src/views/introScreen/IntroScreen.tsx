@@ -122,8 +122,8 @@ const DesktopLayout = () => {
             {isMobile ? (
               <div className={'intro__buttons-container'}>
                 <Landing.LoginButton wide />
-                <Landing.Separator />
-                <Landing.RegisterButton wide />
+                {/*<Landing.Separator />*/}
+                {/*<Landing.RegisterButton wide />*/}
               </div>
             ) : (
               <Landing.DemoButton onDemoButtonClick={createDemoAccount} />

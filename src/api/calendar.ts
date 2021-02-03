@@ -49,6 +49,9 @@ const CalendarApi = {
   setTimezone: async (timezone: string) => {
     await Axios.patch(`${APP_API_PREFIX}/${API_SET_TIMEZONE}`, {timezone})
   },
+  getInfo: async () => {
+    return Axios.get('/user/info')
+  },
   updateSettings: async (data: any): Promise<AxiosResponse> => {
     return Axios.patch(`${APP_API_PREFIX}/${API_UPDATE_SETTINGS}`, data)
   },

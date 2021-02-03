@@ -38,14 +38,15 @@ const ListHeaderIcons = (props: IListHeaderIconsProps) => {
         </IconButton>
       ) : null}
       {isMobile ? null : (
-        <IconButton onClick={openDropdown} style={{ position: 'relative' }}>
+        <IconButton onClick={openDropdown} style={{ position: 'relative', right: 0 }}>
           <EvaIcons.Grid className={`icon-svg ${isDark ? 'dark-svg' : ''}`} />
           <Dropdown
-            isOpen={dropdown}
-            handleClose={closeDropdown}
-            variant={'desktop'}
+              isOpen={dropdown}
+              handleClose={closeDropdown}
+              variant={'desktop'}
           />
         </IconButton>
+
       )}
     </div>
   );

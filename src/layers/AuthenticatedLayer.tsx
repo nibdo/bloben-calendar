@@ -1,6 +1,6 @@
 /* tslint:disable:no-magic-numbers */
 import { createBrowserHistory } from 'history';
-import React, { useContext, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Route } from 'react-router-dom';
 import { Redirect, Router } from 'react-router';
 import {
@@ -27,7 +27,7 @@ import {
   setIsFirstLogin,
   setRangeFrom,
   setRangeTo,
-  setSelectedDate, setTimezones, updateTimezoneSetting,
+  setSelectedDate, setTimezones, setWarning, updateTimezoneSetting,
 } from '../redux/actions';
 import {
   getArrayEnd,
@@ -71,6 +71,11 @@ import GeneralApi from '../bloben-common/api/general.api';
 import { DatetimeParser } from '../bloben-package/utils/datetimeParser';
 import { DateTime } from 'luxon';
 import { ICalendarSettings } from '../types/types';
+import AccountApi from '../bloben-package/api/account.api';
+import AlertTemp from '../bloben-package/components/alertTemp/alertTemp';
+import HeaderModal from '../bloben-package/components/headerModal/HeaderModal';
+import ScrollView from '../bloben-common/components/scrollView/ScrollView';
+import { ButtonBase } from '@material-ui/core';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -83,6 +88,7 @@ const AuthenticatedLayer = () => {
   const [store] = useContext(Context);
   const { isReactNative, isMobile } = store;
 
+  const warning: boolean = useSelector((state: any) => state.warning);
   const calendarSettings: ICalendarSettings = useSelector((state: any) => state.calendarSettings);
   const calendars: any = useSelector((state: any) => state.calendars);
   const events: any = useSelector((state: any) => state.events);
@@ -285,10 +291,20 @@ const AuthenticatedLayer = () => {
     );
   };
 
+  const [tempText, setTempText] = useState({
+                                             text: '',
+                                           link: ''});
+  const loadTempText = async () => {
+    const resp: AxiosResponse = await CalendarApi.getInfo();
+
+    setTempText({text: resp.data.data, link: resp.data.link});
+  }
+
   const initLoad = () => {
     connectToWs();
 
     loadCalendarSettings();
+    loadTempText();
 
     if (!checkIfIsSafari()) {
       setServiceWorkerLister();
@@ -544,6 +560,15 @@ const AuthenticatedLayer = () => {
     });
   };
 
+  const [tempModalIsVisible, showTempModal] = useState(false);
+  // Temp alert
+  const closeTempAlert = () => {
+    dispatch(setWarning(false))
+  }
+  const readMoreTempAlert = () => {
+    dispatch(setWarning(false))
+    showTempModal(true)
+  }
   /**
    * Listener for different state
    */
@@ -554,6 +579,7 @@ const AuthenticatedLayer = () => {
     }
   },        [eventsToImport]);
 
+  // @ts-ignore
   return !isAppStarting ? (
     <div className={'app_wrapper'}>
       <Router history={history}>
@@ -589,6 +615,7 @@ const AuthenticatedLayer = () => {
           )}
         </Route>
 
+        {warning ? <AlertTemp closeTempAlert={closeTempAlert} readMoreTempAlert={readMoreTempAlert}/> : null }
         <Route path={'/calendar'}>
             {(calendarDays &&
               selectedDate &&
@@ -614,6 +641,28 @@ const AuthenticatedLayer = () => {
             <EditCalendar/>
           </Modal>
         </Route>
+        <div style={{ position: 'absolute', top: 12, right: 90}}>
+          <ButtonBase
+              onClick={() =>  showTempModal(true)}
+              className={'button__container-small'} style={{width: '100%'}}
+          >Info</ButtonBase>
+        </div>
+
+        {tempModalIsVisible ? <Modal>
+          <ScrollView isDark={false}>
+            <HeaderModal
+                onClose={() => showTempModal(false)}
+                hasHeaderShadow={true}
+                title={'Information'}
+                icons={[]}
+            />
+              <p style={{ padding: 24, fontSize: 14, whiteSpace: 'pre-wrap' }}>{tempText.text}</p>
+           <ButtonBase
+               onClick={() => window.location.assign(tempText.link)}
+               className={'button__container-small'} style={{width: '100%'}}
+           >Reddit discussion</ButtonBase>
+          </ScrollView>
+        </Modal> : null}
 
         <Route path={'/calendar/events/import'}>
           <Modal>

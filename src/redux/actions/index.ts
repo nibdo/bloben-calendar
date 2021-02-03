@@ -19,6 +19,12 @@ export const setPassword = (password: string) => {
         payload: password
     }
 }
+export const setWarning = (value: boolean) => {
+    return {
+        type: 'SET_WARNING',
+        payload: value
+    }
+}
 export const setTimezones = (timezones: string[]) => {
     return {
         type: 'SET_TIMEZONES',
