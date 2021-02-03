@@ -97,7 +97,7 @@ const DesktopLayout = () => {
         {isMobile ? (
           <Landing.Subtitle
             subtitle={'Calendar'}
-            description={'Encrypt your plans for' + ' free'}
+            description={'Encrypt your plans'}
           />
         ) : (
           <Landing.Subtitle subtitle={''} description={''} />
@@ -107,9 +107,12 @@ const DesktopLayout = () => {
             <Landing.ContainerRowPart>
               <Landing.Container>
                 <Landing.MainText>Encrypted Calendar</Landing.MainText>
-                <Landing.SubMainText>
-                  Hide your private plans for free
-                </Landing.SubMainText>
+                {/*<Landing.SubMainText>*/}
+                {/*  Hide your private plans*/}
+                {/*</Landing.SubMainText>*/}
+                  {!isMobile ?  <Landing.SubMainText>
+                      Coming as self hosted application
+                      </Landing.SubMainText> : null}
               </Landing.Container>
             </Landing.ContainerRowPart>
           ) : null}
@@ -118,11 +121,14 @@ const DesktopLayout = () => {
               src={TresorImage}
               style={{ marginTop: 24, marginBottom: 24, height: '50%' }}
             />
+              <Landing.Separator />
 
+              {isMobile ? <p style={{ fontSize: 18, marginTop: 16}}>
+                  Comings as self hosted application
+              </p> : null}
             {isMobile ? (
               <div className={'intro__buttons-container'}>
                 <Landing.LoginButton wide />
-                {/*<Landing.Separator />*/}
                 {/*<Landing.RegisterButton wide />*/}
               </div>
             ) : (
