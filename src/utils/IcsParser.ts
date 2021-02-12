@@ -1,5 +1,5 @@
-import EventStateEntity from '../data/entities/state/event.entity';
-import CalendarStateEntity from '../data/entities/state/calendar.entity';
+import EventStateEntity from '../bloben-utils/models/event.entity';
+import CalendarStateEntity from '../data/models/state/calendar.entity';
 
 const EVENT_BEGIN_KEY_VALUE: string = 'BEGIN:VEVENT';
 const EVENT_END_KEY_VALUE: string = 'END:VEVENT';
@@ -16,7 +16,7 @@ const IcsParser: any = {
               ...item,
               calendarId: calendar.id,
               color: calendar.color,
-              reminders: [],
+              alarms: [],
               isRepeated: false
           }
           const event: EventStateEntity = new EventStateEntity(data);

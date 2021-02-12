@@ -1,25 +1,18 @@
 import _ from 'lodash';
 import { reduxStore } from '../bloben-package/layers/ReduxLayer';
-import { TCalendarNotificationType } from '../types/types';
+import { TCalendarAlarmType } from '../types/types';
 import { v4 } from 'uuid';
 import {
-  addDays,
-  areIntervalsOverlapping,
   differenceInCalendarDays,
   differenceInHours,
   differenceInMinutes,
-  formatISO,
-  getDate,
-  getMonth,
-  getUnixTime,
-  getYear,
 } from 'date-fns';
-import EventStateEntity from '../data/entities/state/event.entity';
+import EventStateEntity from '../bloben-utils/models/event.entity';
 import { setAllEvents, setCalendars, setEvents } from '../redux/actions';
-import { formatTimestampToDate } from '../components/calendarView/calendar-common';
 import { DateTime } from 'luxon';
 // @ts-ignore
 import Interval from 'luxon/src/interval.js';
+import { formatTimestampToDate } from '../bloben-utils/utils/common';
 export const mapTags = (tags: any) => {
   const tagsObj: any = {};
 
@@ -173,68 +166,34 @@ export const handleEventReduxDelete = async (
 
   reduxStore.dispatch(setEvents(stateClone));
 };
-export const handleCalendarReduxDelete = (calendarId: string) => {
-  const store: any = reduxStore.getState();
-  const stateCloneCalendars: any = cloneDeep(store.calendars);
-  const stateCloneEvents: any = cloneDeep(store.events);
-  const stateCloneAllEvents: any = cloneDeep(store.allEvents);
 
-  // Delete calendar
-  const filteredCalendars: any = stateCloneCalendars.filter(
-    (item: any) => item.id !== calendarId
-  );
-
-  // Delete all events from this calendar
-  const filteredEvents: any = deleteAllCalendarEvents(
-    calendarId,
-    stateCloneEvents
-  );
-
-  const filteredAllEvents: any = stateCloneAllEvents.filter(
-    (item: any) => item.calendarId !== calendarId
-  );
-
-  reduxStore.dispatch(setCalendars(filteredCalendars));
-  reduxStore.dispatch(setEvents(filteredEvents));
-  reduxStore.dispatch(setAllEvents(filteredAllEvents));
-};
-export const addNotification = (data: any, setState: any, reminders: any) => {
-  const newNotification: TCalendarNotificationType = {
+export const addAlarm = (data: any, setState: any, alarms: any) => {
+  const newAlarm: TCalendarAlarmType = {
     id: v4(),
     ...data.value,
   };
-  setState('reminders', [...reminders, newNotification]);
+  setState('alarms', [...alarms, newAlarm]);
 };
-export const removeNotification = (
+export const removeAlarm = (
   item: any,
   setState: any,
-  reminders: any
+  alarms: any
 ) => {
-  const notificationsFiltered: any = [...reminders].filter(
-    (reminder: any) => reminder.id !== item.id
+  const alarmsFiltered: any = [...alarms].filter(
+    (alarm: any) => alarm.id !== item.id
   );
-  setState('reminders', notificationsFiltered);
+  setState('alarms', alarmsFiltered);
 };
 
 export const nullTimeInDate = (date: DateTime): DateTime =>
   date.set({ hour: 0, minute: 0, second: 0 });
 
 export const getDayTimeStart = (date: DateTime): string =>
-  date.set({ hour: 0, minute: 0, second: 0 }).toString();
+  date.set({ hour: 0, minute: 0, second: 0 }).toUTC().toString();
 export const getDayTimeEnd = (date: DateTime): string =>
-  date.set({ hour: 23, minute: 59, second: 59 }).toString();
+  date.set({ hour: 23, minute: 59, second: 59 }).toUTC().toString();
 
-const deleteAllCalendarEvents = (calendarId: string, events: any) => {
-  const eventsObj: any = Object.entries(events);
 
-  const result: any = {};
-
-  for (const [key, value] of eventsObj) {
-    result[key] = value.filter((item: any) => item.calendarId !== calendarId);
-  }
-
-  return result;
-};
 
 export const getEventsList = (): any => {
   const store: any = reduxStore.getState();
@@ -367,3 +326,4 @@ export const createMultiDayClone = (event: EventStateEntity) => {
 
   return data;
 };
+

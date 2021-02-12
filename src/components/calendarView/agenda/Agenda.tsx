@@ -8,7 +8,7 @@ import {
   parseStringToDate,
 } from '../calendar-common';
 import { useDispatch, useSelector } from 'react-redux';
-import EventStateEntity from '../../../data/entities/state/event.entity';
+import EventStateEntity from '../../../bloben-utils/models/event.entity';
 import { setEventsAreFetching } from '../../../redux/actions';
 import _ from 'lodash';
 import { useHistory } from 'react-router';
@@ -16,7 +16,7 @@ import { HeightHook } from '../../../bloben-common/utils/layout';
 import { Context } from '../../../bloben-package/context/store';
 import { parseCssDark } from '../../../bloben-common/utils/common';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
+import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
 
 interface IMonthTitleProps {
   isDark: boolean;
@@ -40,10 +40,10 @@ interface IAgendaEventProps {
   isFirstForDay?: boolean;
   changeHeaderTitle: any;
   initScrollOffset: any;
-  history: any;
+  history?: any;
   isDisabled?: boolean;
 }
-const AgendaEvent = (props: IAgendaEventProps) => {
+export const AgendaEvent = (props: IAgendaEventProps) => {
   const {
     isDark,
     item,
@@ -54,7 +54,7 @@ const AgendaEvent = (props: IAgendaEventProps) => {
     isDisabled,
   } = props;
 
-  const { id, color, text, startAt, endAt } = item;
+  const { id, color, summary, startAt, endAt } = item;
 
   const eventColor: string = parseEventColor(color, isDark);
 
@@ -62,12 +62,12 @@ const AgendaEvent = (props: IAgendaEventProps) => {
     background: `${eventColor}`,
   };
 
-  const isDateToday: boolean = isFirstForDay ? isToday(startAt) : false;
+  const isDateToday: boolean = isFirstForDay ? LuxonHelper.isToday(DateTime.fromISO(startAt)) : false;
 
   // Scroll to first event
   useEffect(() => {
     if (initScrollOffset && isFirstForDay) {
-      changeHeaderTitle(format(startAt, 'MMMM'));
+      changeHeaderTitle(DateTime.fromISO(startAt).toFormat('MMMM'));
       // @ts-ignore
 
       const element: any = document.getElementById('agenda');
@@ -83,13 +83,13 @@ const AgendaEvent = (props: IAgendaEventProps) => {
       return;
     }
 
-    history.push(`/calendar/event/${id}`);
+    history.push(`/event/${id}`);
   };
 
   return (
     <div
       className={'agenda-item__wrapper'}
-      id={startAt.format('MMMM')}
+      id={DateTime.fromISO(startAt).toFormat('MMMM')}
       onClick={handleEventClick}
     >
       <div
@@ -112,19 +112,19 @@ const AgendaEvent = (props: IAgendaEventProps) => {
               className={`agenda__day-container${isDateToday ? '-today' : ''}`}
             >
               <p className={parseCssDark(`agenda__day-text${isDateToday ? '-today' : ''}`, isDark)}>
-                {startAt.format('d')}
+                {DateTime.fromISO(startAt).toFormat('d')}
               </p>
             </div>
             <div className={'agenda__day-container-small'}>
-              <p className={parseCssDark('agenda__day-text-small', isDark)}>{startAt.format('iii')}</p>
+              <p className={parseCssDark('agenda__day-text-small', isDark)}>{DateTime.fromISO(startAt).toFormat('iii')}</p>
             </div>
           </div>
         ) : null}
       </div>
       <div className={'agenda-item__container'} style={itemStyle}>
-        <p className={parseCssDark('agenda-item__title', isDark)}>{text}</p>
+        <p className={parseCssDark('agenda-item__title', isDark)}>{summary}</p>
         <p className={'agenda-item__hours'}>
-          {startAt.format('hh:mm')}- {endAt.format('hh:mm')}
+          {DateTime.fromISO(startAt).toFormat('hh:mm')} - {DateTime.fromISO(endAt).toFormat('hh:mm')}
         </p>
       </div>
     </div>

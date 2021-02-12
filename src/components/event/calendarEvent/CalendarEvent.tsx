@@ -262,7 +262,7 @@ const CalendarEvent = (props: ICalendarEventProps) => {
   const handleEventSelect = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    history.push(`/calendar/event/${event.id}`);
+    history.push(`/event/${event.id}`);
     // dispatch(selectEvent(props.event))
   };
 
@@ -288,7 +288,7 @@ const CalendarEvent = (props: ICalendarEventProps) => {
       style={style}
       onClick={(e: any) => (state.dragging ? '' : handleEventSelect(e))}
     >
-      <p className={parseCssDark('event__text', isDark)}>{event.text} </p>
+      <p className={parseCssDark('event__text', isDark)}>{event.summary} </p>
     </div>
   );
 };

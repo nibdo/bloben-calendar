@@ -1,5 +1,5 @@
-import { DateTime } from 'luxon';
 import { ICalendarSettings } from '../../types/types';
+import { IUserProfile } from '../../bloben-package/types/common.types';
 
 export const setPgpKeys = (pgpKeys: any) => {
     return {
@@ -19,6 +19,25 @@ export const setPassword = (password: string) => {
         payload: password
     }
 }
+export const setUserProfile = (userProfile: IUserProfile) => {
+    return {
+        type: 'SET_USER_PROFILE',
+        payload: userProfile
+    }
+}
+export const setContacts = (contacts: any) => {
+    return {
+        type: 'SET_CONTACTS',
+        payload: contacts
+    }
+}
+export const addContact = (data: any) => {
+    return {
+        type: 'ADD_CONTACT',
+        payload: data,
+    }
+}
+
 export const setWarning = (value: boolean) => {
     return {
         type: 'SET_WARNING',
@@ -110,6 +129,12 @@ export const updateCalendar = (data: any) => {
         payload: data,
     }
 }
+export const deleteCalendar = (data: any) => {
+    return {
+        type: 'DELETE_CALENDAR',
+        payload: data,
+    }
+}
 export const setCalendars = (data: any) => {
     return {
         type: 'SET_CALENDARS',
@@ -138,6 +163,36 @@ export const setEventsLastSync = (data: any) => {
     return {
         type: 'SET_EVENTS_LAST_SYNC',
         payload: data,
+    }
+}
+export const setAllEventsLastSync = () => {
+    return {
+        type: 'SET_ALL_EVENTS_SYNC_LOG',
+    }
+}
+export const setAllEventsSyncLog = () => {
+    return {
+        type: 'SET_ALL_EVENTS_SYNC_LOG',
+    }
+}
+export const setEventsSyncLog = () => {
+    return {
+        type: 'SET_EVENTS_SYNC_LOG',
+    }
+}
+export const setCalendarsSyncLog = () => {
+    return {
+        type: 'SET_CALENDARS_SYNC_LOG',
+    }
+}
+export const setContactsSyncLog = () => {
+    return {
+        type: 'SET_CONTACTS_SYNC_LOG',
+    }
+}
+export const setNotificationsSyncLog = () => {
+    return {
+        type: 'SET_NOTIFICATIONS_SYNC_LOG',
     }
 }
 export const setAllEvents = (data: any) => {

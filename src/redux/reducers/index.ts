@@ -33,10 +33,16 @@ import timezones from './timezones';
 import defaultTimezone from './defaultTimezone';
 import calendarSettings from './calendarSettings';
 import warning from './warning';
+import userProfile from '../../bloben-package/redux/reducers/userProfile';
+import contacts from '../../bloben-package/redux/reducers/contacts';
+import syncLog from './syncLog';
 
 export const allReducers: any = combineReducers({
     isAndroidApp,
-                                                    warning,
+    userProfile,
+    warning,
+    syncLog,
+    contacts,
     calendarSettings,
     timezones,
     defaultTimezone,

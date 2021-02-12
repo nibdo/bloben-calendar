@@ -5,41 +5,46 @@ import EventDetail from '../eventDetail/EventDetail';
 import EventStateEntity, {
   EventBodyToSend,
   RRULE_DATE_PROPS,
-} from '../../../data/entities/state/event.entity';
+} from '../../../bloben-utils/models/event.entity';
 import {
-  addNotification,
+  addAlarm,
   findInArrayById,
   findInEvents,
   handleEventReduxDelete,
   handleEventReduxUpdate,
-  removeNotification,
+  removeAlarm,
 } from '../../../utils/common';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, useParams } from 'react-router';
-import {
-  sendWebsocketMessage,
-  WEBSOCKET_CREATE_EVENT,
-  WEBSOCKET_DELETE_EVENT,
-  WEBSOCKET_UPDATE_EVENT,
-} from '../../../api/calendar';
+import CalendarApi from '../../../api/calendar';
 import { calculateNewEventTime, setDefaultReminder } from '../event.utils';
-import { mergeEvent } from '../../../redux/actions';
-import { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
+import { addEvents, mergeEvent } from '../../../redux/actions';
+import { PgpKeys } from '../../../bloben-utils/utils/OpenPgp';
 import _ from 'lodash';
 import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
 import { Context } from '../../../bloben-package/context/store';
 import { DatetimeParser } from '../../../bloben-package/utils/datetimeParser';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
-import { ICalendarSettings } from '../../../types/types';
+import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
+import { ICalendarSettings, TCalendarAlarmType } from '../../../types/types';
 import { getLocalTimezone } from '../../../bloben-package/utils/common';
+import { IUserProfile } from '../../../bloben-package/types/common.types';
+import { createEmailAlarm } from '../../../bloben-utils/models/EmailAlarm';
+import ICalHelper, {
+  Attendee,
+  createAttendee, ROLE_OPT,
+  ROLE_REQ
+} from '../../../bloben-package/utils/ICalHelper';
+import { v4 } from 'uuid';
+import ContactApi from '../../../bloben-package/api/contact.api';
+import Contact from '../../../bloben-utils/models/Contact';
 
 const initialFormState: any = {
   prevItem: {},
   id: '',
-  text: '',
+  summary: '',
   location: '',
-  notes: '',
+  description: '',
   date: '',
   calendarId: null,
   type: 'events',
@@ -50,7 +55,8 @@ const initialFormState: any = {
   endAt: DateTime.local().plus({ hours: 1 }).toString(),
   timezoneEnd: null,
   isRepeated: false,
-  reminders: [],
+  alarms: [],
+  attendees: [],
   createdAt: null,
   updatedAt: null,
   color: '',
@@ -97,10 +103,13 @@ const EditEvent = (props: IEditEventProps) => {
   const history: any = useHistory();
   const dispatch: any = useDispatch();
   const calendars: any = useSelector((state: any) => state.calendars);
-  const cryptoPassword: any = useSelector((state: any) => state.cryptoPassword);
+  const username: string = useSelector((state: any) => state.username);
   const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
   const calendarSettings: ICalendarSettings = useSelector(
     (state: any) => state.calendarSettings
+  );
+  const userProfile: IUserProfile = useSelector(
+    (state: any) => state.userProfile
   );
 
   const [calendar, setCalendar] = useState(null);
@@ -146,21 +155,22 @@ const EditEvent = (props: IEditEventProps) => {
   const [form, dispatchForm] = useReducer(formReducer, initialFormState);
   const {
     prevItem,
-    text,
+    summary,
     location,
-    notes,
+    description,
     calendarId,
     allDay,
     startAt,
     endAt,
     isRepeated,
-    reminders,
+    alarms,
     timezoneStart,
+    attendees,
   } = form;
 
   /**
    * Find calendar by calendarId
-   * Set color event and default reminders for this calendar if event has none
+   * Set color event and default alarms for this calendar if event has none
    */
   const loadCalendar = async () => {
     const thisCalendar: any = await findInArrayById(calendars, calendarId);
@@ -185,8 +195,8 @@ const EditEvent = (props: IEditEventProps) => {
     }
     setCalendar(thisCalendar);
 
-    if ((!reminders || reminders.length === 0) && thisCalendar.reminders) {
-      setForm('reminders', thisCalendar.reminders);
+    if ((!alarms || alarms.length === 0) && thisCalendar.alarms) {
+      setForm('alarms', thisCalendar.alarms);
     }
   };
 
@@ -242,8 +252,8 @@ const EditEvent = (props: IEditEventProps) => {
   //   const setNewCalendarReminders = async () => {
   //     const calendar: CalendarStateEntity = await findInArrayById(calendars, calendarId)
   //
-  //     if ((!reminders || reminders.length === 0) && calendar.reminders) {
-  //       setForm('reminders', calendar.reminders)
+  //     if ((!alarms || alarms.length === 0) && calendar.alarms) {
+  //       setForm('alarms', calendar.alarms)
   //     }
   //   }
   //   setNewCalendarReminders()
@@ -280,13 +290,47 @@ const EditEvent = (props: IEditEventProps) => {
     dispatchRRuleState({ type, payload });
   };
 
-  const addNotificationEvent = (item: any) => {
-    addNotification(item, setForm, reminders);
+  const addAlarmEvent = (item: any) => {
+    addAlarm(item, setForm, alarms);
   };
 
-  const removeNotificationEvent = (item: any) => {
-    removeNotification(item, setForm, reminders);
+  const removeAlarmEvent = (item: any) => {
+    removeAlarm(item, setForm, alarms);
   };
+
+  /**
+   * Attendees
+   * @param item
+   */
+  const addAttendee = (item: Attendee) => {
+    setForm('attendees', [...attendees, item]);
+  }
+  const removeAttendee = (item: any) => {
+    const attendeeFiltered: any = [...attendees].filter(
+        (attendee: any) => attendee.mailto !== item.mailto
+    );
+    setForm('attendees', attendeeFiltered);
+  }
+  const makeOptional = (item: Attendee) => {
+    const items: Attendee[] = [...attendees];
+    const result: any = items.map((attendee: Attendee) => {
+      if (attendee.mailto === item.mailto) {
+        if (attendee.role === ROLE_REQ) {
+          attendee.role = ROLE_OPT;
+        } else {
+          attendee.role = ROLE_REQ
+        }
+      }
+
+      return attendee;
+    })
+
+    setForm('attendees', result);
+  }
+
+  /**
+    Attendees end
+   */
 
   const setStartTimezone = (value: string) => {
     setForm('timezoneStart', value);
@@ -304,10 +348,7 @@ const EditEvent = (props: IEditEventProps) => {
     startAtDate: any,
     endAtDate: any
   ): boolean => {
-    if (
-      LuxonHelper.isBeforeAny(endAtDate, startAtDate
-      )
-    ) {
+    if (LuxonHelper.isBeforeAny(endAtDate, startAtDate)) {
       return false;
     }
 
@@ -371,11 +412,35 @@ const EditEvent = (props: IEditEventProps) => {
       calendarSettings.defaultTimezone
     );
 
+    // Handle email alarms, add payload
+    if (newEvent.alarms && newEvent.alarms.length > 0) {
+      if (typeof newEvent.alarms !== 'string') {
+        const alarmsParsed: any = [];
+
+        for (const item of newEvent.alarms) {
+          if (item.alarmType === 'email') {
+            item.payload = JSON.stringify(
+              await createEmailAlarm(
+                newEvent.summary,
+                newEvent.startAt,
+                userProfile.emailPublicKey
+              )
+            );
+          }
+
+          alarmsParsed.push(item);
+        }
+
+        newEvent.alarms = alarmsParsed;
+      }
+    }
+
+    console.log('newEvent,', newEvent);
+
     // Encrypt data
-    const bodyToSend: EventBodyToSend =
-      pgpKeys && pgpKeys.publicKey
-        ? await newEvent.formatBodyToSendOpenPgp(pgpKeys)
-        : await newEvent.formatBodyToSend(cryptoPassword);
+    const bodyToSend: EventBodyToSend = await newEvent.formatBodyToSendOpenPgp(
+      pgpKeys
+    );
 
     // Different handling for new event and edited event
     if (isNewEvent) {
@@ -385,10 +450,49 @@ const EditEvent = (props: IEditEventProps) => {
       // Save to redux store
       dispatch(mergeEvent(simpleObj));
 
-      sendWebsocketMessage(WEBSOCKET_CREATE_EVENT, bodyToSend);
+      // TODO MOVE ELSEWHERE
+
+
+      if (attendees.length > 0) {
+        console.log('attendees', attendees)
+
+        const attendeeFromContacts: any = attendees.map((item: any) => createAttendee(item))
+        const icalTest: any = new ICalHelper(simpleObj, userProfile.publicName ? userProfile.publicName : username, attendees).parseTo();
+        console.log(icalTest)
+        const inviteData: any = {
+          attendee: attendees.map((item: any) => item.mailto),
+          payload: JSON.stringify({
+                                    body: 'Event invite',
+                                    subject: 'Event invite',
+                                    attachment: btoa(icalTest),
+                                  })
+        };
+        console.log(inviteData);
+
+        await CalendarApi.sendInvite(inviteData)
+      }
+
+
+      // Create contacts
+      // TODO check if not exists
+      if (attendees.length > 0) {
+        for (const item of attendees) {
+          const newContact = new Contact(item);
+          const contactBodyToSend: any = await newContact.formatBodyToEncrypt(pgpKeys.publicKey);
+          console.log('contactBodyToSend', contactBodyToSend)
+          await ContactApi.createContact(contactBodyToSend)
+        }
+      }
+      //
+      // const test: any = await ContactApi.getContacts();
+      // const test2: any = await ContactApi.getContactById('13668662-d012-46c0-8f81-671859e6c30f')
+
+      await CalendarApi.createEvent(bodyToSend);
+
+      // sendWebsocketMessage(WEBSOCKET_CREATE_EVENT, bodyToSend);
     } else {
       // Update event
-      sendWebsocketMessage(WEBSOCKET_UPDATE_EVENT, bodyToSend);
+      await CalendarApi.updateEvent(bodyToSend);
 
       // TODO need to either calculate events parameters client side, or refresh data from backend
       // Update Redux store
@@ -399,13 +503,13 @@ const EditEvent = (props: IEditEventProps) => {
     handleClose();
   };
 
-  const deleteEvent = () => {
+  const deleteEvent = async() => {
     const event: EventStateEntity = new EventStateEntity(form, rRuleState);
     event.delete();
 
-    handleEventReduxDelete(prevItem, event);
+    await CalendarApi.deleteEvent(event)
 
-    sendWebsocketMessage(WEBSOCKET_DELETE_EVENT, { id: params.id });
+    handleEventReduxDelete(prevItem, event);
 
     handleClose();
   };
@@ -438,9 +542,9 @@ const EditEvent = (props: IEditEventProps) => {
           handleScroll={handleScroll}
           isNewEvent={isNewEvent}
           calendar={calendar}
-          text={text}
+          summary={summary}
           location={location}
-          notes={notes}
+          description={description}
           startDate={startAt}
           endDate={endAt}
           isRepeated={isRepeated}
@@ -452,12 +556,16 @@ const EditEvent = (props: IEditEventProps) => {
           rRuleState={rRuleState}
           setRRule={setRRule}
           isStartDateValid={isStartDateValid}
-          reminders={reminders}
-          addNotification={addNotificationEvent}
-          removeNotification={removeNotificationEvent}
+          alarms={alarms}
+          addAlarm={addAlarmEvent}
+          removeAlarm={removeAlarmEvent}
           timezoneStart={timezoneStart}
           setStartTimezone={setStartTimezone}
           selectCalendar={selectCalendar}
+          attendees={attendees}
+          addAttendee={addAttendee}
+          removeAttendee={removeAttendee}
+          makeOptional={makeOptional}
         />
       ) : (
         <div />

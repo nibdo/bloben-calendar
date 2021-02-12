@@ -5,23 +5,22 @@ import StateReducer from '../../../utils/state-reducer';
 import Utils from '../CalendarEdit.utils';
 import CalendarStateEntity, {
   CalendarBodyToSend,
-} from '../../../data/entities/state/calendar.entity';
+} from '../../../data/models/state/calendar.entity';
 import {
-  addNotification,
-  findInArrayById,
-  handleCalendarReduxDelete,
-  removeNotification,
+  addAlarm,
+  findInArrayById, removeAlarm,
 } from '../../../utils/common';
 import { useDispatch, useSelector } from 'react-redux';
-import {
+import CalendarApi, {
   sendWebsocketMessage,
   WEBSOCKET_DELETE_CALENDAR,
   WEBSOCKET_UPDATE_CALENDAR,
 } from '../../../api/calendar';
 import { updateCalendar } from '../../../redux/actions';
-import { PgpKeys } from '../../../bloben-package/utils/OpenPgp';
+import { PgpKeys } from '../../../bloben-utils/utils/OpenPgp';
 import { logger } from '../../../bloben-common/utils/common';
 import { getLocalTimezone } from '../../../bloben-package/utils/common';
+import SyncCalendars from '../../../utils/sync/CalendarSync';
 
 const EditCalendar = () => {
   const dispatch = useDispatch();
@@ -29,7 +28,7 @@ const EditCalendar = () => {
     StateReducer,
     Utils.initialState
   );
-  const { name, color, reminders, timezone } = calendarState;
+  const { name, color, alarms, timezone } = calendarState;
   const history = useHistory();
   const params: any = useParams();
   const { id } = params;
@@ -54,7 +53,7 @@ const EditCalendar = () => {
 
     // Set data
     for (const [key, value] of Object.entries(thisCalendar)) {
-      if (key === 'reminders' && !value) {
+      if (key === 'alarms' && !value) {
         setLocalState(key, 'simple', []);
       } else if (key === 'timezone' && !value) {
         setLocalState(key, 'simple', getLocalTimezone())
@@ -89,22 +88,23 @@ const EditCalendar = () => {
   const selectTimezone = (timezoneValue: string) =>
       setLocalState('timezone', 'simple', timezoneValue)
 
-  const addNotificationCalendar = (item: any) => {
-    addNotification(item, setLocalState, reminders);
+  const addAlarmCalendar = (item: any) => {
+    addAlarm(item, setLocalState, alarms);
   };
 
-  const removeNotificationCalendar = (item: any) => {
-    removeNotification(item, setLocalState, reminders);
+  const removeAlarmCalendar = (item: any) => {
+    removeAlarm(item, setLocalState, alarms);
   };
 
-  const deleteCalendar = () => {
+  const deleteCalendar = async () => {
     if (params.id === defaultCalendar || !defaultCalendar) {
       logger('Error: Can\'t delete default calendar')
 
       return;
     }
-    sendWebsocketMessage(WEBSOCKET_DELETE_CALENDAR, { id: params.id });
-    handleCalendarReduxDelete(params.id);
+    await CalendarApi.deleteCalendar({id: params.id})
+
+    SyncCalendars.deleteCalendar(params.id);
 
     history.goBack();
   };
@@ -120,7 +120,7 @@ const EditCalendar = () => {
 
     dispatch(updateCalendar(stateData.getStoreObj()));
 
-    sendWebsocketMessage(WEBSOCKET_UPDATE_CALENDAR, bodyToSend);
+    await CalendarApi.updateCalendar(bodyToSend);
 
     history.goBack();
   };
@@ -131,10 +131,10 @@ const EditCalendar = () => {
       handleChange={handleChange}
       selectColor={selectColor}
       saveCalendar={saveCalendar}
-      reminders={reminders}
+      alarms={alarms}
       timezone={timezone}
-      addNotification={addNotificationCalendar}
-      removeNotification={removeNotificationCalendar}
+      addAlarm={addAlarmCalendar}
+      removeAlarm={removeAlarmCalendar}
       deleteCalendar={deleteCalendar}
       calendarId={params.id}
       isNewCalendar={false}

@@ -44,21 +44,23 @@ export type calendarType = {
 
 export type TCalendarTimeUnit = 'MINUTES' | 'HOURS' | 'DAYS' | 'WEEKS';
 
-export type TCalendarNotificationType =
-  | TCalendarPushNotification
-  | TCalendarEmailNotification;
+export type TCalendarAlarmType =
+  | TCalendarPushAlarm
+  | TCalendarEmailAlarm;
 
-export type TCalendarPushNotification = {
+export type TCalendarPushAlarm = {
   id: string;
-  reminderType: 'push';
+  alarmType: 'push';
   amount: number;
   timeUnit: TCalendarTimeUnit;
+  payload: null;
 };
-export type TCalendarEmailNotification = {
+export type TCalendarEmailAlarm = {
   id: string;
-  reminderType: 'email';
+  alarmType: 'email';
   amount: number;
   timeUnit: TCalendarTimeUnit;
+  payload: string;
 };
 
 export type GetEventWebsocketByIdDTO = {
@@ -79,6 +81,13 @@ export type TCryptoPasswordObject = {
 export interface ICalendarSettings {
   defaultCalendar: any;
   defaultTimezone: string;
+  defaultAlarmType: string;
   autoUpdateTimezone: boolean;
-  updatedAt: string;
+}
+export interface ISyncLog {
+  calendars: string,
+  events: string,
+  eventsAll: string,
+  contacts: string,
+  notifications: string,
 }

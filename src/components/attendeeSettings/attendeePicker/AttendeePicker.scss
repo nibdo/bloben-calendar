@@ -1,0 +1,26 @@
+@import "bloben-common/globals/theme.scss";
+
+.timezone__container {
+  display: flex !important;
+  flex-direction: column !important;
+  height: 55px !important;
+  width: 100% !important;
+  padding: 24px 16px 24px 16px !important;
+  align-items: flex-start !important;
+  justify-content: center !important;
+  border-radius: 8px !important;
+}
+
+.timezone__container-dark {
+  @extend .timezone__container;
+}
+
+.timezone__text {
+  font-size: 1.3rem !important;
+  color: $GRAY_800 !important;
+}
+
+.timezone__text-dark {
+  @extend .timezone__text;
+  color: $GRAY_300 !important;
+}

@@ -27,7 +27,7 @@ import {
   setIsFirstLogin,
   setRangeFrom,
   setRangeTo,
-  setSelectedDate, setTimezones, setWarning, updateTimezoneSetting,
+  setSelectedDate, setTimezones, setUserProfile, setWarning, updateTimezoneSetting,
 } from '../redux/actions';
 import {
   getArrayEnd,
@@ -41,11 +41,7 @@ import { subscribeToPush } from 'bloben-package/utils/pushSubscription';
 import { setServiceWorkerLister } from '../utils/ServiceWorkerListener';
 import CalendarApi, {
   sendWebsocketMessage,
-  WEBSOCKET_GET_ALL_CALENDARS,
-  WEBSOCKET_GET_ALL_EVENTS,
   WEBSOCKET_GET_EVENTS, WEBSOCKET_GET_NOTIFICATIONS,
-  WEBSOCKET_SYNC_CALENDARS,
-  WEBSOCKET_SYNC_EVENTS, WEBSOCKET_SYNC_TIMEZONES, WEBSOCKET_SYNC_TIMEZONES_CALENDARS,
 } from '../api/calendar';
 import Axios from '../bloben-common/utils/axios';
 import Search from '../views/search/Search';
@@ -73,9 +69,9 @@ import { DateTime } from 'luxon';
 import { ICalendarSettings } from '../types/types';
 import AccountApi from '../bloben-package/api/account.api';
 import AlertTemp from '../bloben-package/components/alertTemp/alertTemp';
-import HeaderModal from '../bloben-package/components/headerModal/HeaderModal';
-import ScrollView from '../bloben-common/components/scrollView/ScrollView';
-import { ButtonBase } from '@material-ui/core';
+import ContactSync from '../bloben-package/utils/sync/ContactSync';
+import CalendarSync from '../utils/sync/CalendarSync';
+import SyncEvents from '../utils/sync/EventsSync';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -130,33 +126,38 @@ const AuthenticatedLayer = () => {
    * Load calendar settings
    */
   const loadCalendarSettings = async () => {
-    const settings: ICalendarSettings = await CalendarApi.getCalendarSettings();
+    await CalendarSync.getAll();
 
-    dispatch(setCalendarSettings(settings));
+    await CalendarSync.syncClientServer();
+    await ContactSync.getAndDecryptFromServer();
 
-    dispatch(setDefaultCalendar(settings.defaultCalendar.id ? settings.defaultCalendar.id : settings.defaultCalendar));
+    await initEvents()
 
-    // TODO revert after migration
     // Handle auto update timezone
-    // Temp solution for older accounts to set default timezone if missing
+    const response: AxiosResponse = await CalendarApi.getCalendarSettings();
 
-    if (settings.autoUpdateTimezone || settings.defaultTimezone === 'device' || !settings.defaultTimezone) {
+    const {data} = response;
+
+    dispatch(setCalendarSettings(data));
+
+    dispatch(
+        setDefaultCalendar(
+            data.defaultCalendar.id
+                ? data.defaultCalendar.id
+                : data.defaultCalendar
+        )
+    );
+
+    if (data.autoUpdateTimezone || data.defaultTimezone === 'device' || !data.defaultTimezone) {
       const timezone: string = getLocalTimezone()
 
       dispatch(setDefaultTimezone(timezone));
 
-      await CalendarApi.updateSettings({ timezone });
+      await CalendarApi.updateSettings({ key: 'timezone', value: timezone });
 
       dispatch(updateTimezoneSetting(timezone));
     }
 
-  }
-
-  const migrateTimezone =  () => {
-    const timezone: string = getLocalTimezone()
-
-    sendWebsocketMessage(WEBSOCKET_SYNC_TIMEZONES, { timezone });
-    sendWebsocketMessage(WEBSOCKET_SYNC_TIMEZONES_CALENDARS, { timezone });
   }
 
   const initTimezones = async () => {
@@ -170,35 +171,25 @@ const AuthenticatedLayer = () => {
    */
   const handleFirstLogin = (): void => {
     if (isFirstLogin) {
-      sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, { lastSync: null });
       dispatch(setIsFirstLogin(false));
 
       // Load timezones
       initTimezones()
 
-      // Load app settings
-      loadCalendarSettings()
     }
   };
 
-  const connectToWs = async (): Promise<void> => {
-    // First verify if session is still active
-    try {
-      const response: AxiosResponse = await Axios.get('/user/account');
-      if (response.status !== 200) {
-        dispatch({ type: 'USER_LOGOUT' });
+  const initEvents = async () => {
+    const currentDate: DateTime = DateTime.local();
+    const rangeFromInit: string = getDayTimeStart(currentDate.minus({ days: 7 }));
+    const rangeToInit: string = getDayTimeEnd(currentDate.plus({ days: 14 }));
 
-        return;
-      }
-      if (response.data && !response.data.username) {
-        dispatch({ type: 'USER_LOGOUT' });
+    await SyncEvents.getAllInRange(rangeFromInit, rangeToInit)
+    sendWebsocketMessage(WEBSOCKET_GET_NOTIFICATIONS);
+  }
 
-        return;
-      }
-    } catch (e) {
-      // Return, user might be just offline
-      return;
-    }
+  const connectToWs = (): void => {
+
 
     // Clear stompClient after lost connection
     socket = null;
@@ -218,16 +209,11 @@ const AuthenticatedLayer = () => {
     // TODO to websocket
     const sendIdsToSync = () => {
 
+      loadCalendarSettings()
       // Get event and calendar ids
-      const data: any = getEventAndCalendarIds();
-
-      if (calendars && calendars.length > 0) {
-        sendWebsocketMessage(WEBSOCKET_SYNC_CALENDARS, data.calendars);
-      }
-
-      if (data.events && data.events.length > 0) {
-        sendWebsocketMessage(WEBSOCKET_SYNC_EVENTS, data.events);
-      }
+      // if (calendars && calendars.length > 0) {
+      //   sendWebsocketMessage(WEBSOCKET_SYNC_CALENDARS, data.calendars);
+      // }
     };
 
     // Init connection
@@ -239,20 +225,6 @@ const AuthenticatedLayer = () => {
         setTimeout(() => {
           handleFirstLogin();
 
-          const currentDate: DateTime = DateTime.local();
-          const rangeFromInit: string = getDayTimeStart(currentDate.minus({ days: 7 }));
-          const rangeToInit: string = getDayTimeEnd(currentDate.plus({ days: 14 }));
-
-          migrateTimezone()
-          sendWebsocketMessage(WEBSOCKET_GET_NOTIFICATIONS);
-          sendWebsocketMessage(WEBSOCKET_GET_ALL_CALENDARS);
-          sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
-            lastSync: eventsLastSynced ? eventsLastSynced: null,
-          });
-          sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
-            rangeFrom: rangeFromInit,
-            rangeTo: rangeToInit,
-          });
           dispatch(setIsAppStarting(false));
           // Send all event and calendar ids to server to check if they exist
           // Return only ids of items to delete
@@ -266,23 +238,11 @@ const AuthenticatedLayer = () => {
         stompClient.subscribe('/user/sync', (message: any) => {
           WebsocketHandler.handleSyncGeneral(message);
         });
-        stompClient.subscribe('/user/events', (message: any) => {
-          WebsocketHandler.getEvents(message.body);
-        });
-        stompClient.subscribe('/user/calendars', (message: any) => {
-          WebsocketHandler.handleCreateCalendar(message.body);
-        });
         stompClient.send(
           '/app/notifications',
           {},
           JSON.stringify({ name: 'username' })
         );
-        stompClient.send(
-          '/app/updates',
-          {},
-          JSON.stringify({ name: 'store.username' })
-        );
-        // Do something
       },
       (e: any) => {
         connectToWs();
@@ -291,20 +251,8 @@ const AuthenticatedLayer = () => {
     );
   };
 
-  const [tempText, setTempText] = useState({
-                                             text: '',
-                                           link: ''});
-  const loadTempText = async () => {
-    const resp: AxiosResponse = await CalendarApi.getInfo();
-
-    setTempText({text: resp.data.data, link: resp.data.link});
-  }
-
   const initLoad = () => {
     connectToWs();
-
-    loadCalendarSettings();
-    loadTempText();
 
     if (!checkIfIsSafari()) {
       setServiceWorkerLister();
@@ -326,34 +274,34 @@ const AuthenticatedLayer = () => {
     if (isReactNative) {
       const result: any = [];
       // Get current reminders
-      const reminders: any = await CalendarApi.getScheduledReminders();
+      const alarms: any = await CalendarApi.getScheduledReminders();
 
-      for (const reminder of reminders) {
-        const reminderPayload: any = JSON.parse(reminder.payload);
+      for (const alarm of alarms) {
+        const reminderPayload: any = JSON.parse(alarm.payload);
 
         const eventWithReminder: any = await findInArrayById(
           allEvents,
           reminderPayload.id
         );
 
-        reminder.title = 'Event reminder';
+        alarm.title = 'Event reminder';
 
         if (eventWithReminder) {
-          reminder.body = `${eventWithReminder.text} starts at ${format(
+          alarm.body = `${eventWithReminder.text} starts at ${format(
             parseJSON(eventWithReminder.startAt),
             'HH:MM, dd. MMMM'
           )}`;
         } else {
-          reminder.body = 'Unknown body';
+          alarm.body = 'Unknown body';
         }
 
-        result.push(reminder);
+        result.push(alarm);
       }
 
       // Try to find events in storage to get decrypted text content for local notification
       sendMessageToReactNative({
         action: 'scheduledReminders',
-        data: reminders,
+        data: alarms,
       });
     }
   };
@@ -507,7 +455,7 @@ const AuthenticatedLayer = () => {
    * @param isGoingForward
    * @param index
    */
-  const getNewCalendarDays = (isGoingForward: boolean, index: number) => {
+  const getNewCalendarDays = async (isGoingForward: boolean, index: number) => {
     if (isGoingForward === undefined) {
       requestEvents();
 
@@ -543,10 +491,12 @@ const AuthenticatedLayer = () => {
       dispatch(setRangeFrom(rangeFromFetch));
     }
 
-    sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
-      rangeFrom: rangeFromFetch,
-      rangeTo: rangeToFetch,
-    });
+    // sendWebsocketMessage(WEBSOCKET_GET_EVENTS, {
+    //   rangeFrom: rangeFromFetch,
+    //   rangeTo: rangeToFetch,
+    // });
+    await SyncEvents.getAllInRange(rangeFromFetch, rangeToFetch)
+
   };
 
   const requestEvents = (): void => {
@@ -560,22 +510,13 @@ const AuthenticatedLayer = () => {
     });
   };
 
-  const [tempModalIsVisible, showTempModal] = useState(false);
-  // Temp alert
-  const closeTempAlert = () => {
-    dispatch(setWarning(false))
-  }
-  const readMoreTempAlert = () => {
-    dispatch(setWarning(false))
-    showTempModal(true)
-  }
   /**
    * Listener for different state
    */
   // Redirect to event import
   useEffect(() => {
     if (eventsToImport.length > 2) {
-      history.push('/calendar/events/import/ics');
+      history.push('/events/import/ics');
     }
   },        [eventsToImport]);
 
@@ -583,7 +524,7 @@ const AuthenticatedLayer = () => {
   return !isAppStarting ? (
     <div className={'app_wrapper'}>
       <Router history={history}>
-        <Redirect to={'/calendar'} />
+        <Redirect to={'/'} />
         <Route exact path={'/search'}>
           {isMobile ? (
             <Modal>
@@ -614,9 +555,7 @@ const AuthenticatedLayer = () => {
             <Settings />
           )}
         </Route>
-
-        {warning ? <AlertTemp closeTempAlert={closeTempAlert} readMoreTempAlert={readMoreTempAlert}/> : null }
-        <Route path={'/calendar'}>
+        <Route path={'/'}>
             {(calendarDays &&
               selectedDate &&
               calendarDays.length > 0 &&
@@ -630,7 +569,6 @@ const AuthenticatedLayer = () => {
               />
             ) : null}
         </Route>
-
         <Route exact path={'/calendar/new'}>
           <Modal>
             <NewCalendar/>
@@ -641,35 +579,13 @@ const AuthenticatedLayer = () => {
             <EditCalendar/>
           </Modal>
         </Route>
-        <div style={{ position: 'absolute', top: 12, right: 90}}>
-          <ButtonBase
-              onClick={() =>  showTempModal(true)}
-              className={'button__container-small'} style={{width: '100%'}}
-          >Info</ButtonBase>
-        </div>
 
-        {tempModalIsVisible ? <Modal>
-          <ScrollView isDark={false}>
-            <HeaderModal
-                onClose={() => showTempModal(false)}
-                hasHeaderShadow={true}
-                title={'Information'}
-                icons={[]}
-            />
-              <p style={{ padding: 24, fontSize: 14, whiteSpace: 'pre-wrap' }}>{tempText.text}</p>
-           <ButtonBase
-               onClick={() => window.location.assign(tempText.link)}
-               className={'button__container-small'} style={{width: '100%'}}
-           >Reddit discussion</ButtonBase>
-          </ScrollView>
-        </Modal> : null}
-
-        <Route path={'/calendar/events/import'}>
+        <Route path={'/events/import'}>
           <Modal>
             <EventImportButton autoFocus={true} />
           </Modal>
         </Route>
-        <Route path={'/calendar/events/import/ics'}>
+        <Route path={'/events/import/ics'}>
           <Modal>
             <EventImport />
           </Modal>

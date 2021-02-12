@@ -11,7 +11,7 @@ export type EventResultDTO = {
     createdAt: string;
     updatedAt: string;
     rRule: string;
-    reminders: string;
+    alarms: string;
 }
 
 export type CalendarResultDTO = {

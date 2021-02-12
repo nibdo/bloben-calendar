@@ -1,7 +1,7 @@
 import { logger } from 'bloben-common/utils/common';
 import { LocalForage } from '../bloben-package/utils/LocalForage';
 import { setIsLoading } from './actions';
-import OpenPgp, { PgpKeys } from '../bloben-package/utils/OpenPgp';
+import OpenPgp, { PgpKeys } from '../bloben-utils/utils/OpenPgp';
 
 export const loadState =  async (state?: any) => {
   try {
@@ -19,9 +19,9 @@ export const loadState =  async (state?: any) => {
       return undefined;
     }
 
-    const parsedState: any = parseStringDateToDate(decryptedState);
+    // const parsedState: any = parseStringDateToDate(decryptedState);
 
-    return parsedState;
+    return decryptedState;
   } catch (err) {
     logger(err);
 

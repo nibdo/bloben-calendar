@@ -1,40 +1,47 @@
 import { stompClient } from '../layers/AuthenticatedLayer';
-import { decryptAllEvents, decryptEvents } from './decrypt-events';
 import { reduxStore } from '../bloben-package/layers/ReduxLayer';
 import Crypto from '../bloben-package/utils/encryption';
 import {
-    addCalendar,
-    addNotification,
-    setCalendars,
-    setEvents,
-    setNotifications
+  addCalendar,
+  addNotification,
+  setCalendars, setCalendarSettings,
+  setEvents,
+  setNotifications, setUserProfile
 } from '../redux/actions';
-import EventStateEntity from '../data/entities/state/event.entity';
+import EventStateEntity from '../bloben-utils/models/event.entity';
 import {
   cloneDeep,
   findInArrayById,
   findInEvents,
-  handleCalendarReduxDelete,
 } from './common';
-import {
+import CalendarApi, {
   sendWebsocketMessage,
-  WEBSOCKET_GET_ONE_CALENDAR,
+  WEBSOCKET_GET_ONE_CALENDAR, WEBSOCKET_GET_ONE_CONTACT,
   WEBSOCKET_GET_ONE_EVENT,
   WEBSOCKET_GET_ONE_NOTIFICATION,
 } from '../api/calendar';
 import { GetEventWebsocketByIdDTO } from '../types/types';
 import { isBefore, parseISO } from 'date-fns';
-import CalendarStateEntity from '../data/entities/state/calendar.entity';
-import OpenPgp, { PgpKeys } from '../bloben-package/utils/OpenPgp';
+import CalendarStateEntity from '../data/models/state/calendar.entity';
+import OpenPgp, { PgpKeys } from '../bloben-utils/utils/OpenPgp';
 import { LocalForage } from '../bloben-package/utils/LocalForage';
-import LuxonHelper from '../bloben-package/utils/LuxonHelper';
+import LuxonHelper from '../bloben-utils/utils/LuxonHelper';
 import { DateTime } from 'luxon';
+import CalendarSync from './sync/CalendarSync';
+import SyncCalendars from './sync/CalendarSync';
+import SyncEvents from './sync/EventsSync';
+import { AxiosResponse } from 'axios';
+import AccountApi from '../bloben-package/api/account.api';
+import SyncNotification from '../bloben-package/sync/NotificationSync';
 
 // Message constants
 const WEBSOCKET_EVENT_MESSAGE: WebsocketMessageType = 'event';
 const WEBSOCKET_CALENDAR_MESSAGE: WebsocketMessageType = 'calendar';
 const WEBSOCKET_NOTIFICATION_MESSAGE: WebsocketMessageType = 'notification';
-type WebsocketMessageType = 'event' | 'calendar' | 'notification';
+const WEBSOCKET_CALENDAR_SETTINGS_MESSAGE: WebsocketMessageType = 'calendarSettings';
+const WEBSOCKET_USER_SETTINGS_MESSAGE: WebsocketMessageType = 'userProfile';
+const WEBSOCKET_CONTACT_MESSAGE: WebsocketMessageType = 'contact';
+type WebsocketMessageType = 'event' | 'calendar' | 'notification' | 'calendarSettings' | 'userProfile' | 'contact';
 
 // Action constants
 const WEBSOCKET_CREATE_ACTION: WebsocketCrudAction = 'create';
@@ -64,6 +71,15 @@ const WebsocketHandler = {
         break;
       case WEBSOCKET_NOTIFICATION_MESSAGE:
         await WebsocketHandler.handleNotificationSync(messageObj);
+        break;
+      case WEBSOCKET_CALENDAR_SETTINGS_MESSAGE:
+        WebsocketHandler.handleCalendarSettingsSync(messageObj);
+        break;
+      case WEBSOCKET_USER_SETTINGS_MESSAGE:
+        WebsocketHandler.handleUserSettingsSync(messageObj);
+        break;
+      case WEBSOCKET_CONTACT_MESSAGE:
+        WebsocketHandler.handleUserSettingsSync(messageObj);
         break;
       default:
     }
@@ -135,6 +151,20 @@ const WebsocketHandler = {
       default:
     }
   },
+  /**
+   * Process contact sync actions
+   * @param messageObj
+   */
+  handleContactSync: async (messageObj: any) => {
+    const action: WebsocketCrudAction = messageObj.action;
+    // Filter actions
+    switch (action) {
+      case WEBSOCKET_CREATE_ACTION:
+        await WebsocketHandler.handleCreateContact(messageObj);
+        break;
+      default:
+    }
+  },
   handleSyncEventMessage: async (messageObj: any): Promise<void> => {
     if (!messageObj.data || messageObj.data.length === 0) {
       return;
@@ -160,7 +190,7 @@ const WebsocketHandler = {
     );
 
     if (!calendarInState) {
-      sendWebsocketMessage(WEBSOCKET_GET_ONE_CALENDAR, { id: item.id });
+      await CalendarSync.addCalendar(item.id)
     }
   },
   handleUpdateCalendarMessage: async (item: any): Promise<void> => {
@@ -174,13 +204,12 @@ const WebsocketHandler = {
       calendars,
       id
     );
-
     // Get calendar from server if not found or if it is older
     if (
-      !calendarInState || LuxonHelper.isBefore(calendarInState.updatedAt, updatedAt)
-    ) {
-      // Construct request event body
-      sendWebsocketMessage(WEBSOCKET_GET_ONE_CALENDAR, { id });
+      !calendarInState) {
+      await CalendarSync.addCalendar(item.id)
+    } else if (LuxonHelper.isBefore(LuxonHelper.parseToString(calendarInState.updatedAt), updatedAt)) {
+      await CalendarSync.updateCalendar(item.id)
     } else {
       // Flag found state item as synced
       const calendarToUpdate: CalendarStateEntity = CalendarStateEntity.flagAsSynced(
@@ -200,7 +229,7 @@ const WebsocketHandler = {
     );
 
     if (calendarInState) {
-      handleCalendarReduxDelete(id);
+      SyncCalendars.deleteCalendar(id)
     }
   },
   handleCreateEventMessage: async (item: any): Promise<void> => {
@@ -217,13 +246,8 @@ const WebsocketHandler = {
       eventInState.updatedAt !== updatedAt
     ) {
       // Construct request event body
-      const requestEventDataById: GetEventWebsocketByIdDTO = {
-        id,
-        rangeFrom,
-        rangeTo,
-      };
+      await SyncEvents.addEvent(id);
 
-      sendWebsocketMessage(WEBSOCKET_GET_ONE_EVENT, requestEventDataById);
     } else {
       // Flag found state item as synced
       // TODO flag as synced
@@ -232,7 +256,6 @@ const WebsocketHandler = {
   },
   handleUpdateEventMessage: async (item: any): Promise<void> => {
     const store: any = reduxStore.getState();
-    const { rangeFrom, rangeTo } = store;
 
     const { id, updatedAt } = item;
 
@@ -240,16 +263,13 @@ const WebsocketHandler = {
     const eventInState: EventStateEntity | null = await findInEvents(id);
     // Get event from server if not found, if needed to fetch all occurrences or is older
     if (
-      !eventInState || LuxonHelper.isBefore(eventInState.updatedAt, updatedAt)
-    ) {
-      // Construct request event body
-      const requestEventDataById: GetEventWebsocketByIdDTO = {
-        id,
-        rangeFrom,
-        rangeTo,
-      };
-      sendWebsocketMessage(WEBSOCKET_GET_ONE_EVENT, requestEventDataById);
+        !eventInState) {
+      await SyncEvents.addEvent(item.id)
+    } else if (LuxonHelper.isBefore(LuxonHelper.parseToString(eventInState.updatedAt), updatedAt)) {
+
+      await SyncEvents.updateEvent(item.id)
     } else {
+
       // Flag found state item as synced
       // TODO flag as synced
       // eventInState.flagAsSynced();
@@ -278,78 +298,16 @@ const WebsocketHandler = {
     const { type, data } = objParsed;
     // Process and decode events
     if (type === 'events' || type === 'event') {
-      await decryptEvents(data);
     } else if (type === 'allEvents') {
-      await decryptAllEvents(data);
     }
   },
   getCalendars: async (message: string) => {
     const objParsed: any = JSON.parse(message);
     const { type, data } = objParsed;
     // Process and decode events
-    if (type === 'events' || type === 'event') {
-      await decryptEvents(data);
-    }
-  },
-  handleCreateCalendar: async (message: string) => {
-    const objParsed: any = JSON.parse(message);
-    const store: any = reduxStore.getState();
-    const cryptoPassword: string = store.cryptoPassword;
-    const password: string = store.password;
-    const pgpKeys: PgpKeys = store.pgpKeys;
-    const stateClone: any = cloneDeep(store.calendars);
-
-    const { data } = objParsed;
-
-    const decryptCalendar = async (item: any) => {
-      const { id } = item;
-
-      let decryptedData: any;
-
-      if (cryptoPassword) {
-        decryptedData = await Crypto.decrypt(item.data, cryptoPassword);
-      } else {
-        decryptedData = await OpenPgp.decrypt(
-            pgpKeys.publicKey,
-            pgpKeys.privateKey,
-            password,
-            item.data
-        );
-        decryptedData = JSON.parse(decryptedData);
-      }
-
-      delete item.data;
-
-      // Merge
-      const calendarData: any = { ...item, ...decryptedData };
-      const calendar: any = new CalendarStateEntity(calendarData).getStoreObj();
-
-      const calendarInState: CalendarStateEntity | null = await findInArrayById(
-          stateClone,
-          id
-      );
-
-      // Create calendar
-      if (!calendarInState) {
-        reduxStore.dispatch(addCalendar(calendar));
-      } else {
-        // Update calendar in state
-        const newState: any = stateClone.filter((clonedCalendar: any) =>
-                                                    clonedCalendar.id === id ? calendar : clonedCalendar
-        );
-
-        reduxStore.dispatch(setCalendars(newState));
-        // TODO calendar and event color update
-      }
-    }
-
-    if (Array.isArray(data)) {
-      for (const item of data) {
-        await decryptCalendar(item);
-      }
-    } else {
-      await decryptCalendar(data);
-    }
+    // if (type === 'events' || type === 'event') {
+    //   await decryptEvents(data);
+    // }
   },
   getUpdate: async (setState: any, message: string, state: any) => {
     const { data, rangeFrom, rangeTo } = state;
@@ -363,6 +321,18 @@ const WebsocketHandler = {
       JSON.stringify({ id: objParsed.id, rangeFrom, rangeTo })
     );
   },
+  handleCreateContact: async (item: any): Promise<void> => {
+    const store: any = reduxStore.getState();
+    const { notifications } = store;
+    const notificationInState: any = await findInArrayById(
+        notifications,
+        item.id
+    );
+
+    if (!notificationInState) {
+      sendWebsocketMessage(WEBSOCKET_GET_ONE_CONTACT, { id: item.id });
+    }
+  },
   handleCreateNotificationMessage: async (item: any): Promise<void> => {
     const store: any = reduxStore.getState();
     const { notifications } = store;
@@ -372,16 +342,19 @@ const WebsocketHandler = {
     );
 
     if (!notificationInState) {
-      sendWebsocketMessage(WEBSOCKET_GET_ONE_NOTIFICATION, { id: item.id });
+      await SyncNotification.addNotification(item.id)
     }
   },
-  handleSyncNotificationMessage: async (messageObj: any): Promise<void> => {
-    if (!messageObj.data || messageObj.data.length === 0) {
-      return;
-    }
-    for (const item of messageObj.data) {
-      await WebsocketHandler.handleNotificationSync(item);
-    }
+  handleCalendarSettingsSync: async (messageObj: any): Promise<void> => {
+    const response: AxiosResponse = await CalendarApi.getCalendarSettings();
+
+    reduxStore.dispatch(setCalendarSettings(response.data));
+  },
+  handleUserSettingsSync: async (messageObj: any): Promise<void> => {
+
+    const response: AxiosResponse = await AccountApi.getUserProfile();
+
+    reduxStore.dispatch(setUserProfile(response.data));
   },
   handleCreateNotification: async (message: string) => {
     const objParsed: any = JSON.parse(message);
@@ -393,7 +366,7 @@ const WebsocketHandler = {
 
     const { data } = objParsed;
 
-    const decryptNotification = async(item: any) => {
+    const decryptNotification = async (item: any) => {
       const {id} = item;
 
       let decryptedData: any = await OpenPgp.decrypt(

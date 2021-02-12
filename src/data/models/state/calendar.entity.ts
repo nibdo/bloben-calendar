@@ -1,13 +1,9 @@
 import { v4 } from 'uuid';
-import { TCalendarNotificationType } from '../../../types/types';
-import {
-  parseDateToString,
-  parseToDate,
-} from '../../../components/calendarView/calendar-common';
+import { TCalendarAlarmType } from '../../../types/types';
 import Crypto from '../../../bloben-package/utils/encryption';
-import OpenPgp from '../../../bloben-package/utils/OpenPgp';
+import OpenPgp from '../../../bloben-utils/utils/OpenPgp';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
+import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
 
 export type CalendarsStateType = 'calendars';
 export const CALENDARS_STATE: string = 'calendars';
@@ -31,7 +27,7 @@ export type CalendarBodyToSend = {
   updatedAt: string;
   isShared: boolean;
   isPublic: boolean;
-  reminders: string | null;
+  alarms: string | null;
 };
 
 type iCalDataType = {
@@ -43,7 +39,7 @@ export type CalendarStateType = {
   id: string;
   name: string;
   color: string;
-  reminders: TCalendarNotificationType[];
+  alarms: TCalendarAlarmType[];
   iCalData: iCalDataType | null;
   createdAt: string;
   updatedAt: string;
@@ -59,7 +55,7 @@ export default class CalendarStateEntity {
   name: string;
   color: string;
   timezone: string;
-  reminders: TCalendarNotificationType[];
+  alarms: TCalendarAlarmType[];
   iCalData: iCalDataType | null = null;
   createdAt: string;
   updatedAt: string;
@@ -73,7 +69,7 @@ export default class CalendarStateEntity {
 
     this.id = data.id ? data.id : v4();
     this.color = data.color;
-    this.reminders = data.reminders;
+    this.alarms = data.alarms;
     this.isShared = data.isShared;
     this.isPublic = data.isPublic;
     this.timezone = data.timezone;
@@ -98,7 +94,7 @@ export default class CalendarStateEntity {
       name: this.name,
       timezone: this.timezone,
       color: this.color,
-      reminders: this.reminders,
+      alarms: this.alarms,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       isShared: this.isShared,
@@ -114,33 +110,6 @@ export default class CalendarStateEntity {
     name: this.name,
   });
 
-  /**
-   * Encrypt calendar with password
-   * @param password
-   */
-  public encryptCalendar = async (password: string): Promise<string> =>
-    Crypto.encrypt(this.getCalendarPropsForEncryption(), password);
-
-  /**
-   *
-   * @param cryptoPassword
-   */
-  public formatBodyToSend = async (
-    cryptoPassword: string
-  ): Promise<CalendarBodyToSend> => ({
-    id: this.id,
-    color: this.color,
-    data: await this.encryptCalendar(cryptoPassword),
-    timezone: this.timezone,
-    createdAt: LuxonHelper.toUtcString(this.createdAt),
-    updatedAt: LuxonHelper.toUtcString(this.updatedAt),
-    isShared: this.isShared,
-    isPublic: this.isPublic,
-    reminders:
-      this.reminders && this.reminders.length > 0
-        ? JSON.stringify(this.reminders)
-        : null,
-  });
   public formatBodyToSendPgp = async (
     publicKey: string
   ): Promise<CalendarBodyToSend> => ({
@@ -155,9 +124,9 @@ export default class CalendarStateEntity {
     updatedAt: LuxonHelper.toUtcString(this.updatedAt),
     isShared: this.isShared,
     isPublic: this.isPublic,
-    reminders:
-      this.reminders && this.reminders.length > 0
-        ? JSON.stringify(this.reminders)
+    alarms:
+      this.alarms && this.alarms.length > 0
+        ? JSON.stringify(this.alarms)
         : null,
   });
   public static flagAsSynced = (

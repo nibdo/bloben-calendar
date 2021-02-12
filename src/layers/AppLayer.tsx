@@ -10,10 +10,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   setCalendarBodyHeight,
   setCalendarBodyWidth,
-  setDefaultCalendar, setEventsLastSync,
+  setCalendarSettings,
+  setDefaultCalendar,
+  setEventsLastSync,
   setEventsToImport,
   setIsAppStarting,
-  setIsMobile, setSelectedDate,
+  setIsMobile,
+  setSelectedDate,
+  setUserProfile,
 } from '../redux/actions';
 import {
   CALENDAR_DRAWER_DESKTOP_WIDTH,
@@ -31,6 +35,10 @@ import CalendarApi from '../api/calendar';
 import Modal from '../bloben-package/components/modal';
 import { logger } from 'bloben-common/utils/common';
 import { DateTime } from 'luxon';
+import { IUserProfile } from '../bloben-package/types/common.types';
+import AccountApi from '../bloben-package/api/account.api';
+import { ICalendarSettings } from '../types/types';
+import { AxiosResponse } from 'axios';
 
 // Init webworker for better openpgp performance outside main thread
 openpgp.initWorker({ path: 'openpgp.worker.js' });
@@ -53,7 +61,7 @@ const AppLayer = (props: any) => {
     (state: any) => state.isAppStarting
   );
   const eventsLastSynced: any = useSelector(
-      (state: any) => state.eventsLastSynced
+    (state: any) => state.eventsLastSynced
   );
   const selectedDate: any = useSelector((state: any) => state.selectedDate);
   const isDark: boolean = useSelector((state: any) => state.isDark);
@@ -70,8 +78,6 @@ const AppLayer = (props: any) => {
    * Set mobile/desktop layout
    */
   useEffect(() => {
-
-
     // tslint:disable-next-line:no-magic-numbers
     if (width < MOBILE_MAX_WIDTH) {
       dispatch(setIsMobile(true));
@@ -88,8 +94,7 @@ const AppLayer = (props: any) => {
       );
       dispatch(setCalendarBodyHeight(height - HEADER_HEIGHT_BASE_DESKTOP));
     }
-  }, [width, isAppStarting]);
-
+  },        [width, isAppStarting]);
 
   /*
    * First initialization of app
@@ -104,24 +109,24 @@ const AppLayer = (props: any) => {
       if (username) {
         // Try to compare userData with server
         try {
-          const userData: any = (await Axios.get('/user/account')).data;
-          if (defaultCalendar.length < 1) {
-            // Load app settings
-            const settings: any = await CalendarApi.getCalendarSettings();
+            const response: AxiosResponse = await Axios.get('/user/account');
+            if (response.status !== 200) {
+              dispatch({ type: 'USER_LOGOUT' });
 
-            dispatch(setDefaultCalendar(settings.defaultCalendar));
-          }
+              return;
+            }
+            if ((response.data.username && response.data.username !== username) ||
+                !response.data.username) {
+              dispatch({ type: 'USER_LOGOUT' });
+              dispatch(setIsAppStarting(false));
 
-          // TODO CHECK if while offline it doesn't delete database
-          if (
-            (userData.username && userData.username !== username) ||
-            !userData.username
-          ) {
-            // Different user, destroy prev user
-            // TODO CLEAR REDUX
-            // logOut(dispatch)
-            dispatch(setIsAppStarting(false));
-          }
+              return;
+            }
+               // Load app settings
+            const userProfile: AxiosResponse = await AccountApi.getUserProfile();
+
+            dispatch(setUserProfile(userProfile.data));
+
         } catch (error) {
           logger(error);
         }
@@ -131,7 +136,7 @@ const AppLayer = (props: any) => {
     };
 
     initApp();
-  }, []);
+  },        []);
 
   // Init DateTime redux dates selected date
   useEffect(() => {
@@ -143,9 +148,9 @@ const AppLayer = (props: any) => {
     // }
 
     if (!selectedDate || !selectedDate.isValid) {
-      dispatch(setSelectedDate(DateTime.local()))
+      dispatch(setSelectedDate(DateTime.local()));
     }
-  }, [])
+  },        []);
 
   // Verify authentication
   const isAuthenticated: boolean =
@@ -164,16 +169,15 @@ const AppLayer = (props: any) => {
 
       if (action === 'eventImport') {
         dispatch(setEventsToImport(data));
-        history.push('/calendar/events/import/ics');
+        history.push('/events/import/ics');
       }
     });
-  }, []);
+  },        []);
 
   return (
     <div className={`root-wrapper${isDark ? '-dark' : ''}`}>
       {isAuthenticated && selectedDate.isValid ? (
-        <AuthenticatedLayer
-        />
+        <AuthenticatedLayer />
       ) : (
         <AnonymView />
       )}

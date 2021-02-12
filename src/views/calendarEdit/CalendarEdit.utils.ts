@@ -4,7 +4,7 @@ export default {
     name: '',
     color: 'indigo',
     timezone: null,
-    reminders: [],
+    alarms: [],
     isShared: false,
     isPublic: false,
     createdAt: null,

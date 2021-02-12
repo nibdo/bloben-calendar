@@ -155,7 +155,7 @@ const CalendarView = (props: ICalendarViewProps) => {
             title={headerTitle}
             hasHeaderShadow={isAgenda}
             icons={[
-              <IconButton key={'bell'} onClick={() => history.push('/calendar/notifications')}>
+              <IconButton key={'bell'} onClick={() => history.push('/notifications')}>
                 <EvaIcons.Bell className={parseCssDark('icon-svg', isDark)} />
               </IconButton>,
             ]}
@@ -177,7 +177,7 @@ const CalendarView = (props: ICalendarViewProps) => {
             ) : null}
           </div>
           <Router history={history}>
-            <Route path={'/calendar/new/event'}>
+            <Route path={'/event'}>
               {isMobile ? (
                 <Modal {...props} handleClose={() => history.goBack()}>
                   <EditEvent isNewEvent={true} newEventTime={newEventIsOpen} />
@@ -188,12 +188,12 @@ const CalendarView = (props: ICalendarViewProps) => {
                 </Modal>
               )}
             </Route>
-            <Route path={'/calendar/event/:id'}>
+            <Route path={'/event/:id'}>
               <Modal {...props} handleClose={() => history.goBack()}>
                 <EditEvent isNewEvent={false} />
               </Modal>
             </Route>
-            <Route path={'/calendar/notifications'}>
+            <Route path={'/notifications'}>
               {isMobile ? (
                   <Modal>
                     <Notifications />
@@ -318,7 +318,7 @@ const Calendar = (props: ICalendarProps) => {
   };
   const openNewEvent = (eventData: any) => {
     setLocalState('newEventIsOpen', 'simple', eventData);
-    history.push('/calendar/new/event');
+    history.push('/event');
   };
 
   return (

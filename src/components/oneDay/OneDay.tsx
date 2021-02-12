@@ -16,7 +16,7 @@ import { parseCssDark } from '../../bloben-common/utils/common';
 import { checkOverlappingEvents } from '../../utils/common';
 import { Context } from '../../bloben-package/context/store';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
+import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
 import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
 import { ICalendarSettings } from '../../types/types';
 

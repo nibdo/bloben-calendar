@@ -113,7 +113,7 @@ const SettingsBaseView = () => {
                         }
                         title={'Account'}
                         link={'account'}
-                        description={'Delete account'}
+                        description={'Email, Delete account'}
                     />
                     <SettingsItem
                         icon={
@@ -123,7 +123,7 @@ const SettingsBaseView = () => {
                         }
                         title={'Calendar'}
                         link={'calendar'}
-                        description={'Timezones'}
+                        description={'Timezones, Alarms'}
                     />
                     <SettingsItem
                         icon={

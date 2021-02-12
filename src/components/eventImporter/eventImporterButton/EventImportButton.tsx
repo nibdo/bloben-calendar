@@ -81,7 +81,7 @@ const EventImportButton = (props: IEventImportButtonProps) => {
           setFile(readerResult);
 
           dispatch(setEventsToImport(readerResult));
-          history.push('/calendar/events/import/ics');
+          history.push('/events/import/ics');
         };
       } else {
         // clearData()

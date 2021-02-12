@@ -49,7 +49,7 @@ const CalendarSettingsView = (props: ICalendarSettingsViewProps) => {
       />
       <CalendarSettingsItem
           title={'Import events'}
-          onClick={() => navigateTo('/calendar/events/import')}
+          onClick={() => navigateTo('/events/import')}
       />
       <CalendarSettingsItem
         title={'Settings'}

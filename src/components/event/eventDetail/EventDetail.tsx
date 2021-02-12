@@ -24,11 +24,11 @@ import {
 } from '../../../bloben-package/utils/date';
 import EvaIcons from '../../../bloben-common/components/eva-icons';
 import { useSelector } from 'react-redux';
-import NotificationSettings from '../../../bloben-package/components/notificationSettings/NotificationSettings';
+import NotificationSettings from '../../../bloben-package/components/alarmSettings/AlarmSettings';
 import {
   MAX_REPEAT_UNTIL,
   MAX_REPEAT_UNTIL_STRING
-} from '../../../data/entities/state/event.entity';
+} from '../../../bloben-utils/models/event.entity';
 import DropdownWrapper from '../../../bloben-package/components/dropdownWrapper/DropdownWrapper';
 import BottomSheetDropdownSwitcher from '../../../bloben-package/components/bottomSheetDropdownSwitcher/BottomSheetDropdownSwitcher';
 import ModalSmall from '../../../bloben-package/components/modalSmall/ModalSmall';
@@ -41,7 +41,9 @@ import Modal from '../../../bloben-package/components/modal/Modal';
 import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
 import { DateTime } from 'luxon';
 import { DatetimeParser, parseToDateTime } from '../../../bloben-package/utils/datetimeParser';
-import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
+import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
+import AlarmSettings from '../../../bloben-package/components/alarmSettings/AlarmSettings';
+import AttendeeSettings from '../../attendeeSettings/AttendeeSettings';
 
 const repeatOptions: any = [
   { label: 'No repeat', value: 'none' },
@@ -70,7 +72,7 @@ const Title = (props: ITitleProps) => {
       <Input
         placeholder='Add event'
         type='text'
-        name='text'
+        name='summary'
         autoFocus={isNewEvent}
         multiline={true}
         value={value}
@@ -814,7 +816,7 @@ const Notes = (props: INotesProps) => {
       </div>
       <Input
         type='text'
-        name='notes'
+        name='description'
         placeholder='Add notes'
         autoComplete={'off'}
         className={parseCssDark('event_detail__input', isDark)}
@@ -827,7 +829,7 @@ const Notes = (props: INotesProps) => {
 };
 
 interface IEventDetailProps {
-  text: string;
+  summary: string;
   handleChange: any;
   calendar: any;
   location: string;
@@ -835,14 +837,14 @@ interface IEventDetailProps {
   endDate: string;
   isRepeated: boolean;
   isStartDateValid?: any;
-  notes: string;
+  description: string;
   allDay: boolean;
   setForm: any;
   setRRule: any;
   rRuleState: any;
-  reminders: any;
-  addNotification: any;
-  removeNotification: any;
+  alarms: any;
+  addAlarm: any;
+  removeAlarm: any;
   isNewEvent: boolean;
   handleScroll: any;
   handleChangeDateFrom: any;
@@ -850,6 +852,10 @@ interface IEventDetailProps {
   timezoneStart: string;
   setStartTimezone: any;
   selectCalendar: any;
+  attendees: any;
+  addAttendee: any;
+  removeAttendee: any;
+  makeOptional: any;
 }
 const EventDetail = (props: IEventDetailProps) => {
   const [isDateFromVisible, openDateFrom] = useState(false);
@@ -866,7 +872,7 @@ const EventDetail = (props: IEventDetailProps) => {
   const { isMobile } = store;
 
   const {
-    text,
+    summary,
     handleChange,
     calendar,
     location,
@@ -874,21 +880,25 @@ const EventDetail = (props: IEventDetailProps) => {
     endDate,
     isRepeated,
     isStartDateValid,
-    notes,
+    description,
     allDay,
     setForm,
     setRRule,
     rRuleState,
-    reminders,
-    addNotification,
-    removeNotification,
+    alarms,
+    addAlarm,
+    removeAlarm,
     isNewEvent,
     handleScroll,
     handleChangeDateFrom,
     handleChangeDateTill,
     timezoneStart,
     setStartTimezone,
-    selectCalendar
+    selectCalendar,
+    attendees,
+      addAttendee,
+      removeAttendee,
+    makeOptional
   } = props;
 
   /**
@@ -926,7 +936,7 @@ const EventDetail = (props: IEventDetailProps) => {
       style={wrapperStyle}
       onScroll={handleScroll}
     >
-      <Title value={text} handleChange={handleChange} isNewEvent={isNewEvent} />
+      <Title value={summary} handleChange={handleChange} isNewEvent={isNewEvent} />
       <Calendar
         calendar={calendar}
         setForm={setForm}
@@ -967,15 +977,21 @@ const EventDetail = (props: IEventDetailProps) => {
         coordinates={coordinates}
         setCoordinates={setCoordinates}
       />
-      <NotificationSettings
-        notifications={reminders}
-        addNotification={addNotification}
-        removeNotification={removeNotification}
+      <AttendeeSettings
+          attendees={attendees}
+          addAttendee={addAttendee}
+          removeAttendee={removeAttendee}
+          makeOptional={makeOptional}
+      />
+      <AlarmSettings
+        alarms={alarms}
+        addAlarm={addAlarm}
+        removeAlarm={removeAlarm}
         coordinates={coordinates}
         setCoordinates={setCoordinates}
       />
       <Location handleChange={handleChange} value={location} />
-      <Notes handleChange={handleChange} value={notes} />
+      <Notes handleChange={handleChange} value={description} />
       {isMobile ? <div className={'empty__space'} /> : null}
 
       {isDateFromVisible ||

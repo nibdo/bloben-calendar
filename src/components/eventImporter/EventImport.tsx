@@ -7,13 +7,13 @@ import { HeightHook } from '../../bloben-common/utils/layout';
 import { renderAgendaEvents } from '../calendarView/agenda/Agenda';
 import EventStateEntity, {
   EventBodyToSend,
-} from '../../data/entities/state/event.entity';
+} from '../../bloben-utils/models/event.entity';
 import {
   cloneDeep,
   findInArrayById,
   mapEventsToDates,
 } from '../../utils/common';
-import { PgpKeys } from 'bloben-package/utils/OpenPgp';
+import { PgpKeys } from 'bloben-utils/utils/OpenPgp';
 import {
   sendWebsocketMessage,
   WEBSOCKET_IMPORT_EVENTS,
@@ -199,7 +199,7 @@ const EventImport = () => {
   };
   const clearData = () => {
     setData(null);
-    history.push('/calendar');
+    history.push('/');
   };
 
   /**

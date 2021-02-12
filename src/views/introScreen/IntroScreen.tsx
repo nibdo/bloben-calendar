@@ -110,9 +110,6 @@ const DesktopLayout = () => {
                 {/*<Landing.SubMainText>*/}
                 {/*  Hide your private plans*/}
                 {/*</Landing.SubMainText>*/}
-                  {!isMobile ?  <Landing.SubMainText>
-                      Coming as self hosted application
-                      </Landing.SubMainText> : null}
               </Landing.Container>
             </Landing.ContainerRowPart>
           ) : null}
@@ -123,13 +120,11 @@ const DesktopLayout = () => {
             />
               <Landing.Separator />
 
-              {isMobile ? <p style={{ fontSize: 18, marginTop: 16}}>
-                  Comings as self hosted application
-              </p> : null}
             {isMobile ? (
               <div className={'intro__buttons-container'}>
                 <Landing.LoginButton wide />
-                {/*<Landing.RegisterButton wide />*/}
+                  <Landing.Separator />
+                  <Landing.RegisterButton wide />
               </div>
             ) : (
               <Landing.DemoButton onDemoButtonClick={createDemoAccount} />

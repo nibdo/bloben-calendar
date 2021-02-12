@@ -3,7 +3,6 @@ import './CalendarBody.scss';
 import OneDay from '../oneDay/OneDay';
 import {
   CALENDAR_OFFSET_LEFT,
-  formatTimestampToDate,
   hoursArrayString,
 } from '../calendarView/calendar-common';
 import { WidthHook } from 'bloben-common/utils/layout';
@@ -12,6 +11,7 @@ import _ from 'lodash';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import { Context } from '../../bloben-package/context/store';
 import { DateTime } from 'luxon';
+import { formatTimestampToDate } from '../../bloben-utils/utils/common';
 
 const renderOneDay = (
   calendarDays: DateTime[],

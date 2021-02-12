@@ -3,25 +3,63 @@ import './Search.scss';
 import IconButton from '@material-ui/core/IconButton';
 import EvaIcons from '../../bloben-common/components/eva-icons';
 import { useSelector } from 'react-redux';
-import { mapEventsToDates } from '../../utils/common';
-import { formatTimestampToDate } from '../../components/calendarView/calendar-common';
-import { renderAgendaEvents } from '../../components/calendarView/agenda/Agenda';
-import { HeightHook } from '../../bloben-common/utils/layout';
 import {
-  sendWebsocketMessage,
-  WEBSOCKET_GET_ALL_EVENTS,
-} from '../../api/calendar';
+  parseEventColor
+} from '../../components/calendarView/calendar-common';
+import { HeightHook } from '../../bloben-common/utils/layout';
 import { Input } from '../../bloben-package/components/input/Input';
 import { Context } from '../../bloben-package/context/store';
 import { useHistory } from 'react-router-dom';
 import { parseCssDark } from '../../bloben-common/utils/common';
+import SyncEvents from '../../utils/sync/EventsSync';
+import EventStateEntity from '../../bloben-utils/models/event.entity';
 import { DateTime } from 'luxon';
+import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
+import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
+import { ButtonBase } from '@material-ui/core';
 
 const SearchImage = () => (
   <div className={'search_empty__wrapper'}>
     <p className={'search_empty__text'}>No result</p>
   </div>
 );
+
+const SearchItem = (props: any) => {
+  const {item, isDark, history} = props;
+  const {id, startAt, timezoneStart, endAt, summary, color} = item;
+  const calendarColor: string = parseEventColor(color, isDark);
+
+  const isSameDay: boolean = LuxonHelper.isSameDay(startAt, endAt);
+
+  const handleClick: any = () => {
+    history.push(`/event/${id}`)
+  }
+
+  return <ButtonBase className={'search-item__wrapper'} onClick={handleClick}>
+    <div className={'search-item__container'}>
+      <div className={'search-item__color'} style={{ background: calendarColor}}/>
+      <div className={'search-item__content'}>
+      <h5 className={'search-item__title'}>{summary}</h5>
+      <p className={'search-item__text'}>
+        {parseToDateTime(startAt, timezoneStart).toFormat(`d LLL ${isSameDay ? 'yyyy' : ''}`)} {!isSameDay ? ` - ${parseToDateTime(endAt, timezoneStart).toFormat('d LLL yyyy')}` : ''}
+      </p>
+        <p className={'search-item__text'}>
+          {parseToDateTime(startAt, timezoneStart).toFormat('hh:mm')} - {parseToDateTime(endAt, timezoneStart).toFormat('hh:mm')}
+        </p>
+      </div>
+    </div>
+  </ButtonBase>
+}
+
+const renderResults = (events: any, isDark: boolean, history: any) => {
+  return events.map((event: any) => {
+    return <SearchItem
+        item={event}
+        isDark={isDark}
+        history={history}
+    />
+  })
+}
 
 interface IResultsProps {
   results: any;
@@ -34,14 +72,12 @@ const Results = (props: IResultsProps) => {
   const {isDark} = store;
 
   const height: number = HeightHook() - 56;
+  const history: any = useHistory();
 
-  const emptyFunc: any = () => {};
-
-  const renderedResults: any = renderAgendaEvents(
+  const renderedResults: any = renderResults(
     results,
     isDark,
-    emptyFunc,
-    emptyFunc
+    history
   );
 
   return (
@@ -139,15 +175,15 @@ interface IMobileViewProps {
 const MobileView = (props: IMobileViewProps) => {
   const { results } = props;
 
-  const length: number = Object.keys(results).length;
-
-  return length > 0 ? <Results results={results} /> : <SearchImage />;
+  return results.length > 0 ? <Results results={results} /> : <SearchImage />;
 };
 interface IDesktopViewProps {
   results: any;
 }
 const DesktopView = (props: IDesktopViewProps) => {
   const { results } = props;
+
+  console.log('RRRR', results)
 
   return results.length > 0 ? (
     <Results results={results} />
@@ -191,29 +227,24 @@ const SearchView = (props: ISearchViewProps) => {
 
 const Search = () => {
   const allEvents: any = useSelector((state: any) => state.allEvents);
-  const eventsLastSynced: any = useSelector(
-    (state: any) => state.eventsLastSynced
-  );
 
   const [typedText, setTypedText] = useState('');
   const [results, setResults]: any = useState([]);
   const [mappedEvents, setMappedEvents] = useState({});
 
-  useEffect(() => {
-    const result: any = mapEventsToDates(allEvents);
-
-    if (result) {
-      setMappedEvents(result);
-    }
-  },        [allEvents.toString()]);
+  // useEffect(() => {
+  //   const result: any = mapEventsToDates(allEvents);
+  //
+  //   if (result) {
+  //     setMappedEvents(result);
+  //   }
+  // },        [allEvents.toString()]);
 
   /**
    * Get changes in allEvents on mount
    */
   useEffect(() => {
-    sendWebsocketMessage(WEBSOCKET_GET_ALL_EVENTS, {
-      lastSync: eventsLastSynced ? eventsLastSynced.toString() : null,
-    });
+    SyncEvents.getAllLastSync();
   },        []);
 
   const onSearchInput = (event: any) => {
@@ -237,26 +268,18 @@ const Search = () => {
   },        [typedText]);
 
   const search = (keyWord: string) => {
-    const result: any = {};
+    const result: any = [];
 
-    for (const [key, value] of Object.entries(mappedEvents)) {
-      for (const item of value as any) {
-        const { startAt, text, location, notes } = item;
+    for (const item of allEvents) {
+        const { startAt, summary, location, description } = item;
 
         if (
-          text.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
+          summary.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
           location.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
-          notes.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1
+            description.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1
         ) {
-          const dateKey: string = formatTimestampToDate(startAt);
-
-          if (result[dateKey] === undefined) {
-            result[formatTimestampToDate(startAt)] = [item];
-          } else {
-            result[formatTimestampToDate(startAt)].push(item);
-          }
+          result.push(item)
         }
-      }
     }
 
     return result;

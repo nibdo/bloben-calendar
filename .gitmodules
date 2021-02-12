@@ -4,3 +4,9 @@
 [submodule "src/bloben-package"]
 	path = src/bloben-package
 	url = git@github.com:nibdo/bloben-package.git
+[submodule "src/ical-js-parser"]
+	path = src/ical-js-parser
+	url = git@github.com:nibdo/ical-js-parser.git
+[submodule "src/bloben-utils"]
+	path = src/bloben-utils
+	url = git@github.com:nibdo/bloben-utils.git

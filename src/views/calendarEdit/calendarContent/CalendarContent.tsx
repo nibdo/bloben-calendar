@@ -64,8 +64,8 @@ interface ICalendarContentViewProps {
   saveCalendar: any;
   deleteCalendar?: any;
   calendarId?: string;
-  addNotification?: any;
-  removeNotification?: any;
+  addAlarm?: any;
+  removeAlarm?: any;
   openTimezoneModal: any;
   timezoneModalIsOpen: boolean;
   selectTimezone: any;
@@ -82,8 +82,8 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
     saveCalendar,
     deleteCalendar,
     calendarId,
-    addNotification,
-    removeNotification,
+    addAlarm,
+    removeAlarm,
     openTimezoneModal,
     timezoneModalIsOpen,
     selectTimezone,
@@ -164,22 +164,22 @@ const CalendarContentView = (props: ICalendarContentViewProps) => {
 interface ICalendarContentProps {
   selectColor: any;
   timezone: string;
-  addNotification: any;
-  removeNotification: any;
+  addAlarm: any;
+  removeAlarm: any;
   deleteCalendar?: any;
   calendarId?: string;
   calendarState: any;
   saveCalendar: any;
   handleChange: any;
-  reminders: any;
+  alarms: any;
   isNewCalendar: boolean;
   selectTimezone: any;
 }
 const CalendarContent = (props: ICalendarContentProps) => {
   const {
     selectColor,
-    addNotification,
-    removeNotification,
+    addAlarm,
+    removeAlarm,
     deleteCalendar,
     calendarId,
     calendarState,
@@ -214,8 +214,8 @@ const CalendarContent = (props: ICalendarContentProps) => {
       toggleColorModal={toggleColorModal}
       colorModalIsOpen={colorModalIsOpen}
       handleColorClick={handleColorClick}
-      addNotification={addNotification}
-      removeNotification={removeNotification}
+      addAlarm={addAlarm}
+      removeAlarm={removeAlarm}
       deleteCalendar={deleteCalendar}
       calendarId={calendarId}
       calendarState={calendarState}

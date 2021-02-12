@@ -30,8 +30,6 @@
     "crypto-js": "^4.0.0",
     "date-fns": "^2.9.0",
     "date-fns-tz": "^1.0.12",
-    "ical-js-parser": "0.0.1-beta.2",
-    "ical.js": "^1.4.0",
     "localforage": "^1.9.0",
     "lodash": "^4.17.20",
     "lodash.shuffle": "^4.2.0",
@@ -63,7 +61,7 @@
   "scripts": {
     "start": "BROWSER=none PORT=4003 react-scripts start",
     "build:development": "REACT_APP_NAME=Calendar REACT_APP_PUBLIC_VAPID_KEY=BOvP6_qzS5rYxbQDFwyON9WQUDyHx_da1S9wnKAXaJpCrdamRikQYua-LwbiggJC2qNX2kZhXV6HQ5M22Qpb2Tk REACT_APP_URL=https://calendar.nibdo.com REACT_APP_API_URL=https://api.nibdo.com PUBLIC_URL=https://calendar.nibdo.com REACT_APP_NODE_ENV=development npm run build",
-    "build:production": "REACT_APP_VERSION=0.3.10 REACT_APP_NAME=Calendar REACT_APP_PUBLIC_VAPID_KEY=BOvP6_qzS5rYxbQDFwyON9WQUDyHx_da1S9wnKAXaJpCrdamRikQYua-LwbiggJC2qNX2kZhXV6HQ5M22Qpb2Tk REACT_APP_URL=https://calendar.bloben.com REACT_APP_API_URL=https://api.bloben.com  PUBLIC_URL=https://calendar.bloben.com REACT_APP_NODE_ENV=production npm run build",
+    "build:production": "REACT_APP_VERSION=0.3.10 REACT_APP_NAME=Calendar REACT_APP_EMAIL_DOMAIN=bloben.net REACT_APP_PUBLIC_VAPID_KEY=BOvP6_qzS5rYxbQDFwyON9WQUDyHx_da1S9wnKAXaJpCrdamRikQYua-LwbiggJC2qNX2kZhXV6HQ5M22Qpb2Tk REACT_APP_URL=https://calendar.bloben.com REACT_APP_API_URL=https://api.bloben.com  PUBLIC_URL=https://calendar.bloben.com REACT_APP_NODE_ENV=production npm run build",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

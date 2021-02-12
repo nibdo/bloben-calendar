@@ -1,8 +1,5 @@
-import {
-    formatIsoStringDate,
-    formatTimestampToDate
-} from '../../components/calendarView/calendar-common';
 import { cloneDeep } from '../../utils/common';
+import { formatTimestampToDate } from '../../bloben-utils/utils/common';
 
 const events = (state: any = {}, action: any) => {
     switch (action.type) {

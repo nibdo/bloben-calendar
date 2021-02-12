@@ -11,7 +11,7 @@ import {
 import { reduxStore } from '../../bloben-package/layers/ReduxLayer';
 import { setSelectedDate } from '../../redux/actions';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
+import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
 
 const ONE_DAY: number = 1;
 const THREE_DAYS: number = 3;
@@ -25,8 +25,7 @@ export const HEADER_HEIGHT_EXTENDER: number = 166;
 export const NAVBAR_HEIGHT_BASE: number = 50;
 export const CALENDAR_DRAWER_DESKTOP_WIDTH: number = 247;
 
-export const formatTimestampToDate = (dateObj: any): string =>
-    dateObj.isValid ? dateObj.toFormat('dd-MM-yyyy') : DateTime.fromISO(dateObj).toFormat('dd-MM-yyyy')
+
 
 export const formatIsoStringDate = (stringDate: string) =>
 

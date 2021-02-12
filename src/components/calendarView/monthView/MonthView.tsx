@@ -8,7 +8,6 @@ import { useSelector } from 'react-redux';
 import {
   CALENDAR_DRAWER_DESKTOP_WIDTH,
   checkIfSwipingForward,
-  formatTimestampToDate,
   parseEventColor,
 } from '../calendar-common';
 import { useHistory } from 'react-router';
@@ -16,7 +15,8 @@ import Slider from 'react-slick';
 import { parseCssDark } from '../../../bloben-common/utils/common';
 import { Context } from '../../../bloben-package/context/store';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../../bloben-package/utils/LuxonHelper';
+import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
+import { formatTimestampToDate } from '../../../bloben-utils/utils/common';
 
 interface IEventProps {
   isDark: boolean;
@@ -62,7 +62,7 @@ const Event = (props: IEventProps) => {
   const handleEventSelect = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    history.push(`/calendar/event/${event.id}`);
+    history.push(`/event/${event.id}`);
     // dispatch(selectEvent(props.event))
   };
 

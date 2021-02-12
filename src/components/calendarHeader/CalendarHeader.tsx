@@ -14,7 +14,6 @@ import {
   CALENDAR_OFFSET_LEFT,
   calendarColors,
   daysText,
-  formatTimestampToDate,
 } from '../calendarView/calendar-common';
 import { useSelector } from 'react-redux';
 import { parseCssDark } from '../../bloben-common/utils/common';
@@ -22,8 +21,9 @@ import { useHistory } from 'react-router-dom';
 import { checkOverlappingEvents } from '../../utils/common';
 import { Context } from '../../bloben-package/context/store';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../bloben-package/utils/LuxonHelper';
+import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
 import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
+import { formatTimestampToDate } from '../../bloben-utils/utils/common';
 
 interface IEventHeaderProps {
   calendarColor: string;
@@ -48,7 +48,7 @@ const EventHeader = (props: IEventHeaderProps) => {
   const handleEventSelect = (e: any) => {
     e.preventDefault();
     e.stopPropagation();
-    history.push(`/calendar/event/${event.id}`);
+    history.push(`/event/${event.id}`);
   };
 
   return (
@@ -58,7 +58,7 @@ const EventHeader = (props: IEventHeaderProps) => {
       onClick={handleEventSelect}
     >
       <p className={`event_header__text${isDark ? '--dark' : ''}`}>
-        {event.text}{' '}
+        {event.summary}{' '}
       </p>
     </div>
   );

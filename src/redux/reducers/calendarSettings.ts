@@ -3,8 +3,8 @@ import { ICalendarSettings } from '../../types/types';
 const initCalendarSettings: ICalendarSettings = {
     defaultCalendar: null,
     defaultTimezone: '',
+    defaultAlarmType: '',
     autoUpdateTimezone: false,
-    updatedAt: ''
 }
 
 const calendarSettings = (state: ICalendarSettings = initCalendarSettings, action: any) => {
