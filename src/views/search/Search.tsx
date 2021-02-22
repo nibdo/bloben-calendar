@@ -17,6 +17,7 @@ import { DateTime } from 'luxon';
 import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
 import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
 import { ButtonBase } from '@material-ui/core';
+import { formatEventDate } from '../../utils/common';
 
 const SearchImage = () => (
   <div className={'search_empty__wrapper'}>
@@ -24,12 +25,26 @@ const SearchImage = () => (
   </div>
 );
 
+
+export const EventDateText = (props: any) => {
+  const {event} = props;
+
+  const humanDate: any = formatEventDate(event);
+  const {dates, time} = humanDate;
+
+  return <div style={{display: 'flex', flexDirection: 'column'}}>
+    <p className={'search-item__text'}>{dates}</p>
+    <p className={'search-item__text'}>
+      {time}
+    </p>
+  </div>
+}
+
 const SearchItem = (props: any) => {
   const {item, isDark, history} = props;
   const {id, startAt, timezoneStart, endAt, summary, color} = item;
   const calendarColor: string = parseEventColor(color, isDark);
 
-  const isSameDay: boolean = LuxonHelper.isSameDay(startAt, endAt);
 
   const handleClick: any = () => {
     history.push(`/event/${id}`)
@@ -40,12 +55,7 @@ const SearchItem = (props: any) => {
       <div className={'search-item__color'} style={{ background: calendarColor}}/>
       <div className={'search-item__content'}>
       <h5 className={'search-item__title'}>{summary}</h5>
-      <p className={'search-item__text'}>
-        {parseToDateTime(startAt, timezoneStart).toFormat(`d LLL ${isSameDay ? 'yyyy' : ''}`)} {!isSameDay ? ` - ${parseToDateTime(endAt, timezoneStart).toFormat('d LLL yyyy')}` : ''}
-      </p>
-        <p className={'search-item__text'}>
-          {parseToDateTime(startAt, timezoneStart).toFormat('hh:mm')} - {parseToDateTime(endAt, timezoneStart).toFormat('hh:mm')}
-        </p>
+      <EventDateText event={item}/>
       </div>
     </div>
   </ButtonBase>

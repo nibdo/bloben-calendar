@@ -1,0 +1,12 @@
+@import "bloben-common/globals/theme.scss";
+
+.search-item__container {
+  display: flex;
+  flex-direction: column;
+}
+
+.event-dates__container {
+  display: flex;
+  flex-direction: column;
+  padding: 16px;
+}

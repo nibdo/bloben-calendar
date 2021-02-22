@@ -26,6 +26,7 @@ import { Context } from '../../bloben-package/context/store';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import Notifications from '../../bloben-package/views/notifications/Notifications';
 import { DateTime } from 'luxon';
+import EventView from '../../components/event/eventView/EventView';
 
 interface ICalendarTypeProps {
   getNewCalendarDays: any;
@@ -178,17 +179,16 @@ const CalendarView = (props: ICalendarViewProps) => {
           </div>
           <Router history={history}>
             <Route path={'/event'}>
-              {isMobile ? (
                 <Modal {...props} handleClose={() => history.goBack()}>
                   <EditEvent isNewEvent={true} newEventTime={newEventIsOpen} />
                 </Modal>
-              ) : (
-                <Modal {...props} handleClose={() => history.goBack()}>
-                  <EditEvent isNewEvent={true} newEventTime={newEventIsOpen} />
-                </Modal>
-              )}
             </Route>
             <Route path={'/event/:id'}>
+              <Modal handleClose={() => history.goBack()}>
+                <EventView />
+              </Modal>
+            </Route>
+            <Route path={'/event/edit/:id'}>
               <Modal {...props} handleClose={() => history.goBack()}>
                 <EditEvent isNewEvent={false} />
               </Modal>

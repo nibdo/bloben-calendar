@@ -7,3 +7,43 @@
 .attendee-settings__row-add{
   width: 100%;
 }
+
+
+.attendee-actions__container {
+  display: flex;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  padding: 24px;
+}
+
+.attendee-actions__container-left {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  width: 50px;
+}
+.attendee-actions__text-info {
+  font-size: 1.3rem;
+  color: $GRAY_700;
+  margin: 0;
+  padding: 0;
+}
+
+.attendee-actions__container-right {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+}
+
+.attendee-actions__button {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: auto !important;
+  padding: 6px !important;
+}

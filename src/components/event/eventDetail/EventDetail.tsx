@@ -56,16 +56,17 @@ const repeatOptions: any = [
 interface ITitleProps {
   isNewEvent: boolean;
   value: string;
-  handleChange: any;
+  handleChange?: any;
+  disabled?: boolean;
 }
-const Title = (props: ITitleProps) => {
-  const { isNewEvent, value, handleChange } = props;
+export const Title = (props: ITitleProps) => {
+  const { isNewEvent, value, handleChange, disabled } = props;
 
   const [store] = useContext(Context);
   const { isDark } = store;
 
   return (
-    <div className={parseCssDark('event_detail__row', isDark)}>
+    <div className={parseCssDark(`event_detail__row ${disabled ? 'no-row' : ''}`, isDark)}>
       <div className={'event_detail__container--icon'}>
         <CalendarIcon className={'event_detail__icon--hidden'} />
       </div>
@@ -78,6 +79,7 @@ const Title = (props: ITitleProps) => {
         value={value}
         className={parseCssDark('event_detail__input--big', isDark)}
         onChange={handleChange}
+        disabled={disabled}
       />
     </div>
   );
@@ -124,16 +126,13 @@ const parseRRuleText = (rRule: any) => {
 };
 
 interface ICalendarProps {
-  setForm: any;
   calendar: any;
-  coordinates: any;
-  setCoordinates: any;
-  selectCalendar: any;
+  selectCalendar?: any;
+  disabled?: boolean;
 }
 export const Calendar = (props: ICalendarProps) => {
-  const { setForm, calendar, coordinates, setCoordinates, selectCalendar } = props;
+  const { calendar, disabled, selectCalendar } = props;
 
-  const [anchor, setAnchor] = useState(null);
   const [isOpen, openMenu] = useState(false);
 
   const calendars: any = useSelector((state: any) => state.calendars);
@@ -143,24 +142,21 @@ export const Calendar = (props: ICalendarProps) => {
 
   const handleMenuOpen = (e: any) => {
     if (!isOpen) {
-      setAnchor(e.currentTarget);
       openMenu(true);
     }
   };
   const handleMenuClose = () => {
     openMenu(false);
-    setAnchor(null);
   };
   const selectOption = (item: any) => {
     selectCalendar(item);
-    // setForm('calendarId', item.id);
     handleMenuClose();
   };
 
   return (
     <div
-      className={parseCssDark('event_detail__row', isDark)}
-      onClick={handleMenuOpen}
+      className={parseCssDark(`event_detail__row ${disabled ? 'no-row': ''}`, isDark)}
+      onClick={!disabled ? handleMenuOpen : undefined}
     >
       <div className={'event_detail__container--icon'}>
         <EvaIcons.CircleFill
@@ -168,26 +164,27 @@ export const Calendar = (props: ICalendarProps) => {
           fill={calendarColors[calendar.color][isDark ? 'dark' : 'light']}
         />
       </div>
-      <div className={'event_detail__button'} onClick={handleMenuOpen}>
+      <div className={'event_detail__button'} onClick={!disabled ? handleMenuOpen : undefined}>
         <p className={parseCssDark('event_detail__input', isDark)}>
           {calendar.name}
         </p>
       </div>
       {isOpen ? (
         !isMobile ? (
-          <DropdownWrapper
-            coordinates={coordinates}
-            setCoordinates={setCoordinates}
-            handleClose={handleMenuClose}
-          >
-            <MyMenu
-              variant='calendar'
-              select={selectOption}
-              selected={calendar}
-              handleClose={handleMenuClose}
-              data={calendars}
-            />
-          </DropdownWrapper>
+            <Dropdown
+                isOpen={isOpen}
+                handleClose={handleMenuClose}
+                values={<MyMenu
+                    variant='calendar'
+                    select={selectOption}
+                    selected={calendar}
+                    handleClose={handleMenuClose}
+                    data={calendars}
+                />}
+                onClick={selectOption}
+                type={'children'}
+            >
+            </Dropdown>
         ) : (
           <ModalSmall isOpen={isOpen} handleClose={handleMenuClose}>
             <MyMenu
@@ -852,6 +849,7 @@ interface IEventDetailProps {
   timezoneStart: string;
   setStartTimezone: any;
   selectCalendar: any;
+  organizer: any;
   attendees: any;
   addAttendee: any;
   removeAttendee: any;
@@ -898,7 +896,8 @@ const EventDetail = (props: IEventDetailProps) => {
     attendees,
       addAttendee,
       removeAttendee,
-    makeOptional
+    makeOptional,
+    organizer
   } = props;
 
   /**
@@ -939,9 +938,6 @@ const EventDetail = (props: IEventDetailProps) => {
       <Title value={summary} handleChange={handleChange} isNewEvent={isNewEvent} />
       <Calendar
         calendar={calendar}
-        setForm={setForm}
-        coordinates={coordinates}
-        setCoordinates={setCoordinates}
         selectCalendar={selectCalendar}
       />
       <DateFrom
@@ -978,10 +974,12 @@ const EventDetail = (props: IEventDetailProps) => {
         setCoordinates={setCoordinates}
       />
       <AttendeeSettings
+          organizer={organizer}
           attendees={attendees}
           addAttendee={addAttendee}
           removeAttendee={removeAttendee}
           makeOptional={makeOptional}
+          isEditable={true}
       />
       <AlarmSettings
         alarms={alarms}

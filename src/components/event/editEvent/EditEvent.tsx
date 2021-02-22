@@ -8,7 +8,7 @@ import EventStateEntity, {
 } from '../../../bloben-utils/models/event.entity';
 import {
   addAlarm,
-  findInArrayById,
+  findInArrayById, findInArrayByKeyValue,
   findInEvents,
   handleEventReduxDelete,
   handleEventReduxUpdate,
@@ -32,8 +32,9 @@ import { IUserProfile } from '../../../bloben-package/types/common.types';
 import { createEmailAlarm } from '../../../bloben-utils/models/EmailAlarm';
 import ICalHelper, {
   Attendee,
-  createAttendee, ROLE_OPT,
-  ROLE_REQ
+  createAttendee,
+  ROLE_OPT,
+  ROLE_REQ,
 } from '../../../bloben-package/utils/ICalHelper';
 import { v4 } from 'uuid';
 import ContactApi from '../../../bloben-package/api/contact.api';
@@ -61,6 +62,7 @@ const initialFormState: any = {
   updatedAt: null,
   color: '',
   calendarTimezone: '',
+  organizer: '',
 };
 const initialState: any = {
   modalIsOpen: false,
@@ -103,6 +105,7 @@ const EditEvent = (props: IEditEventProps) => {
   const history: any = useHistory();
   const dispatch: any = useDispatch();
   const calendars: any = useSelector((state: any) => state.calendars);
+  const contacts: any = useSelector((state: any) => state.contacts);
   const username: string = useSelector((state: any) => state.username);
   const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
   const calendarSettings: ICalendarSettings = useSelector(
@@ -166,6 +169,7 @@ const EditEvent = (props: IEditEventProps) => {
     alarms,
     timezoneStart,
     attendees,
+    organizer,
   } = form;
 
   /**
@@ -233,6 +237,23 @@ const EditEvent = (props: IEditEventProps) => {
         ? getLocalTimezone()
         : thisCalendar.timezone
     );
+
+    const organizerName: string | null = userProfile.publicName
+      ? userProfile.publicName
+      : userProfile.appEmail;
+    const organizerAsAttendee: any = {
+      cn: organizerName,
+      role: 'REQ-PARTICIPANT',
+      rsvp: true,
+      partstat: 'ACCEPTED',
+      mailto: userProfile.appEmail,
+    };
+    addAttendee(organizerAsAttendee);
+    setForm('organizer', {
+      role: 'REQ-PARTICIPANT',
+      cn: organizerName,
+      mailto: userProfile.appEmail,
+    });
 
     if (!newEventTime) {
       return;
@@ -304,13 +325,13 @@ const EditEvent = (props: IEditEventProps) => {
    */
   const addAttendee = (item: Attendee) => {
     setForm('attendees', [...attendees, item]);
-  }
+  };
   const removeAttendee = (item: any) => {
     const attendeeFiltered: any = [...attendees].filter(
-        (attendee: any) => attendee.mailto !== item.mailto
+      (attendee: any) => attendee.mailto !== item.mailto
     );
     setForm('attendees', attendeeFiltered);
-  }
+  };
   const makeOptional = (item: Attendee) => {
     const items: Attendee[] = [...attendees];
     const result: any = items.map((attendee: Attendee) => {
@@ -318,15 +339,15 @@ const EditEvent = (props: IEditEventProps) => {
         if (attendee.role === ROLE_REQ) {
           attendee.role = ROLE_OPT;
         } else {
-          attendee.role = ROLE_REQ
+          attendee.role = ROLE_REQ;
         }
       }
 
       return attendee;
-    })
+    });
 
     setForm('attendees', result);
-  }
+  };
 
   /**
     Attendees end
@@ -409,7 +430,8 @@ const EditEvent = (props: IEditEventProps) => {
     const newEvent: EventStateEntity = new EventStateEntity(
       form,
       rRuleState,
-      calendarSettings.defaultTimezone
+      calendarSettings.defaultTimezone,
+      username
     );
 
     // Handle email alarms, add payload
@@ -452,35 +474,44 @@ const EditEvent = (props: IEditEventProps) => {
 
       // TODO MOVE ELSEWHERE
 
+      if (attendees.length > 1) {
+        console.log('attendees', attendees);
 
-      if (attendees.length > 0) {
-        console.log('attendees', attendees)
-
-        const attendeeFromContacts: any = attendees.map((item: any) => createAttendee(item))
-        const icalTest: any = new ICalHelper(simpleObj, userProfile.publicName ? userProfile.publicName : username, attendees).parseTo();
-        console.log(icalTest)
+        const icalTest: any = new ICalHelper(simpleObj).parseTo();
+        console.log(icalTest);
         const inviteData: any = {
-          attendee: attendees.map((item: any) => item.mailto),
-          payload: JSON.stringify({
-                                    body: 'Event invite',
-                                    subject: 'Event invite',
-                                    attachment: btoa(icalTest),
-                                  })
+          attendee: attendees
+            .filter((item: any) => item.mailto !== userProfile.appEmail)
+            .map((item: any) => item.mailto),
+          body: 'Event invite',
+          subject: 'Event invite',
+          attachment: btoa(icalTest),
         };
         console.log(inviteData);
 
-        await CalendarApi.sendInvite(inviteData)
-      }
+          CalendarApi.sendInvite(inviteData);
 
+      }
 
       // Create contacts
       // TODO check if not exists
-      if (attendees.length > 0) {
+      if (attendees.length > 1) {
         for (const item of attendees) {
-          const newContact = new Contact(item);
-          const contactBodyToSend: any = await newContact.formatBodyToEncrypt(pgpKeys.publicKey);
-          console.log('contactBodyToSend', contactBodyToSend)
-          await ContactApi.createContact(contactBodyToSend)
+          if (item.mailto !== userProfile.appEmail) {
+
+            const contactInState: any = await findInArrayByKeyValue(contacts, 'email', item.mailto)
+
+            console.log('contact in state', contactInState);
+
+            if (!contactInState) {
+              const newContact = new Contact(item);
+              const contactBodyToSend: any = await newContact.formatBodyToEncrypt(
+                  pgpKeys.publicKey
+              );
+              console.log('contactBodyToSend', contactBodyToSend);
+              await ContactApi.createContact(contactBodyToSend);
+            }
+          }
         }
       }
       //
@@ -496,18 +527,18 @@ const EditEvent = (props: IEditEventProps) => {
 
       // TODO need to either calculate events parameters client side, or refresh data from backend
       // Update Redux store
-      handleEventReduxUpdate(prevItem, newEvent);
+      await handleEventReduxUpdate(prevItem, newEvent);
     }
 
     // Close modal
     handleClose();
   };
 
-  const deleteEvent = async() => {
+  const deleteEvent = async () => {
     const event: EventStateEntity = new EventStateEntity(form, rRuleState);
     event.delete();
 
-    await CalendarApi.deleteEvent(event)
+    await CalendarApi.deleteEvent(event);
 
     handleEventReduxDelete(prevItem, event);
 
@@ -566,6 +597,7 @@ const EditEvent = (props: IEditEventProps) => {
           addAttendee={addAttendee}
           removeAttendee={removeAttendee}
           makeOptional={makeOptional}
+          organizer={organizer}
         />
       ) : (
         <div />

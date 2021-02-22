@@ -5,7 +5,7 @@
   flex-direction: column;
   overflow-y: scroll;
   overflow-x: hidden;
-  padding: 24px 0 24px 0;
+  //padding: 16px 0 16px 0;
   @media (max-width: 750px) {
     height: auto;
   }
@@ -17,7 +17,7 @@
 .event_detail__row {
   width: 100%;
   display: flex !important;
-  padding: 0 24px 0 24px !important;
+  padding: 0 8px 0 8px !important;
   flex-direction: row !important;
   justify-content: flex-start !important;
   align-items: center !important;
@@ -79,6 +79,7 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  width: 48.2px;
 }
 .event_detail__icon {
   font-size: 2.2rem !important;
@@ -106,13 +107,24 @@
   margin: 0 !important;
   font-family: Poppins !important;
   //height: 100% !important;
-
 }
 .event_detail__input-secondary {
   @extend .event_detail__input;
   color: $GRAY_700 !important;
   //font-size: 1rem !important;
   padding-left: 8px;
+}
+.event_detail__input-sub {
+  @extend .event_detail__input;
+  position: absolute;
+  bottom: 4px !important;
+  //left: 16px !important;
+  padding: 0 !important;
+  //padding-top: 4px !important;
+  padding-left: 16px !important;
+  margin: 0 !important;
+  font-size: 1.1rem !important;
+  color: $GRAY_600 !important;
 }
 .event_detail__input-secondary-dark {
   @extend .event_detail__input-secondary;
@@ -125,7 +137,8 @@
 .event_detail__input--big {
   @extend .event_detail__input;
   font-size: 2.6rem !important;
-  font-weight: 600;
+  font-weight: 600 !important;
+  color: $GRAY_900 !important;
   margin-top: 8px;
   margin-bottom: 8px;
   padding-left: 16px !important;
@@ -167,6 +180,9 @@
   flex-direction: row;
   justify-content: flex-end;
   align-items: center;
+  padding: 0;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
 }
 
 .repeat__container {
@@ -237,7 +253,6 @@
 }
 .event-content-svg {
   width: 1.8rem;
-  margin-right: 12px;
   fill: $GRAY_700;
 }
 .event-content-svg-hidden {
@@ -252,13 +267,14 @@
   padding-bottom: 4px;
   justify-content: center;
   align-items: flex-start;
-  width: 150% !important;
+  width: 100% !important;
+  position: relative;
 }
 
 .event_detail__button-row {
   display: flex;
   flex-direction: row;
-  width: 100px !important;
+  width: 150px !important;
 }
 .event_detail__button-inverted {
   @extend .event_detail__button;

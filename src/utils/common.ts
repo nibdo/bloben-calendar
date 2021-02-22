@@ -13,6 +13,8 @@ import { DateTime } from 'luxon';
 // @ts-ignore
 import Interval from 'luxon/src/interval.js';
 import { formatTimestampToDate } from '../bloben-utils/utils/common';
+import LuxonHelper from '../bloben-utils/utils/LuxonHelper';
+import { parseToDateTime } from '../bloben-package/utils/datetimeParser';
 export const mapTags = (tags: any) => {
   const tagsObj: any = {};
 
@@ -49,6 +51,24 @@ export const findInArrayById = (array: any, id: string): any =>
       }
     }
   });
+
+export const findInArrayByKeyValue = (array: any, key: string, value: string): any =>
+    new Promise((resolve) => {
+      if (!array || array.length === 0) {
+        resolve(false);
+      }
+
+      for (let i = 0; i < array.length; i += 1) {
+        if (array[i][key] === value) {
+          resolve(array[i]);
+        }
+
+        // Handle loop end
+        if (i + 1 === array.length) {
+          resolve(false);
+        }
+      }
+    });
 
 export const findInState = (item: any, stateString: any) =>
   new Promise((resolve) => {
@@ -150,7 +170,7 @@ export const getDateKey = (event: EventStateEntity): string =>
 
 export const handleEventReduxDelete = async (
   prevItem: any,
-  newItem: EventStateEntity
+  newItem?: EventStateEntity
 ) => {
   const store: any = reduxStore.getState();
   const stateClone: any = cloneDeep(store.events);
@@ -327,3 +347,26 @@ export const createMultiDayClone = (event: EventStateEntity) => {
   return data;
 };
 
+export const formatEventDate = (event: any) => {
+  const { startAt, endAt, timezoneStart } = event;
+
+  const isSameDay: boolean = LuxonHelper.isSameDay(startAt, endAt);
+
+  const dateFromString: string = parseToDateTime(
+      startAt,
+      timezoneStart
+  ).toFormat(`d LLL ${isSameDay ? 'yyyy' : ''}`);
+  const dateToString: string = !isSameDay
+      ? ` - ${parseToDateTime(endAt, timezoneStart).toFormat('d LLL yyyy')}`
+      : '';
+  const dates: string = `${dateFromString}${dateToString}`;
+
+  const timeFrom: string = parseToDateTime(startAt, timezoneStart).toFormat('hh:mm');
+  const timeTo: string = parseToDateTime(endAt, timezoneStart).toFormat('hh:mm');
+  const time: string = `${timeFrom} - ${timeTo}`
+
+  return {
+    dates,
+    time
+  }
+}

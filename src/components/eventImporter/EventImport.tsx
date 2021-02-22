@@ -95,9 +95,6 @@ const ImportedEvents = (props: IImportedEventsProps) => {
         />
         <Calendar
           calendar={calendar}
-          setForm={changeCalendar}
-          coordinates={coordinates}
-          setCoordinates={setCoordinates}
           selectCalendar={selectCalendar}
         />
         <Results results={data} />

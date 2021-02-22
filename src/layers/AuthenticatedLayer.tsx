@@ -72,6 +72,8 @@ import AlertTemp from '../bloben-package/components/alertTemp/alertTemp';
 import ContactSync from '../bloben-package/utils/sync/ContactSync';
 import CalendarSync from '../utils/sync/CalendarSync';
 import SyncEvents from '../utils/sync/EventsSync';
+import SyncNotification from '../bloben-package/sync/NotificationSync';
+import { reduxStore } from '../bloben-package/layers/ReduxLayer';
 
 // STOMP WEBSOCKETS
 let socket;
@@ -126,10 +128,16 @@ const AuthenticatedLayer = () => {
    * Load calendar settings
    */
   const loadCalendarSettings = async () => {
+    const userProfileResponse: AxiosResponse = await AccountApi.getUserProfile();
+
+    dispatch(setUserProfile(userProfileResponse.data));
+
     await CalendarSync.getAll();
 
     await CalendarSync.syncClientServer();
     await ContactSync.getAndDecryptFromServer();
+
+    await SyncNotification.getAll();
 
     await initEvents()
 
