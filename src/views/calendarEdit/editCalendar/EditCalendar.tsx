@@ -1,51 +1,69 @@
-import React, { useEffect, useReducer } from 'react';
+import React, { useContext, useEffect, useReducer } from 'react';
 import { useHistory, useParams } from 'react-router';
-import CalendarContent from '../calendarContent/CalendarContent';
 import StateReducer from '../../../utils/state-reducer';
 import Utils from '../CalendarEdit.utils';
-import CalendarStateEntity, {
-  CalendarBodyToSend,
-} from '../../../data/models/state/calendar.entity';
-import {
-  addAlarm,
-  findInArrayById, removeAlarm,
-} from '../../../utils/common';
+import { addAlarm, findInArrayById, removeAlarm } from '../../../utils/common';
 import { useDispatch, useSelector } from 'react-redux';
-import CalendarApi, {
-  sendWebsocketMessage,
-  WEBSOCKET_DELETE_CALENDAR,
-  WEBSOCKET_UPDATE_CALENDAR,
-} from '../../../api/calendar';
-import { updateCalendar } from '../../../redux/actions';
-import { PgpKeys } from '../../../bloben-utils/utils/OpenPgp';
-import { logger } from '../../../bloben-common/utils/common';
+import { addCalendar, updateCalendar } from '../../../redux/actions';
+import CalendarContent from '../calendarContent/CalendarContent';
 import { getLocalTimezone } from '../../../bloben-package/utils/common';
+import CalendarApi from '../../../api/calendar';
+import {
+  CalendarEncrypted,
+  createCalendarEncrypted,
+} from '../../../bloben-utils/models/CalendarEncrypted';
+import { IUser } from '../../../bloben-utils/models/User';
+import { ReduxState } from '../../../types/types';
+import {
+  Calendar,
+  createCalendar,
+} from '../../../bloben-utils/models/Calendar';
+import { Context } from '../../../bloben-package/context/store';
+import { logger } from '../../../bloben-common/utils/common';
 import SyncCalendars from '../../../utils/sync/CalendarSync';
 
-const EditCalendar = () => {
-  const dispatch = useDispatch();
+interface NewCalendarProps {
+  isNewCalendar: boolean;
+}
+
+const EditCalendar = (props: NewCalendarProps) => {
+  const { isNewCalendar } = props;
+
+  const [store, dispatchContext] = useContext(Context);
+
+  const setContext = (type: string, payload: any) => {
+    dispatchContext({ type, payload });
+  };
+
   const [calendarState, dispatchState]: any = useReducer(
     StateReducer,
     Utils.initialState
   );
-  const { name, color, alarms, timezone } = calendarState;
+  const { alarms, timezone } = calendarState;
+
   const history = useHistory();
   const params: any = useParams();
   const { id } = params;
-  const cryptoPassword: any = useSelector((state: any) => state.cryptoPassword);
-  const calendars: any = useSelector((state: any) => state.calendars);
-  const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
-  const defaultCalendar: string = useSelector(
-      (state: any) => state.defaultCalendar
+
+  const dispatch: any = useDispatch();
+  const user: IUser = useSelector((state: ReduxState): IUser => state.user);
+  const calendars: Calendar[] = useSelector(
+    (state: ReduxState): Calendar[] => state.calendars
   );
+  const defaultCalendar: string = useSelector(
+    (state: any) => state.defaultCalendar
+  );
+
+  const setLocalState = (stateName: string, data: any): void => {
+    const payload: any = { stateName, type: 'simple', data };
+    // @ts-ignore
+    dispatchState({ calendarState, payload });
+  };
 
   // Init props of selected calendar
   const initEditCalendar = async () => {
     // Find calendar
-    const thisCalendar: CalendarStateEntity = await findInArrayById(
-      calendars,
-      id
-    );
+    const thisCalendar: Calendar = await findInArrayById(calendars, id);
 
     if (!thisCalendar) {
       // TODO error msg
@@ -54,11 +72,11 @@ const EditCalendar = () => {
     // Set data
     for (const [key, value] of Object.entries(thisCalendar)) {
       if (key === 'alarms' && !value) {
-        setLocalState(key, 'simple', []);
+        setLocalState(key, []);
       } else if (key === 'timezone' && !value) {
-        setLocalState(key, 'simple', getLocalTimezone())
+        setLocalState(key, getLocalTimezone());
       } else {
-        setLocalState(key, 'simple', value);
+        setLocalState(key, value);
       }
     }
   };
@@ -70,23 +88,10 @@ const EditCalendar = () => {
     initEditCalendar();
   }, [id]);
 
-  const setLocalState = (stateName: string, type: string, data: any): void => {
-    const payload: any = { stateName, type, data };
-    // @ts-ignore
-    dispatchState({ calendarState, payload });
-  };
-
   const handleChange = (event: any) => {
     const target = event.target;
-    setLocalState(target.name, 'simple', event.target.value);
+    setLocalState(target.name, event.target.value);
   };
-
-  const selectColor = (colorValue: any) => {
-    setLocalState('color', 'simple', colorValue);
-  };
-
-  const selectTimezone = (timezoneValue: string) =>
-      setLocalState('timezone', 'simple', timezoneValue)
 
   const addAlarmCalendar = (item: any) => {
     addAlarm(item, setLocalState, alarms);
@@ -96,49 +101,61 @@ const EditCalendar = () => {
     removeAlarm(item, setLocalState, alarms);
   };
 
-  const deleteCalendar = async () => {
+  useEffect(() => {
+    setLocalState('timezone', getLocalTimezone());
+  }, []);
+
+  const deleteCalendar = async (): Promise<void> => {
     if (params.id === defaultCalendar || !defaultCalendar) {
-      logger('Error: Can\'t delete default calendar')
+      logger("Error: Can't delete default calendar");
 
       return;
     }
-    await CalendarApi.deleteCalendar({id: params.id})
+
+    await CalendarApi.deleteCalendar({ id: params.id });
 
     SyncCalendars.deleteCalendar(params.id);
 
     history.goBack();
   };
 
-  const saveCalendar = async () => {
-    const stateData: any = new CalendarStateEntity(calendarState);
+  const saveCalendar = async (): Promise<void> => {
+    try {
+      const calendar: Calendar = createCalendar(calendarState);
 
-    // Encrypt data
-    const bodyToSend: CalendarBodyToSend =
-      pgpKeys && pgpKeys.publicKey
-        ? await stateData.formatBodyToSendPgp(pgpKeys.publicKey)
-        : await stateData.formatBodyToSend(cryptoPassword);
+      const encryptedCalendar: CalendarEncrypted = await createCalendarEncrypted(
+        user.publicKey,
+        calendar
+      );
 
-    dispatch(updateCalendar(stateData.getStoreObj()));
+      if (isNewCalendar) {
+        await CalendarApi.createCalendar(encryptedCalendar);
 
-    await CalendarApi.updateCalendar(bodyToSend);
+        // Save to redux store
+        dispatch(addCalendar(calendar));
+      } else {
+        dispatch(updateCalendar(calendar));
 
-    history.goBack();
+        await CalendarApi.updateCalendar(encryptedCalendar);
+      }
+
+      history.goBack();
+    } catch (e) {
+      setContext('showSnackbar', {
+        text: 'Error',
+      });
+    }
   };
 
   return (
     <CalendarContent
       calendarState={calendarState}
       handleChange={handleChange}
-      selectColor={selectColor}
       saveCalendar={saveCalendar}
-      alarms={alarms}
-      timezone={timezone}
       addAlarm={addAlarmCalendar}
       removeAlarm={removeAlarmCalendar}
-      deleteCalendar={deleteCalendar}
-      calendarId={params.id}
-      isNewCalendar={false}
-      selectTimezone={selectTimezone}
+      deleteCalendar={!isNewCalendar ? deleteCalendar : undefined}
+      setLocalState={setLocalState}
     />
   );
 };

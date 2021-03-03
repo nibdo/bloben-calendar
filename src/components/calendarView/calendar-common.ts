@@ -1,34 +1,42 @@
 /* tslint:disable:no-magic-numbers */
 import {
-  addDays, addMonths,
-  format, formatISO,
+  addDays,
+  addMonths,
+  format,
+  formatISO,
   getDay,
   getMonth,
-  getYear, lastDayOfMonth,
+  getYear,
+  lastDayOfMonth,
   parseISO,
-  subDays, subMonths,
+  subDays,
+  subMonths,
 } from 'date-fns';
-import { reduxStore } from '../../bloben-package/layers/ReduxLayer';
+import { reduxStore } from '../../bloben-package/layers/ReduxProvider';
 import { setSelectedDate } from '../../redux/actions';
 import { DateTime } from 'luxon';
 import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
+import {
+  CALENDAR_3DAYS_VIEW,
+  CALENDAR_DAY_VIEW,
+  CALENDAR_MONTH_VIEW,
+  CALENDAR_WEEK_VIEW,
+} from '../../utils/contants';
+import { CalendarView } from '../../types/types';
 
-const ONE_DAY: number = 1;
-const THREE_DAYS: number = 3;
-const SEVEN_DAYS: number = 7;
-export const CALENDAR_OFFSET_LEFT: number = 24;
-export const ONE_HOUR_HEIGHT: number = 39;
-export const HEADER_HEIGHT_SMALL: number = 56;
-export const HEADER_HEIGHT_BASE: number = 156;
-export const HEADER_HEIGHT_BASE_DESKTOP: number = 235;
-export const HEADER_HEIGHT_EXTENDER: number = 166;
-export const NAVBAR_HEIGHT_BASE: number = 50;
-export const CALENDAR_DRAWER_DESKTOP_WIDTH: number = 247;
-
-
+const ONE_DAY = 1;
+const THREE_DAYS = 3;
+const SEVEN_DAYS = 7;
+export const CALENDAR_OFFSET_LEFT = 24;
+export const ONE_HOUR_HEIGHT = 39;
+export const HEADER_HEIGHT_SMALL = 56;
+export const HEADER_HEIGHT_BASE = 156;
+export const HEADER_HEIGHT_BASE_DESKTOP = 235;
+export const HEADER_HEIGHT_EXTENDER = 166;
+export const NAVBAR_HEIGHT_BASE = 50;
+export const CALENDAR_DRAWER_DESKTOP_WIDTH = 247;
 
 export const formatIsoStringDate = (stringDate: string) =>
-
   stringDate.slice(0, stringDate.indexOf('T'));
 
 export const hoursArray = [
@@ -86,58 +94,74 @@ export const hoursArrayString = [
   '23',
 ];
 
-export const parseEventColor = (colorString: string, isDark?: boolean): string =>
-    calendarColors[colorString][isDark ? 'dark' : 'light'];
+export const parseEventColor = (
+  colorString: string,
+  isDark?: boolean
+): string => calendarColors[colorString][isDark ? 'dark' : 'light'];
 
 export const calendarColors: any = {
-  'red': { dark: '#ef9a9a', light: '#e53935' },
-  'pink': { dark: '#f48fb1', light: '#d81b60' },
-  'purple': { dark: '#ce93d8', light: '#8e24aa' },
+  red: { dark: '#ef9a9a', light: '#e53935' },
+  pink: { dark: '#f48fb1', light: '#d81b60' },
+  purple: { dark: '#ce93d8', light: '#8e24aa' },
   'deep purple': { dark: '#b39ddb', light: '#5e35b1' },
-  'indigo': { dark: '#9fa8da', light: '#3949ab' },
-  'blue': { dark: '#90caf9', light: '#1e88e5' },
+  indigo: { dark: '#9fa8da', light: '#3949ab' },
+  blue: { dark: '#90caf9', light: '#1e88e5' },
   'light blue': { dark: '#81d4fa', light: '#039be5' },
-  'cyan': { dark: '#80deea', light: '#00acc1' },
-  'teal': { dark: '#80cbc4', light: '#00897b' },
-  'green': { dark: '#a5d6a7', light: '#43a047' },
+  cyan: { dark: '#80deea', light: '#00acc1' },
+  teal: { dark: '#80cbc4', light: '#00897b' },
+  green: { dark: '#a5d6a7', light: '#43a047' },
   'light green': { dark: '#c5e1a5', light: '#7cb342' },
-  'yellow': { dark: '#fff59d', light: '#fdd835' },
-  'amber': { dark: '#ffe082', light: '#ffb300' },
-  'orange': { dark: '#ffcc80', light: '#fb8c00' },
+  yellow: { dark: '#fff59d', light: '#fdd835' },
+  amber: { dark: '#ffe082', light: '#ffb300' },
+  orange: { dark: '#ffcc80', light: '#fb8c00' },
   'deep orange': { dark: '#ffab91', light: '#f4511e' },
-  'brown': { dark: '#bcaaa4', light: '#6d4c41' },
+  brown: { dark: '#bcaaa4', light: '#6d4c41' },
   'blue grey': { dark: '#b0bec5', light: '#546e7a' },
 };
 
 export const daysText = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
 
-const getOneDay = (date: DateTime, isGoingForward?: boolean | null): DateTime[] => {
+const getOneDay = (
+  date: DateTime,
+  isGoingForward?: boolean | null
+): DateTime[] => {
   let refDate: DateTime;
 
   if (isGoingForward === null) {
     refDate = date;
   } else if (isGoingForward) {
-    refDate = date.plus({ days: 1});
+    refDate = date.plus({ days: 1 });
   } else {
-    refDate = date.minus({ days: 1 })
+    refDate = date.minus({ days: 1 });
   }
 
   // Set state
   reduxStore.dispatch(setSelectedDate(refDate));
 
   return [refDate];
-}
+};
 
-export const getMonthDays = (date: DateTime, isGoingForward?: boolean | null, isCurrent?: boolean) => {
-  const FIVE_WEEKS_DAYS_COUNT: number = 36;
+export const getMonthDays = (
+  date: DateTime,
+  isGoingForward?: boolean | null,
+  isCurrent?: boolean
+) => {
+  const FIVE_WEEKS_DAYS_COUNT = 36;
   // Get reference date for calculating new month
 
-  const refDate: DateTime = isGoingForward === null ? date : isGoingForward ? date.plus({ days: 15}) : date.minus({ days: 15 })
+  const refDate: DateTime =
+    isGoingForward === null
+      ? date
+      : isGoingForward
+      ? date.plus({ days: 15 })
+      : date.minus({ days: 15 });
 
   // Get first week of current month
   const firstDayOfCurrentMonth: DateTime = LuxonHelper.getFirstDayOfMonth(date);
 
-  const firstWeekOfCurrentMonth: DateTime[] = getWeekDays(firstDayOfCurrentMonth)
+  const firstWeekOfCurrentMonth: DateTime[] = getWeekDays(
+    firstDayOfCurrentMonth
+  );
 
   const monthDays: DateTime[] = firstWeekOfCurrentMonth;
 
@@ -155,33 +179,37 @@ export const getMonthDays = (date: DateTime, isGoingForward?: boolean | null, is
   return monthDays;
 };
 
-export const getWeekDays = (date: DateTime, isGoingForward?: boolean | null): DateTime[] => {
-
+export const getWeekDays = (
+  date: DateTime,
+  isGoingForward?: boolean | null
+): DateTime[] => {
   // Get reference date for calculating new week
-  const dateForNewWeek: any = isGoingForward !== null
-      ? isGoingForward ? date.plus({ days: 1 })
-          : date.minus({ days: 1})
+  const dateForNewWeek: any =
+    isGoingForward !== null
+      ? isGoingForward
+        ? date.plus({ days: 1 })
+        : date.minus({ days: 1 })
       : date;
 
   // Set state
-  if (reduxStore.getState().calendarView !== 'month') {
+  if (reduxStore.getState().calendarView !== CALENDAR_MONTH_VIEW) {
     reduxStore.dispatch(setSelectedDate(dateForNewWeek));
   }
 
   const days = [];
   const dayInWeek = dateForNewWeek.weekday;
-  const startDate = dateForNewWeek.minus({ days: dayInWeek - 1});
+  const startDate = dateForNewWeek.minus({ days: dayInWeek - 1 });
 
-  if (reduxStore.getState().calendarView === 'monthAAA') {
+  if (reduxStore.getState().calendarView === CALENDAR_MONTH_VIEW) {
     if (dayInWeek === 0) {
       for (let i = 6; i > 0; i--) {
-        days.push(dateForNewWeek.minus({days: i}));
+        days.push(dateForNewWeek.minus({ days: i }));
       }
       days.push(dateForNewWeek);
     } else {
       days.push(startDate);
-      for (let i = 0; i < 7; i++) {
-        days.push(startDate.plus({days: i}));
+      for (let i = 1; i < 7; i++) {
+        days.push(startDate.plus({ days: i }));
       }
     }
   } else {
@@ -193,20 +221,23 @@ export const getWeekDays = (date: DateTime, isGoingForward?: boolean | null): Da
   return days;
 };
 
-export const getThreeDays = (date: DateTime, isGoingForward?: boolean | null): DateTime[] => {
+export const getThreeDays = (
+  date: DateTime,
+  isGoingForward?: boolean | null
+): DateTime[] => {
   const days = [];
 
   if (isGoingForward === null) {
     for (let i = 0; i <= 2; i++) {
-      days.push(date.plus({ days: i }))
+      days.push(date.plus({ days: i }));
     }
   } else if (isGoingForward) {
     for (let i = 1; i <= 3; i++) {
-      days.push(date.plus({ days: i }))
+      days.push(date.plus({ days: i }));
     }
   } else {
     for (let i = 3; i > 0; i--) {
-      days.push(date.minus({ days: i }))
+      days.push(date.minus({ days: i }));
     }
   }
 
@@ -223,41 +254,30 @@ export const getCalendarDays = (
   isCurrent?: boolean
 ): DateTime[] => {
   switch (calendarView) {
-    case 'week':
+    case CALENDAR_WEEK_VIEW:
       return getWeekDays(date, isGoingForward);
-    case '3days':
+    case CALENDAR_3DAYS_VIEW:
       return getThreeDays(date, isGoingForward);
-    case 'day':
+    case CALENDAR_DAY_VIEW:
       return getOneDay(date, isGoingForward);
-    case 'month':
+    case CALENDAR_MONTH_VIEW:
       return getMonthDays(date, isGoingForward, isCurrent);
     default:
       return getWeekDays(date, isGoingForward);
   }
-
 };
 
-export const getDaysNum = (calendarView: string): number => {
+export const getDaysNum = (calendarView: CalendarView): number => {
   switch (calendarView) {
-    case 'week':
+    case CALENDAR_WEEK_VIEW:
       return SEVEN_DAYS;
-    case '3days':
+    case CALENDAR_3DAYS_VIEW:
       return THREE_DAYS;
-    case 'day':
+    case CALENDAR_DAY_VIEW:
       return ONE_DAY;
     default:
       return SEVEN_DAYS;
   }
-};
-
-export const parseStringToDate = (stringDate: string): DateTime => {
-  const dateArray: any = stringDate.split('-');
-
-  const year: number = Number(dateArray[2]);
-  const month: number = Number(dateArray[1]);
-  const day: number = Number(dateArray[0]);
-
-  return DateTime.local().set({ year, month, day})
 };
 
 export const mapCalendarColors = (calendars: any) => {
@@ -275,28 +295,30 @@ export const mapCalendarColors = (calendars: any) => {
 };
 
 export const parseToDate = (item: string | DateTime): DateTime =>
-    typeof item === 'string' ? DateTime.fromISO(item) : item;
-
+  typeof item === 'string' ? DateTime.fromISO(item) : item;
 
 export const parseDateToString = (item: string | DateTime): string =>
-    typeof item === 'string' ? item : item.toString();
+  typeof item === 'string' ? item : item.toString();
 
-export const checkIfSwipingForward = (oldIndex: number, newIndex: number): boolean =>
-    oldIndex === 0 && newIndex === 1
-    || oldIndex === 1 && newIndex === 2
-    || oldIndex === 2 && newIndex === 0;
+export const checkIfSwipingForward = (
+  oldIndex: number,
+  newIndex: number
+): boolean =>
+  (oldIndex === 0 && newIndex === 1) ||
+  (oldIndex === 1 && newIndex === 2) ||
+  (oldIndex === 2 && newIndex === 0);
 
-export const chooseSelectedDateIndex = (calendarView: string): number => {
+export const chooseSelectedDateIndex = (calendarView: CalendarView): number => {
   switch (calendarView) {
-    case 'month':
+    case CALENDAR_MONTH_VIEW:
       return 15;
-    case 'week':
+    case CALENDAR_WEEK_VIEW:
       return 2;
-    case '3days':
+    case CALENDAR_3DAYS_VIEW:
       return 0;
-    case 'day':
+    case CALENDAR_DAY_VIEW:
       return 0;
     default:
-      return 0;
+      return 2;
   }
 };

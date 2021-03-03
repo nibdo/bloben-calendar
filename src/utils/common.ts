@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { reduxStore } from '../bloben-package/layers/ReduxLayer';
+import { reduxStore } from '../bloben-package/layers/ReduxProvider';
 import { TCalendarAlarmType } from '../types/types';
 import { v4 } from 'uuid';
 import {
@@ -52,23 +52,27 @@ export const findInArrayById = (array: any, id: string): any =>
     }
   });
 
-export const findInArrayByKeyValue = (array: any, key: string, value: string): any =>
-    new Promise((resolve) => {
-      if (!array || array.length === 0) {
+export const findInArrayByKeyValue = (
+  array: any,
+  key: string,
+  value: string
+): any =>
+  new Promise((resolve) => {
+    if (!array || array.length === 0) {
+      resolve(false);
+    }
+
+    for (let i = 0; i < array.length; i += 1) {
+      if (array[i][key] === value) {
+        resolve(array[i]);
+      }
+
+      // Handle loop end
+      if (i + 1 === array.length) {
         resolve(false);
       }
-
-      for (let i = 0; i < array.length; i += 1) {
-        if (array[i][key] === value) {
-          resolve(array[i]);
-        }
-
-        // Handle loop end
-        if (i + 1 === array.length) {
-          resolve(false);
-        }
-      }
-    });
+    }
+  });
 
 export const findInState = (item: any, stateString: any) =>
   new Promise((resolve) => {
@@ -194,26 +198,20 @@ export const addAlarm = (data: any, setState: any, alarms: any) => {
   };
   setState('alarms', [...alarms, newAlarm]);
 };
-export const removeAlarm = (
-  item: any,
-  setState: any,
-  alarms: any
-) => {
+export const removeAlarm = (item: any, setState: any, alarms: any) => {
   const alarmsFiltered: any = [...alarms].filter(
     (alarm: any) => alarm.id !== item.id
   );
   setState('alarms', alarmsFiltered);
 };
 
-export const nullTimeInDate = (date: DateTime): DateTime =>
+export const setNullTimeInDate = (date: DateTime): DateTime =>
   date.set({ hour: 0, minute: 0, second: 0 });
 
 export const getDayTimeStart = (date: DateTime): string =>
   date.set({ hour: 0, minute: 0, second: 0 }).toUTC().toString();
 export const getDayTimeEnd = (date: DateTime): string =>
   date.set({ hour: 23, minute: 59, second: 59 }).toUTC().toString();
-
-
 
 export const getEventsList = (): any => {
   const store: any = reduxStore.getState();
@@ -263,7 +261,8 @@ export const mapEventsToDates = (events: EventStateEntity[]): any => {
   // Sort events
   const sortedEvents: EventStateEntity[] = events.sort(
     (a: EventStateEntity, b: EventStateEntity) =>
-      DateTime.fromISO(a.startAt).millisecond - DateTime.fromISO(b.startAt).millisecond
+      DateTime.fromISO(a.startAt).millisecond -
+      DateTime.fromISO(b.startAt).millisecond
   );
 
   for (const event of sortedEvents) {
@@ -321,11 +320,13 @@ export const checkOverlappingEvents = (firstDate: any, secondDate: any) => {
   const startAtFirst: DateTime = DateTime.fromISO(firstDate.startAt);
   const endAtFirst: DateTime = DateTime.fromISO(firstDate.endAt);
 
-  return  new Interval({ start: startAtFirst, end: endAtFirst }).overlaps(
-      new Interval({ start: DateTime.fromISO(secondDate.startAt), end: DateTime.fromISO(secondDate.endAt) })
+  return new Interval({ start: startAtFirst, end: endAtFirst }).overlaps(
+    new Interval({
+      start: DateTime.fromISO(secondDate.startAt),
+      end: DateTime.fromISO(secondDate.endAt),
+    })
   );
-}
-
+};
 
 export const createMultiDayClone = (event: EventStateEntity) => {
   const data: any = [];
@@ -353,20 +354,24 @@ export const formatEventDate = (event: any) => {
   const isSameDay: boolean = LuxonHelper.isSameDay(startAt, endAt);
 
   const dateFromString: string = parseToDateTime(
-      startAt,
-      timezoneStart
+    startAt,
+    timezoneStart
   ).toFormat(`d LLL ${isSameDay ? 'yyyy' : ''}`);
   const dateToString: string = !isSameDay
-      ? ` - ${parseToDateTime(endAt, timezoneStart).toFormat('d LLL yyyy')}`
-      : '';
-  const dates: string = `${dateFromString}${dateToString}`;
+    ? ` - ${parseToDateTime(endAt, timezoneStart).toFormat('d LLL yyyy')}`
+    : '';
+  const dates = `${dateFromString}${dateToString}`;
 
-  const timeFrom: string = parseToDateTime(startAt, timezoneStart).toFormat('hh:mm');
-  const timeTo: string = parseToDateTime(endAt, timezoneStart).toFormat('hh:mm');
-  const time: string = `${timeFrom} - ${timeTo}`
+  const timeFrom: string = parseToDateTime(startAt, timezoneStart).toFormat(
+    'hh:mm'
+  );
+  const timeTo: string = parseToDateTime(endAt, timezoneStart).toFormat(
+    'hh:mm'
+  );
+  const time = `${timeFrom} - ${timeTo}`;
 
   return {
     dates,
-    time
-  }
-}
+    time,
+  };
+};

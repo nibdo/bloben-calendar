@@ -263,7 +263,6 @@ const CalendarEvent = (props: ICalendarEventProps) => {
     e.preventDefault();
     e.stopPropagation();
     history.push(`/event/${event.id}`);
-    // dispatch(selectEvent(props.event))
   };
 
   const style = {

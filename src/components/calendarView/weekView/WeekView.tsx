@@ -1,28 +1,31 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import './WeekView.scss';
-
-import CalendarHeader from '../../calendarHeader/CalendarHeader';
-import CalendarBody from '../../calendarBody/CalendarBody';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
-import { WidthHook } from '../../../bloben-common/utils/layout';
-import { checkIfSwipingForward } from '../calendar-common';
 import { useSelector } from 'react-redux';
 
-interface IWeekViewContainerProps {
-    daysNum: number;
-    openNewEvent: any;
-    getNewCalendarDays: any;
+import CalendarHeader from '../../calendarHeader/CalendarHeader';
+import CalendarBody from '../../calendarBody/CalendarBody';
+import { WidthHook } from '../../../bloben-common/utils/layout';
+import { checkIfSwipingForward } from '../calendar-common';
+import { Context } from '../../../bloben-package/context/store';
+import { getNewCalendarDays } from '../../../utils/getCalendarDaysAndEvents';
+
+interface WeekViewContainerProps {
+  daysNum: number;
+  openNewEvent: any;
 }
-const WeekView = (props: IWeekViewContainerProps) => {
-  const { daysNum, openNewEvent, getNewCalendarDays } = props;
+const WeekView = (props: WeekViewContainerProps) => {
+  const { daysNum, openNewEvent } = props;
 
   const width: number = WidthHook();
-  const isMobile: boolean = useSelector((state: any) => state.isMobile);
   const calendarDaysCurrentIndex: number = useSelector(
     (state: any) => state.calendarDaysCurrentIndex
   );
+
+  const [store] = useContext(Context);
+  const { isMobile } = store;
 
   const sliderSettings: any = {
     dots: false,
@@ -44,24 +47,15 @@ const WeekView = (props: IWeekViewContainerProps) => {
   return isMobile ? (
     <Slider {...sliderSettings}>
       <div style={{ height: '100%', width, display: 'flex' }}>
-        <CalendarHeader
-          index={0}
-          daysNum={daysNum}
-        />
+        <CalendarHeader index={0} daysNum={daysNum} />
         <CalendarBody index={0} daysNum={daysNum} openNewEvent={openNewEvent} />
       </div>
       <div style={{ height: '100%', width, display: 'flex' }}>
-        <CalendarHeader
-          index={1}
-          daysNum={daysNum}
-        />
+        <CalendarHeader index={1} daysNum={daysNum} />
         <CalendarBody index={1} daysNum={daysNum} openNewEvent={openNewEvent} />
       </div>
       <div style={{ height: '100%', width, display: 'flex' }}>
-        <CalendarHeader
-          index={2}
-          daysNum={daysNum}
-        />
+        <CalendarHeader index={2} daysNum={daysNum} />
         <CalendarBody index={2} daysNum={daysNum} openNewEvent={openNewEvent} />
       </div>
     </Slider>

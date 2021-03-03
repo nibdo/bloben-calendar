@@ -14,7 +14,9 @@ import { useHistory } from 'react-router-dom';
 import CalendarApi from '../../../api/calendar';
 import { DateTime } from 'luxon';
 import EvaIcons from '../../../bloben-common/components/eva-icons';
-import ICalHelper, { IAttendee } from '../../../bloben-package/utils/ICalHelper';
+import ICalHelper, {
+  IAttendee,
+} from '../../../bloben-package/utils/ICalHelper';
 import AttendeeSettings, {
   AttendeeActions,
 } from '../../attendeeSettings/AttendeeSettings';
@@ -25,7 +27,9 @@ import { Context } from '../../../bloben-package/context/store';
 import CalendarIcon from '@material-ui/icons/DateRange';
 import { IUserProfile } from '../../../bloben-package/types/common.types';
 import { useSelector } from 'react-redux';
-import EventStateEntity, { EventBodyToSend } from '../../../bloben-utils/models/event.entity';
+import EventStateEntity, {
+  EventBodyToSend,
+} from '../../../bloben-utils/models/event.entity';
 import { PgpKeys } from '../../../bloben-utils/utils/OpenPgp';
 
 const EventDates = (props: any) => {
@@ -78,7 +82,6 @@ const EventView = () => {
       eventItem.calendarId
     );
     setCalendar(thisCalendar);
-    console.log('thisCalendar,', thisCalendar);
   };
 
   const loadEvent = async () => {
@@ -102,32 +105,38 @@ const EventView = () => {
       }
 
       return item;
-    })
+    });
 
     event.attendees = attendeesClone;
 
     const eventModel: any = new EventStateEntity(event);
-    const bodyToSend: EventBodyToSend = await eventModel.formatBodyToSendOpenPgp(pgpKeys);
+    const bodyToSend: EventBodyToSend = await eventModel.formatBodyToSendOpenPgp(
+      pgpKeys
+    );
 
-    console.log('bodyyy', bodyToSend)
+    console.log('bodyyy', bodyToSend);
     // Update event
     await CalendarApi.updateEvent(bodyToSend);
 
     // Send response to organizer
-    const icalTest: any = new ICalHelper(eventModel.getReduxStateObj()).parseTo();
-    console.log(icalTest)
+    const icalTest: any = new ICalHelper(
+      eventModel.getReduxStateObj()
+    ).parseTo();
+    console.log(icalTest);
     const inviteData: any = {
-      attendee: event.attendees.filter((item: any) => item.mailto !== userProfile.appEmail).map((item: any) => item.mailto),
+      attendee: event.attendees
+        .filter((item: any) => item.mailto !== userProfile.appEmail)
+        .map((item: any) => item.mailto),
       payload: JSON.stringify({
-                                body: 'Event invite update',
-                                subject: 'Event invite update',
-                                attachment: btoa(icalTest),
-                              })
+        body: 'Event invite update',
+        subject: 'Event invite update',
+        attachment: btoa(icalTest),
+      }),
     };
     console.log(inviteData);
 
-    await CalendarApi.sendInvite(inviteData)
-  }
+    await CalendarApi.sendInvite(inviteData);
+  };
 
   const deleteEvent = async () => {
     if (event) {
@@ -168,8 +177,6 @@ const EventView = () => {
       />
       {calendar.name ? <Calendar calendar={calendar} disabled /> : null}
       {event.attendees.length > 0 ? <AttendeeActions /> : null}
-
-
     </div>
   ) : null;
 };

@@ -1,43 +1,21 @@
-import { reduxStore } from '../../bloben-package/layers/ReduxLayer';
-import OpenPgp, { PgpKeys } from '../../bloben-utils/utils/OpenPgp';
+import { reduxStore } from '../../bloben-package/layers/ReduxProvider';
+import OpenPgp from '../../bloben-utils/utils/OpenPgp';
+import { cloneDeep, createMultiDayClone, findInEvents } from '../common';
 import {
-  cloneDeep,
-  createMultiDayClone,
-  findInArrayById,
-  findInEvents,
-} from '../common';
-import CalendarStateEntity from '../../data/models/state/calendar.entity';
-import {
-  addCalendar,
   setAllEvents,
-  setAllEventsLastSync,
   setAllEventsSyncLog,
-  setCalendars,
-  setCalendarsSyncLog,
   setEvents,
   setEventsAreFetching,
-  setEventsLastSync,
   setEventsSyncLog,
-  updateCalendar,
 } from '../../redux/actions';
 import { AxiosResponse } from 'axios';
-import CalendarApi, {
-  sendWebsocketMessage,
-  WEBSOCKET_GET_ONE_EVENT,
-} from '../../api/calendar';
-import { DateTime } from 'luxon';
-import {
-  GetEventWebsocketByIdDTO,
-  ICalendarSettings,
-  ISyncLog,
-} from '../../types/types';
-import { logger } from '../../bloben-common/utils/common';
+import CalendarApi from '../../api/calendar';
+import { ICalendarSettings, ISyncLog } from '../../types/types';
 import { EventResultDTO } from '../../data/types';
 import EventStateEntity from '../../bloben-utils/models/event.entity';
-import Crypto from '../../bloben-package/utils/encryption';
 import { findInArrayWithIndex } from '../filter/findInArray';
-import { DEFAULT_DATE } from '../../redux/reducers/syncLog';
-import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
+import Crypto from '../../bloben-utils/utils/encryption';
+import { IUser } from '../../bloben-utils/models/User';
 
 export const decryptEvents = async (data: any): Promise<void> => {
   const store: any = reduxStore.getState();
@@ -46,7 +24,7 @@ export const decryptEvents = async (data: any): Promise<void> => {
 
   const cryptoPassword: any = store.cryptoPassword;
   const password: string = store.password;
-  const pgpKeys: PgpKeys = store.pgpKeys;
+  const user: IUser = store.user;
   const calendarSettings: ICalendarSettings = store.calendarSettings;
 
   if (!data || data.length === 0) {
@@ -67,10 +45,10 @@ export const decryptEvents = async (data: any): Promise<void> => {
 
     let decryptedData: any;
 
-    if (pgpKeys && pgpKeys.publicKey) {
+    if (user && user.publicKey) {
       decryptedData = await OpenPgp.decrypt(
-        pgpKeys.publicKey,
-        pgpKeys.privateKey,
+        user.publicKey,
+        user.privateKey,
         password,
         eventResultDTO.data
       );
@@ -146,14 +124,14 @@ export const decryptEvents = async (data: any): Promise<void> => {
 
 const decryptEventPgp = async (
   password: string,
-  pgpKeys: PgpKeys,
+  user: IUser,
   item: EventResultDTO,
   defaultTimezone?: string
 ): Promise<any> => {
   const eventResultDTO: EventResultDTO = item;
   let decryptedData: any = await OpenPgp.decrypt(
-    pgpKeys.publicKey,
-    pgpKeys.privateKey,
+    user.publicKey,
+    user.privateKey,
     password,
     eventResultDTO.data
   );
@@ -193,7 +171,7 @@ const SyncEvents: any = {
   getAllLastSync: async () => {
     const store: any = reduxStore.getState();
     const stateClone: any = cloneDeep(store.allEvents);
-    const pgpKeys: PgpKeys = store.pgpKeys;
+    const user: IUser = store.user;
     const password: string = store.password;
     const syncLog: ISyncLog = store.syncLog;
     const defaultTimezone: string = store.defaultTimezone;
@@ -206,13 +184,13 @@ const SyncEvents: any = {
 
     const { data } = response;
 
-    const decryptedEvents: any = []
+    const decryptedEvents: any = [];
     for (const item of data) {
       const event: any = await decryptEventPgp(
-          password,
-          pgpKeys,
-          item,
-          defaultTimezone
+        password,
+        user,
+        item,
+        defaultTimezone
       );
 
       decryptedEvents.push(event);
@@ -220,29 +198,28 @@ const SyncEvents: any = {
 
     for (const item of decryptedEvents) {
       if (store.allEvents.length === 0) {
-        result.push(item)
+        result.push(item);
       } else {
-        for (let i: number = 0; i < result.length; i += 1) {
+        for (let i = 0; i < result.length; i += 1) {
           if (result[i].ix === item.id) {
             result[i] = await decryptEventPgp(
-                password,
-                pgpKeys,
-                item,
-                defaultTimezone
+              password,
+              user,
+              item,
+              defaultTimezone
             );
           } else {
             if (i + 1 === decryptedEvents.length) {
-              result.push(item)
+              result.push(item);
             }
           }
         }
       }
-
     }
     reduxStore.dispatch(setAllEvents(result));
 
     reduxStore.dispatch(setAllEventsSyncLog());
-    },
+  },
   processEvents: async (data: any) => {
     const store: any = reduxStore.getState();
     const calendarSettings: ICalendarSettings = store.calendarSettings;
@@ -250,7 +227,7 @@ const SyncEvents: any = {
     // Clone state
     const stateClone: any = cloneDeep(store.events);
     const password: string = store.password;
-    const pgpKeys: PgpKeys = store.pgpKeys;
+    const user: IUser = store.user;
 
     if (!data || data.length === 0) {
       return;
@@ -268,8 +245,8 @@ const SyncEvents: any = {
       const eventResultDTO: EventResultDTO = data[i];
 
       let decryptedData: any = await OpenPgp.decrypt(
-        pgpKeys.publicKey,
-        pgpKeys.privateKey,
+        user.publicKey,
+        user.privateKey,
         password,
         eventResultDTO.data
       );

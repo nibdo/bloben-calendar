@@ -6,10 +6,10 @@ import HeaderCalendarTitle from '../headerCalendarTitle/HeaderCalendarTitle';
 import EvaIcons from '../../bloben-common/components/eva-icons';
 import { Context } from '../../bloben-package/context/store';
 import { parseCssDark } from '../../bloben-common/utils/common';
+import { getNewCalendarDays } from '../../utils/getCalendarDaysAndEvents';
 
-interface ICalendarDesktopNavigationProps {
+interface CalendarDesktopNavigationProps {
   title: string;
-  getNewCalendarDays: any;
 }
 
 /**
@@ -17,36 +17,35 @@ interface ICalendarDesktopNavigationProps {
  * @param props
  * @constructor
  */
-const CalendarDesktopNavigation = (props: ICalendarDesktopNavigationProps) => {
-  const {title, getNewCalendarDays} = props;
+const CalendarDesktopNavigation = (props: CalendarDesktopNavigationProps) => {
+  const { title } = props;
 
   const [store] = useContext(Context);
 
-  const {isDark} = store;
+  const { isDark } = store;
 
-  const navigateBackwards = (): void =>
-      getNewCalendarDays(false);
-  const navigateForward = (): void =>
-      getNewCalendarDays(true);
+  const navigateBackwards = async (): Promise<void> =>
+    await getNewCalendarDays(false);
+  const navigateForward = async (): Promise<void> =>
+    await getNewCalendarDays(true);
 
   return (
-      <div
-          className={parseCssDark('calendar-desktop-navigation__container', isDark)}
-      >
-        <div style={{display: 'flex', width: 300}}>
-        <HeaderCalendarTitle title={title}/>
-        </div>
-        <div className={'calendar-desktop-navigation__buttons'}>
-          <IconButton key={'left'} onClick={navigateBackwards}>
-            <EvaIcons.ChevronLeft className={parseCssDark('icon-svg', isDark)} />
-          </IconButton>
-          <IconButton key={'right'} onClick={navigateForward}>
-            <EvaIcons.ChevronRight className={parseCssDark('icon-svg', isDark)} />
-          </IconButton>
-        </div>
+    <div
+      className={parseCssDark('calendar-desktop-navigation__container', isDark)}
+    >
+      <div style={{ display: 'flex', width: 300 }}>
+        <HeaderCalendarTitle title={title} />
       </div>
+      <div className={'calendar-desktop-navigation__buttons'}>
+        <IconButton key={'left'} onClick={navigateBackwards}>
+          <EvaIcons.ChevronLeft className={parseCssDark('icon-svg', isDark)} />
+        </IconButton>
+        <IconButton key={'right'} onClick={navigateForward}>
+          <EvaIcons.ChevronRight className={parseCssDark('icon-svg', isDark)} />
+        </IconButton>
+      </div>
+    </div>
   );
-
-}
+};
 
 export default CalendarDesktopNavigation;

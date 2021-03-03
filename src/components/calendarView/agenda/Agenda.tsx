@@ -1,28 +1,30 @@
 import React, { useContext, useEffect, useState } from 'react';
+import { Dispatch } from 'redux';
+import { useHistory } from 'react-router';
+import _ from 'lodash';
+import { useDispatch, useSelector } from 'react-redux';
+import { DateTime } from 'luxon';
+
 import './Agenda.scss';
-import { format, getMonth, isAfter, isToday } from 'date-fns';
 import {
   HEADER_HEIGHT_SMALL,
   NAVBAR_HEIGHT_BASE,
   parseEventColor,
-  parseStringToDate,
 } from '../calendar-common';
-import { useDispatch, useSelector } from 'react-redux';
 import EventStateEntity from '../../../bloben-utils/models/event.entity';
 import { setEventsAreFetching } from '../../../redux/actions';
-import _ from 'lodash';
-import { useHistory } from 'react-router';
 import { HeightHook } from '../../../bloben-common/utils/layout';
 import { Context } from '../../../bloben-package/context/store';
 import { parseCssDark } from '../../../bloben-common/utils/common';
-import { DateTime } from 'luxon';
 import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
+import { ReduxState } from '../../../types/types';
+import { getNewCalendarDays } from '../../../utils/getCalendarDaysAndEvents';
 
-interface IMonthTitleProps {
+interface MonthTitleProps {
   isDark: boolean;
   title: string;
 }
-const MonthTitle = (props: IMonthTitleProps) => {
+const MonthTitle = (props: MonthTitleProps) => {
   const { isDark, title } = props;
 
   return (
@@ -34,7 +36,7 @@ const MonthTitle = (props: IMonthTitleProps) => {
   );
 };
 
-interface IAgendaEventProps {
+interface AgendaEventProps {
   isDark: boolean;
   item: any;
   isFirstForDay?: boolean;
@@ -43,7 +45,7 @@ interface IAgendaEventProps {
   history?: any;
   isDisabled?: boolean;
 }
-export const AgendaEvent = (props: IAgendaEventProps) => {
+export const AgendaEvent = (props: AgendaEventProps) => {
   const {
     isDark,
     item,
@@ -62,7 +64,9 @@ export const AgendaEvent = (props: IAgendaEventProps) => {
     background: `${eventColor}`,
   };
 
-  const isDateToday: boolean = isFirstForDay ? LuxonHelper.isToday(DateTime.fromISO(startAt)) : false;
+  const isDateToday: boolean = isFirstForDay
+    ? LuxonHelper.isToday(DateTime.fromISO(startAt))
+    : false;
 
   // Scroll to first event
   useEffect(() => {
@@ -76,7 +80,7 @@ export const AgendaEvent = (props: IAgendaEventProps) => {
         element.scrollTo({ top: initScrollOffset * 102 });
       }
     }
-  },        []);
+  }, []);
 
   const handleEventClick = (): void => {
     if (isDisabled) {
@@ -111,12 +115,19 @@ export const AgendaEvent = (props: IAgendaEventProps) => {
             <div
               className={`agenda__day-container${isDateToday ? '-today' : ''}`}
             >
-              <p className={parseCssDark(`agenda__day-text${isDateToday ? '-today' : ''}`, isDark)}>
+              <p
+                className={parseCssDark(
+                  `agenda__day-text${isDateToday ? '-today' : ''}`,
+                  isDark
+                )}
+              >
                 {DateTime.fromISO(startAt).toFormat('d')}
               </p>
             </div>
             <div className={'agenda__day-container-small'}>
-              <p className={parseCssDark('agenda__day-text-small', isDark)}>{DateTime.fromISO(startAt).toFormat('iii')}</p>
+              <p className={parseCssDark('agenda__day-text-small', isDark)}>
+                {DateTime.fromISO(startAt).toFormat('iii')}
+              </p>
             </div>
           </div>
         ) : null}
@@ -124,21 +135,22 @@ export const AgendaEvent = (props: IAgendaEventProps) => {
       <div className={'agenda-item__container'} style={itemStyle}>
         <p className={parseCssDark('agenda-item__title', isDark)}>{summary}</p>
         <p className={'agenda-item__hours'}>
-          {DateTime.fromISO(startAt).toFormat('hh:mm')} - {DateTime.fromISO(endAt).toFormat('hh:mm')}
+          {DateTime.fromISO(startAt).toFormat('hh:mm')} -{' '}
+          {DateTime.fromISO(endAt).toFormat('hh:mm')}
         </p>
       </div>
     </div>
   );
 };
 
-interface IAgendaComponentProps {
+interface AgendaComponentProps {
   events: any;
   isDisabled?: boolean;
   isDark: boolean;
   changeHeaderTitle: any;
   initScrollOffset: any;
 }
-const AgendaComponent = (props: IAgendaComponentProps) => {
+const AgendaComponent = (props: AgendaComponentProps) => {
   const {
     events,
     isDark,
@@ -173,10 +185,10 @@ const parseDateKeysForSort = (dateString: string): number => {
   const month: string = dateArray[1];
   const day: string = dateArray[0];
 
-  const stringResult: string = `${year}${month}${day}`;
+  const stringResult = `${year}${month}${day}`;
 
   return Number(stringResult);
-}
+};
 
 export const renderAgendaEvents = (
   data: any,
@@ -189,36 +201,36 @@ export const renderAgendaEvents = (
 
   let prevMonth: DateTime | null = null;
 
-  let hasEventsForToday: boolean = false;
-  let scrollOffsetFinished: boolean = false;
+  let hasEventsForToday = false;
+  let scrollOffsetFinished = false;
 
   // Store offset for each event
-  let initScrollOffset: number = 0;
+  let initScrollOffset = 0;
 
   // Get real list height
-  let itemsCount: number = 0;
+  let itemsCount = 0;
 
   const objectData: any = Object.keys(data);
 
-  const objectDataSorted: any = objectData.sort((a: any, b: any) => parseDateKeysForSort(a) - parseDateKeysForSort(b)).reduce(
-      (value: any, key: string) => {
-        value[key] = data[key];
+  const objectDataSorted: any = objectData
+    .sort((a: any, b: any) => parseDateKeysForSort(a) - parseDateKeysForSort(b))
+    .reduce((value: any, key: string) => {
+      value[key] = data[key];
 
-        return value;
-      },
-      {}
-  );
+      return value;
+    }, {});
 
   return Object.keys(objectDataSorted).map((keyName: string, index: number) => {
     // const { id, startAt, endDate, scrollToSet } = item;
     const item: any = data[keyName];
 
-    const dateObj: DateTime = DateTime.fromFormat(keyName, 'dd-mm-yyyy')
+    const dateObj: DateTime = DateTime.fromFormat(keyName, 'dd-mm-yyyy');
     const thisMonth: any = dateObj.month;
 
     const isNewMonth: boolean = thisMonth !== prevMonth;
     const isDateToday: boolean = LuxonHelper.isToday(dateObj);
-    const isAfterToday: boolean = DateTime.local().startOf('day') < dateObj.startOf('day');
+    const isAfterToday: boolean =
+      DateTime.local().startOf('day') < dateObj.startOf('day');
 
     if (!scrollOffsetFinished && !hasEventsForToday && isAfterToday) {
       scrollOffsetFinished = true;
@@ -248,19 +260,19 @@ export const renderAgendaEvents = (
         hasEventsForToday = true;
 
         return (
-            <div>
-              {isNewMonth ? (
-                  <MonthTitle title={dateObj.toFormat('MMMM')} isDark={isDark} />
-              ) : null}
-              <AgendaComponent
-                  key={dateObj.toString()}
-                  events={dayEvents}
-                  isDark={isDark}
-                  changeHeaderTitle={changeHeaderTitle}
-                  initScrollOffset={initScrollOffset}
-                  isDisabled={isDisabled}
-              />{' '}
-            </div>
+          <div>
+            {isNewMonth ? (
+              <MonthTitle title={dateObj.toFormat('MMMM')} isDark={isDark} />
+            ) : null}
+            <AgendaComponent
+              key={dateObj.toString()}
+              events={dayEvents}
+              isDark={isDark}
+              changeHeaderTitle={changeHeaderTitle}
+              initScrollOffset={initScrollOffset}
+              isDisabled={isDisabled}
+            />{' '}
+          </div>
         );
       }
 
@@ -273,7 +285,7 @@ export const renderAgendaEvents = (
       return (
         <div>
           {isNewMonth ? (
-              <MonthTitle title={dateObj.toFormat('MMMM')} isDark={isDark} />
+            <MonthTitle title={dateObj.toFormat('MMMM')} isDark={isDark} />
           ) : null}
           <AgendaComponent
             key={dateObj.toString()}
@@ -289,12 +301,12 @@ export const renderAgendaEvents = (
   });
 };
 
-interface IAgendaViewProps {
+interface AgendaViewProps {
   handleScroll: any;
   setListHeight: any;
   changeHeaderTitle: any;
 }
-const AgendaView = (props: IAgendaViewProps) => {
+const AgendaView = (props: AgendaViewProps) => {
   const { handleScroll, setListHeight, changeHeaderTitle } = props;
 
   const [store] = useContext(Context);
@@ -327,18 +339,17 @@ const AgendaView = (props: IAgendaViewProps) => {
   );
 };
 
-interface IAgendaProps {
+interface AgendaProps {
   changeHeaderTitle: any;
-  getNewCalendarDays: any;
 }
-const Agenda = (props: IAgendaProps) => {
+const Agenda = (props: AgendaProps) => {
   const eventsAreFetching: boolean = useSelector(
-    (state: any) => state.eventsAreFetching
+    (state: ReduxState) => state.eventsAreFetching
   );
-  const dispatch: any = useDispatch();
+  const dispatch: Dispatch = useDispatch();
 
   const [listHeight, setListHeight] = useState(0);
-  const { changeHeaderTitle, getNewCalendarDays } = props;
+  const { changeHeaderTitle } = props;
 
   // Threshold trigger for fetching new data
   const FETCH_NEW_DATA_THRESHOLD: number = (listHeight - 6) * 102;
@@ -346,11 +357,11 @@ const Agenda = (props: IAgendaProps) => {
   // Debounce scroll function
   const handleScroll = _.debounce((e: any) => {
     handleScrollFunc(e);
-  },                              50);
+  }, 50);
 
   // Handle onScroll event
   // Fetch new data on list end and update header title
-  const handleScrollFunc = (e: any) => {
+  const handleScrollFunc = async (e: any) => {
     const agendaElement: any = document.getElementById('agenda');
     const element = document.elementFromPoint(0, 56);
 
@@ -365,7 +376,7 @@ const Agenda = (props: IAgendaProps) => {
       !eventsAreFetching
     ) {
       dispatch(setEventsAreFetching(true));
-      getNewCalendarDays();
+      await getNewCalendarDays();
     }
   };
 

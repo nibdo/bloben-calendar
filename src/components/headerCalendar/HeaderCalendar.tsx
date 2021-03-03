@@ -2,20 +2,20 @@ import React, { useContext, useEffect, useState } from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import { Link } from 'react-router-dom';
 import './HeaderCalendar.scss';
+import { useSelector } from 'react-redux';
+
 import EvaIcons from '../../bloben-common/components/eva-icons';
 import Dropdown from '../../bloben-package/components/dropdown/Dropdown';
 import { isCalendarApp } from '../../bloben-package/utils/common';
-import { useSelector } from 'react-redux';
 import Logo from '../../bloben-common/components/logo/Logo';
-import HeaderCalendarButtons
-  from '../headerCalendarButtons/HeaderCalendarButtons';
+import HeaderCalendarButtons from '../headerCalendarButtons/HeaderCalendarButtons';
 import HeaderCalendarTitle from '../headerCalendarTitle/HeaderCalendarTitle';
 import { Context } from '../../bloben-package/context/store';
 
-interface IListHeaderIconsProps {
+interface ListHeaderIconsProps {
   handleOpenSearch: any;
 }
-const ListHeaderIcons = (props: IListHeaderIconsProps) => {
+const ListHeaderIcons = (props: ListHeaderIconsProps) => {
   const { handleOpenSearch } = props;
 
   const [store] = useContext(Context);
@@ -38,21 +38,23 @@ const ListHeaderIcons = (props: IListHeaderIconsProps) => {
         </IconButton>
       ) : null}
       {isMobile ? null : (
-        <IconButton onClick={openDropdown} style={{ position: 'relative', right: 0 }}>
+        <IconButton
+          onClick={openDropdown}
+          style={{ position: 'relative', right: 0 }}
+        >
           <EvaIcons.Grid className={`icon-svg ${isDark ? 'dark-svg' : ''}`} />
           <Dropdown
-              isOpen={dropdown}
-              handleClose={closeDropdown}
-              variant={'desktop'}
+            isOpen={dropdown}
+            handleClose={closeDropdown}
+            variant={'desktop'}
           />
         </IconButton>
-
       )}
     </div>
   );
 };
 
-interface IHeaderMobileProps {
+interface HeaderMobileProps {
   children: any;
   searchIsOpen?: boolean;
   handleCloseSearch: any;
@@ -62,7 +64,7 @@ interface IHeaderMobileProps {
   routeBack?: any;
   close?: any;
 }
-const HeaderMobile = (props: IHeaderMobileProps) => {
+const HeaderMobile = (props: HeaderMobileProps) => {
   const {
     children,
     searchIsOpen,
@@ -101,12 +103,10 @@ const HeaderMobile = (props: IHeaderMobileProps) => {
             marginLeft: isCalendarApp() ? 12 : '',
           }}
         >
-          <HeaderCalendarTitle title={title}/>
+          <HeaderCalendarTitle title={title} />
           <div className={'header__container--icons'}>
             {!icons ? (
-              <ListHeaderIcons
-                handleOpenSearch={handleOpenSearch}
-              />
+              <ListHeaderIcons handleOpenSearch={handleOpenSearch} />
             ) : (
               icons
             )}
@@ -117,10 +117,10 @@ const HeaderMobile = (props: IHeaderMobileProps) => {
   );
 };
 
-interface IHeaderDesktopProps {
+interface HeaderDesktopProps {
   handleOpenSearch?: any;
 }
-const HeaderDesktop = (props: IHeaderDesktopProps) => {
+const HeaderDesktop = (props: HeaderDesktopProps) => {
   const { handleOpenSearch } = props;
 
   const [store] = useContext(Context);
@@ -128,32 +128,30 @@ const HeaderDesktop = (props: IHeaderDesktopProps) => {
 
   return (
     <div className={'header__row'}>
-      <Logo isDark={isDark} imageClassName={'logo__primary'} textClassName={'logo__text-primary'}/>
+      <Logo
+        isDark={isDark}
+        imageClassName={'logo__primary'}
+        textClassName={'logo__text-primary'}
+      />
       <div className={'header__container--icons'}>
-      <HeaderCalendarButtons/>
+        <HeaderCalendarButtons />
       </div>
       <div className={'header__container--icons'}>
-        <ListHeaderIcons handleOpenSearch={handleOpenSearch}/>
+        <ListHeaderIcons handleOpenSearch={handleOpenSearch} />
       </div>
     </div>
   );
 };
 
-interface IHeaderViewProps {
+interface HeaderViewProps {
   hasHeaderShadow: boolean;
   icons?: any;
   animation?: string;
   children: any;
   title: string;
 }
-const HeaderView = (props: IHeaderViewProps) => {
-  const {
-    hasHeaderShadow,
-    icons,
-    animation,
-    children,
-    title
-  } = props;
+const HeaderView = (props: HeaderViewProps) => {
+  const { hasHeaderShadow, icons, animation, children, title } = props;
 
   const [store] = useContext(Context);
   const { isDark, isMobile } = store;
@@ -192,7 +190,7 @@ const HeaderView = (props: IHeaderViewProps) => {
             searchIsOpen={searchIsOpen}
           />
         ) : (
-          <HeaderDesktop  />
+          <HeaderDesktop />
         )}
       </div>
     </div>
@@ -216,7 +214,7 @@ const HeaderCalendar = (props: IHeaderCalendarProps) => {
     } else {
       setAnimation('header__text-hidden');
     }
-  },        [hasHeaderShadow]);
+  }, [hasHeaderShadow]);
 
   return (
     <HeaderView

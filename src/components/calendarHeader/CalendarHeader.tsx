@@ -1,13 +1,9 @@
 import React, { useContext } from 'react';
+import { DateTime } from 'luxon';
+import { useSelector } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
 import './CalendarHeader.scss';
-import {
-  differenceInCalendarDays,
-  format,
-  formatISO,
-  getDate,
-  isSameDay,
-  isToday,
-} from 'date-fns';
 import { WidthHook } from 'bloben-common/utils/layout';
 import {
   CALENDAR_DRAWER_DESKTOP_WIDTH,
@@ -15,25 +11,24 @@ import {
   calendarColors,
   daysText,
 } from '../calendarView/calendar-common';
-import { useSelector } from 'react-redux';
 import { parseCssDark } from '../../bloben-common/utils/common';
-import { useHistory } from 'react-router-dom';
 import { checkOverlappingEvents } from '../../utils/common';
 import { Context } from '../../bloben-package/context/store';
-import { DateTime } from 'luxon';
 import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
 import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
 import { formatTimestampToDate } from '../../bloben-utils/utils/common';
+import { CalendarDays, CalendarView, ReduxState } from '../../types/types';
+import { CALENDAR_DAY_VIEW, CALENDAR_MONTH_VIEW } from '../../utils/contants';
 
-interface IEventHeaderProps {
+interface EventHeaderProps {
   calendarColor: string;
   eventWidth: number;
   offsetLeft: number;
   event: any;
   isDark: boolean;
 }
-const EventHeader = (props: IEventHeaderProps) => {
-  const {calendarColor, eventWidth, offsetLeft, event, isDark} = props;
+const EventHeader = (props: EventHeaderProps) => {
+  const { calendarColor, eventWidth, offsetLeft, event, isDark } = props;
 
   const history: any = useHistory();
 
@@ -64,7 +59,7 @@ const EventHeader = (props: IEventHeaderProps) => {
   );
 };
 
-interface IDaysTextProps {
+interface DaysTextProps {
   daysNum: number;
   days: any;
   width: number;
@@ -75,19 +70,20 @@ interface IDaysTextProps {
  * @param props
  * @constructor
  */
-const DaysText = (props: IDaysTextProps) => {
+const DaysText = (props: DaysTextProps) => {
   const { daysNum, days, width } = props;
 
-  const calendarView: string = useSelector((state: any) => state.calendarView);
-  const calendarBodyWidth: number = useSelector(
-    (state: any) => state.calendarBodyWidth
+  const calendarView: CalendarView = useSelector(
+    (state: ReduxState) => state.calendarView
   );
-  const calendarDays: string = useSelector((state: any) => state.calendarDays);
+  const calendarBodyWidth: number = useSelector(
+    (state: ReduxState) => state.calendarBodyWidth
+  );
 
   const [store] = useContext(Context);
   const { isMobile } = store;
 
-  const isMonthView: boolean = calendarView === 'month';
+  const isMonthView: boolean = calendarView === CALENDAR_MONTH_VIEW;
 
   const colWidth: number = isMonthView
     ? (isMobile ? width : width - CALENDAR_DRAWER_DESKTOP_WIDTH) / daysNum
@@ -129,7 +125,7 @@ const DaysText = (props: IDaysTextProps) => {
   );
 };
 
-interface IDaysNumericProps {
+interface DaysNumericProps {
   daysNum: number;
   index: number;
 }
@@ -139,12 +135,14 @@ interface IDaysNumericProps {
  * @param props
  * @constructor
  */
-const DaysNumeric = (props: IDaysNumericProps) => {
+const DaysNumeric = (props: DaysNumericProps) => {
   const [store] = useContext(Context);
   const { isDark } = store;
 
   const calendarDays: any = useSelector((state: any) => state.calendarDays);
-  const selectedDate: DateTime = useSelector((state: any) => state.selectedDate);
+  const selectedDate: DateTime = useSelector(
+    (state: any) => state.selectedDate
+  );
   const calendarView: string = useSelector((state: any) => state.calendarView);
 
   const calendarBodyWidth: number = useSelector(
@@ -162,7 +160,9 @@ const DaysNumeric = (props: IDaysNumericProps) => {
     calendarDays[index].map((day: DateTime) => {
       const isDayToday: boolean = LuxonHelper.isToday(day);
       const isSelected: boolean =
-        LuxonHelper.isSameDay(day, selectedDate) && calendarView === 'day' && !isDayToday;
+        LuxonHelper.isSameDay(day, selectedDate) &&
+        calendarView === 'day' &&
+        !isDayToday;
 
       return (
         <div
@@ -196,13 +196,13 @@ const DaysNumeric = (props: IDaysNumericProps) => {
   );
 };
 
-interface IHeaderDaysProps {
+interface HeaderDaysProps {
   width: number;
   isMonthView: boolean;
   index: number;
 }
-const HeaderDays = (props: IHeaderDaysProps) => {
-  const {  width, isMonthView, index } = props;
+const HeaderDays = (props: HeaderDaysProps) => {
+  const { width, isMonthView, index } = props;
 
   const calendarDays: any = useSelector((state: any) => state.calendarDays);
 
@@ -228,10 +228,7 @@ const HeaderDays = (props: IHeaderDaysProps) => {
       </div>
       {!isMonthView ? (
         <div className={'header_calendar_days__text__container'}>
-          <DaysNumeric
-            index={index}
-            daysNum={daysNum}
-          />
+          <DaysNumeric index={index} daysNum={daysNum} />
         </div>
       ) : null}
     </div>
@@ -243,7 +240,7 @@ interface IHeaderEventsProps {
   calendarDays: any;
 }
 const HeaderEvents = (props: IHeaderEventsProps) => {
-  const {daysNum, calendarDays } = props;
+  const { daysNum, calendarDays } = props;
 
   const [store] = useContext(Context);
   const { isDark } = store;
@@ -263,8 +260,10 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
         .filter(
           (item: any) =>
             item.allDay ||
-              // @ts-ignore
-              parseToDateTime(item.endAt, item.timezoneStart).diff(parseToDateTime(item.startAt, item.timezoneStart), 'days').toObject().days >= 1
+            // @ts-ignore
+            parseToDateTime(item.endAt, item.timezoneStart)
+              .diff(parseToDateTime(item.startAt, item.timezoneStart), 'days')
+              .toObject().days >= 1
         )
         .map((event: any) => {
           let width = 1; //Full width
@@ -275,8 +274,13 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
             if (
               event.id !== item2.id &&
               (item2.allDay ||
-                  // @ts-ignore
-                  parseToDateTime(item2.endAt, item2.timezoneStart).diff(parseToDateTime(item2.startAt, item2.timezoneStart), 'days').toObject().days >= 1)
+                // @ts-ignore
+                parseToDateTime(item2.endAt, item2.timezoneStart)
+                  .diff(
+                    parseToDateTime(item2.startAt, item2.timezoneStart),
+                    'days'
+                  )
+                  .toObject().days >= 1)
             ) {
               if (checkOverlappingEvents(event, item2)) {
                 width = width + 1; //add width for every overlapping item
@@ -377,43 +381,35 @@ const HeaderEvents = (props: IHeaderEventsProps) => {
   );
 };
 
-interface ICalendarHeaderProps {
+interface CalendarHeaderProps {
   index: number;
   daysNum: number;
 }
-const CalendarHeader = (props: ICalendarHeaderProps) => {
+const CalendarHeader = (props: CalendarHeaderProps) => {
   const width: number = WidthHook();
-  const {
-    daysNum,
-    index,
-  } = props;
+  const { daysNum, index } = props;
 
   const [store] = useContext(Context);
   const { isDark } = store;
 
-  const calendarDays: any = useSelector((state: any) => state.calendarDays);
-  const calendarView: any = useSelector((state: any) => state.calendarView);
-  const isDayView: boolean = calendarView === 'day';
-  const isMonthView: boolean = calendarView === 'month';
+  const calendarDays: CalendarDays = useSelector(
+    (state: ReduxState) => state.calendarDays
+  );
+  const calendarView: CalendarView = useSelector(
+    (state: ReduxState) => state.calendarView
+  );
+  const isDayView: boolean = calendarView === CALENDAR_DAY_VIEW;
+  const isMonthView: boolean = calendarView === CALENDAR_MONTH_VIEW;
 
   return (
     <div
       className={`header_calendar__wrapper${!isMonthView ? '--tall' : ''}${
         isDayView ? '--day' : ''
-      }${isMonthView ? '--small' : ''}${
-        isDark ? '--dark' : ''
-      }`}
+      }${isMonthView ? '--small' : ''}${isDark ? '--dark' : ''}`}
     >
-      <HeaderDays
-        index={index}
-        width={width}
-        isMonthView={isMonthView}
-      />
+      <HeaderDays index={index} width={width} isMonthView={isMonthView} />
       {!isMonthView ? (
-        <HeaderEvents
-          calendarDays={calendarDays[index]}
-          daysNum={daysNum}
-        />
+        <HeaderEvents calendarDays={calendarDays[index]} daysNum={daysNum} />
       ) : null}
     </div>
   );

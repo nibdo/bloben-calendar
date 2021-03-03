@@ -1,49 +1,50 @@
-import { reduxStore } from '../../bloben-package/layers/ReduxLayer';
-import OpenPgp, { PgpKeys } from '../../bloben-utils/utils/OpenPgp';
+import { reduxStore } from '../../bloben-package/layers/ReduxProvider';
+import OpenPgp from '../../bloben-utils/utils/OpenPgp';
 import { cloneDeep, findInArrayById } from '../common';
-import CalendarStateEntity from '../../data/models/state/calendar.entity';
 import {
-  addCalendar, setAllEvents,
+  addCalendar,
+  setAllEvents,
   setCalendars,
-  setCalendarsSyncLog, setEvents,
-  updateCalendar
+  setCalendarsSyncLog,
+  setEvents,
+  updateCalendar,
 } from '../../redux/actions';
 import { AxiosResponse } from 'axios';
 import CalendarApi from '../../api/calendar';
-import { DateTime } from 'luxon';
-import { ISyncLog } from '../../types/types';
+import { ISyncLog, ReduxState } from '../../types/types';
+import { IUser } from '../../bloben-utils/models/User';
+import { Calendar, createCalendar } from '../../bloben-utils/models/Calendar';
 
 const decryptCalendar = async (
   item: any,
-  pgpKeys: PgpKeys,
+  user: IUser,
   password: string
-): Promise<any> => {
+): Promise<Calendar> => {
   let decryptedData: any = await OpenPgp.decrypt(
-    pgpKeys.publicKey,
-    pgpKeys.privateKey,
+    user.publicKey,
+    user.privateKey,
     password,
     item.data
   );
   decryptedData = JSON.parse(decryptedData);
 
   // Merge
-  const decryptedCalendar: any = { ...item, ...decryptedData };
+  const decryptedCalendar: Calendar = { ...item, ...decryptedData };
 
-  return new CalendarStateEntity(
-      decryptedCalendar
-  ).getStoreObj();
+  return createCalendar(decryptedCalendar);
 };
 
 const SyncCalendars: any = {
-  getAll: async () => {
-    const store: any = reduxStore.getState();
+  getAll: async (): Promise<void> => {
+    const store: ReduxState = reduxStore.getState();
     const password: string = store.password;
-    const pgpKeys: PgpKeys = store.pgpKeys;
+    const user: IUser = store.user;
     const syncLog: ISyncLog = store.syncLog;
-    const stateClone: any = cloneDeep(store.calendars);
+    const stateClone: Calendar[] = cloneDeep(store.calendars);
 
-    console.log('store', store)
-    const response: AxiosResponse = await CalendarApi.getCalendars(syncLog.calendars);
+    const response: AxiosResponse = await CalendarApi.getCalendars(
+      syncLog.calendars
+    );
 
     reduxStore.dispatch(setCalendarsSyncLog());
 
@@ -52,13 +53,9 @@ const SyncCalendars: any = {
     for (const item of data) {
       const { id } = item;
 
-      const calendar: any = await decryptCalendar(
-        item,
-        pgpKeys,
-        password
-      );
+      const calendar: Calendar = await decryptCalendar(item, user, password);
 
-      const calendarInState: CalendarStateEntity | null = await findInArrayById(
+      const calendarInState: Calendar | null = await findInArrayById(
         stateClone,
         id
       );
@@ -76,37 +73,37 @@ const SyncCalendars: any = {
       }
     }
   },
-  addCalendar: async (id: string) => {
-    const store: any = reduxStore.getState();
+  addCalendar: async (id: string): Promise<void> => {
+    const store: ReduxState = reduxStore.getState();
     const password: string = store.password;
-    const pgpKeys: PgpKeys = store.pgpKeys;
+    const user: IUser = store.user;
 
     const response: AxiosResponse = await CalendarApi.getCalendarById(id);
 
-    const calendar: any = await decryptCalendar(
-        response.data,
-        pgpKeys,
-        password
+    const calendar: Calendar = await decryptCalendar(
+      response.data,
+      user,
+      password
     );
 
     reduxStore.dispatch(addCalendar(calendar));
   },
-  updateCalendar: async (id: string) => {
-    const store: any = reduxStore.getState();
+  updateCalendar: async (id: string): Promise<void> => {
+    const store: ReduxState = reduxStore.getState();
     const password: string = store.password;
-    const pgpKeys: PgpKeys = store.pgpKeys;
+    const user: IUser = store.user;
 
     const response: AxiosResponse = await CalendarApi.getCalendarById(id);
 
-    const calendar: any = await decryptCalendar(
-        response.data,
-        pgpKeys,
-        password
+    const calendar: Calendar = await decryptCalendar(
+      response.data,
+      user,
+      password
     );
 
     reduxStore.dispatch(updateCalendar(calendar));
   },
-  deleteAllCalendarEvents: (calendarId: string, events: any) => {
+  deleteAllCalendarEvents: (calendarId: string, events: any): Promise<void> => {
     const eventsObj: any = Object.entries(events);
 
     const result: any = {};
@@ -117,25 +114,25 @@ const SyncCalendars: any = {
 
     return result;
   },
-  deleteCalendar: (calendarId: string) => {
+  deleteCalendar: (calendarId: string): void => {
     const store: any = reduxStore.getState();
-    const stateCloneCalendars: any = cloneDeep(store.calendars);
+    const stateCloneCalendars: Calendar[] = cloneDeep(store.calendars);
     const stateCloneEvents: any = cloneDeep(store.events);
     const stateCloneAllEvents: any = cloneDeep(store.allEvents);
 
     // Delete calendar
-    const filteredCalendars: any = stateCloneCalendars.filter(
-        (item: any) => item.id !== calendarId
+    const filteredCalendars: Calendar[] = stateCloneCalendars.filter(
+      (item: any) => item.id !== calendarId
     );
 
     // Delete all events from this calendar
     const filteredEvents: any = SyncCalendars.deleteAllCalendarEvents(
-        calendarId,
-        stateCloneEvents
+      calendarId,
+      stateCloneEvents
     );
 
     const filteredAllEvents: any = stateCloneAllEvents.filter(
-        (item: any) => item.calendarId !== calendarId
+      (item: any) => item.calendarId !== calendarId
     );
 
     reduxStore.dispatch(setCalendars(filteredCalendars));
@@ -145,12 +142,12 @@ const SyncCalendars: any = {
   /**
    * Compare client and server data and sync differences
    */
-  syncClientServer: async () => {
-    const store: any = reduxStore.getState();
-    const stateCloneCalendars: any = cloneDeep(store.calendars);
+  syncClientServer: async (): Promise<void> => {
+    const store: ReduxState = reduxStore.getState();
+    const stateCloneCalendars: Calendar[] = cloneDeep(store.calendars);
 
     // Get all client data
-    const calendars: any[] = stateCloneCalendars.map((item: any) => {
+    const calendars: any[] = stateCloneCalendars.map((item: Calendar) => {
       const { id, updatedAt } = item;
 
       return { id, updatedAt };
@@ -158,24 +155,21 @@ const SyncCalendars: any = {
 
     const response: AxiosResponse = await CalendarApi.syncCalendars(calendars);
 
-    const {data} = response;
-
-    console.log('data', data)
+    const { data } = response;
 
     for (const item of data) {
-      const {id, action} = item;
+      const { id, action } = item;
       switch (action) {
-        case ('update'):
+        case 'update':
           await SyncCalendars.updateCalendar(id);
           break;
-        case ('delete'):
+        case 'delete':
           await SyncCalendars.deleteCalendar(id);
           break;
         default:
       }
     }
-  }
-
+  },
 };
 
 export default SyncCalendars;

@@ -38,8 +38,8 @@
     "node-sass": "^4.13.1",
     "openpgp": "^4.10.9",
     "qrcode.react": "^1.0.0",
-    "react": "^16.13.1",
-    "react-dom": "^16.13.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
     "react-measure": "^2.3.0",
     "react-redux": "^7.2.1",
     "react-router": "^5.0.1",
@@ -84,8 +84,12 @@
   "devDependencies": {
     "@material-ui/styles": "^4.10.0",
     "@types/history": "^4.7.5",
+    "@typescript-eslint/eslint-plugin": "^1.13.0",
+    "@typescript-eslint/parser": "^4.15.2",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-config-react": "^1.1.7",
+    "eslint-plugin-prettier": "^3.3.1",
     "prettier": "^2.0.5",
-    "tsconfig-paths": "^3.9.0",
-    "tslint": "^6.1.2"
+    "tsconfig-paths": "^3.9.0"
   }
 }

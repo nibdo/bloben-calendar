@@ -17,6 +17,8 @@ import { Context } from '../../../bloben-package/context/store';
 import { DateTime } from 'luxon';
 import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
 import { formatTimestampToDate } from '../../../bloben-utils/utils/common';
+import { getNewCalendarDays } from '../../../utils/getCalendarDaysAndEvents';
+import { CalendarDays, ReduxState } from '../../../types/types';
 
 interface IEventProps {
   isDark: boolean;
@@ -63,7 +65,6 @@ const Event = (props: IEventProps) => {
     e.preventDefault();
     e.stopPropagation();
     history.push(`/event/${event.id}`);
-    // dispatch(selectEvent(props.event))
   };
 
   return (
@@ -276,16 +277,19 @@ const renderOneDay = (
   });
 
 const MonthViewContainer = (props: any) => {
-  const {  daysNum, getNewCalendarDays } = props;
+  const [store] = useContext(Context);
+  const { isDark, isMobile } = store;
+
+  const { daysNum } = props;
   const width: any = WidthHook();
   const height: number = HeightHook();
-  const isMobile: boolean = useSelector((state: any) => state.isMobile);
   const calendarDaysCurrentIndex: number = useSelector(
-    (state: any) => state.calendarDaysCurrentIndex
+    (state: ReduxState) => state.calendarDaysCurrentIndex
   );
-  const isDark: boolean = useSelector((state: any) => state.isDark);
-  const calendarDays: any = useSelector((state: any) => state.calendarDays);
-  const events: any = useSelector((state: any) => state.events);
+  const calendarDays: CalendarDays = useSelector(
+    (state: ReduxState) => state.calendarDays
+  );
+  const events: any = useSelector((state: ReduxState) => state.events);
   // Calculate height for days table
   const tableHeight: number = height - 56 - 30 - 50;
 

@@ -26,6 +26,8 @@
   "paths": {
     "bloben-common": ["./bloben-common"],
     "bloben-package": ["./bloben-package"],
+    "bloben-components": ["./bloben-components"],
+    "bloben-utils": ["./bloben-utils"],
     "components": ["./components"],
     "entities": ["./data/entities/"],
     "utils": ["./utils"]

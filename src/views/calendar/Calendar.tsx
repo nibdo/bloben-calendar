@@ -3,130 +3,123 @@ import './Calendar.scss';
 import StateReducer from '../../utils/state-reducer';
 import Utils from './Calendar.utils';
 import { Router, useHistory } from 'react-router';
+import { Route } from 'react-router-dom';
+import AddIcon from '@material-ui/icons/Add';
+import BottomSheet from 'bottom-sheet-react';
+import { Fab, IconButton } from '@material-ui/core';
+import { DateTime } from 'luxon';
+import { useSelector } from 'react-redux';
+
 import { HeightHook } from 'bloben-common/utils/layout';
 import HeaderCalendar from '../../components/headerCalendar/HeaderCalendar';
-import { Route } from 'react-router-dom';
-import { Fab, IconButton } from '@material-ui/core';
 import EvaIcons from '../../bloben-common/components/eva-icons';
 import WeekView from '../../components/calendarView/weekView/WeekView';
 import { getDaysNum } from '../../components/calendarView/calendar-common';
-import { format } from 'date-fns';
 import CalendarDrawer from '../../components/calendarDrawer/CalendarDrawer';
 import MonthView from '../../components/calendarView/monthView/MonthView';
 import Agenda from '../../components/calendarView/agenda/Agenda';
 import SettingsCalendar from '../../components/settingsCalendar/SettingsCalendar';
-import { useDispatch, useSelector } from 'react-redux';
 import EditEvent from '../../components/event/editEvent/EditEvent';
 import CalendarDesktopNavigation from '../../components/CalendarDesktopNavigation/calendar-desktop-navigation';
-import AddIcon from '@material-ui/icons/Add';
-import BottomSheet from 'bottom-sheet-react';
 import Modal from '../../bloben-package/components/modal/Modal';
 import CalendarNavbar from '../../components/calendarNavbar/CalendarNavbar';
 import { Context } from '../../bloben-package/context/store';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import Notifications from '../../bloben-package/views/notifications/Notifications';
-import { DateTime } from 'luxon';
 import EventView from '../../components/event/eventView/EventView';
+import { CalendarDays, CalendarView, ReduxState } from '../../types/types';
+import {
+  CALENDAR_3DAYS_VIEW,
+  CALENDAR_AGENDA_VIEW,
+  CALENDAR_DAY_VIEW,
+  CALENDAR_MONTH_VIEW,
+  CALENDAR_WEEK_VIEW,
+} from '../../utils/contants';
 
-interface ICalendarTypeProps {
-  getNewCalendarDays: any;
+interface CalendarTypeProps {
   openNewEvent: any;
   changeHeaderTitle: any;
   headerTitle: string;
 }
-const CalendarType = (props: ICalendarTypeProps) => {
-  const {
-    getNewCalendarDays,
-    openNewEvent,
-    changeHeaderTitle,
-    headerTitle,
-  } = props;
+const CalendarType = (props: CalendarTypeProps) => {
+  const { openNewEvent, changeHeaderTitle, headerTitle } = props;
 
   const [store] = useContext(Context);
   const { isMobile } = store;
 
-  const events: any = useSelector((state: any) => state.events);
-  const calendarView: any = useSelector((state: any) => state.calendarView);
-  const selectedDate: any = useSelector((state: any) => state.selectedDate);
-  const calendarDays: any = useSelector((state: any) => state.calendarDays);
-  const calendars: any = useSelector((state: any) => state.calendars);
+  const events: any = useSelector((state: ReduxState) => state.events);
+  const calendarView: CalendarView = useSelector(
+    (state: ReduxState) => state.calendarView
+  );
+  const calendarDays: CalendarDays = useSelector(
+    (state: ReduxState) => state.calendarDays
+  );
 
   // Get number of days for view
   const daysNum: number = getDaysNum(calendarView);
 
   return (
     <div className={'full-screen'}>
-      {!isMobile && calendarView !== 'agenda' ? (
-        <CalendarDesktopNavigation
-          title={headerTitle}
-          getNewCalendarDays={getNewCalendarDays}
-        />
+      {!isMobile && calendarView !== CALENDAR_AGENDA_VIEW ? (
+        <CalendarDesktopNavigation title={headerTitle} />
       ) : null}
-      {calendarView === 'agenda' ? (
-        <Agenda
-          changeHeaderTitle={changeHeaderTitle}
-          getNewCalendarDays={getNewCalendarDays}
-        />
+      {calendarView === CALENDAR_AGENDA_VIEW ? (
+        <Agenda changeHeaderTitle={changeHeaderTitle} />
       ) : null}
-      {calendarView === 'day' ||
-      calendarView === 'week' ||
-      calendarView === '3days' ? (
-        <WeekView
-          daysNum={daysNum}
-          openNewEvent={openNewEvent}
-          getNewCalendarDays={getNewCalendarDays}
-        />
+      {calendarView === CALENDAR_DAY_VIEW ||
+      calendarView === CALENDAR_WEEK_VIEW ||
+      calendarView === CALENDAR_3DAYS_VIEW ? (
+        <WeekView daysNum={daysNum} openNewEvent={openNewEvent} />
       ) : null}
-      {calendarView === 'month' ? (
+      {calendarView === CALENDAR_MONTH_VIEW ? (
         <MonthView
           daysNum={calendarDays.length}
           openNewEvent={openNewEvent}
           data={events}
-          getNewCalendarDays={getNewCalendarDays}
         />
       ) : null}
     </div>
   );
 };
 
-interface ICalendarViewProps {
+interface CalendarViewProps {
   openNewEvent: any;
   newEventIsOpen: any;
-  getNewCalendarDays: any;
   toggleDrawer: any;
   toogleSearch: any;
   isDrawerOpen: any;
   areSettingsOpen: any;
   toggleSettingsOpen: any;
-  initCalendar: any;
 }
-const CalendarView = (props: ICalendarViewProps) => {
+const CalendarViewComponent = (props: CalendarViewProps) => {
   const {
     openNewEvent,
     newEventIsOpen,
-    getNewCalendarDays,
     toggleDrawer,
     toogleSearch,
     isDrawerOpen,
     areSettingsOpen,
     toggleSettingsOpen,
-    initCalendar,
   } = props;
 
   const history: any = useHistory();
-  const height: any = HeightHook();
+  const height: number = HeightHook();
   const [store] = useContext(Context);
 
   const { isDark, isMobile } = store;
 
   const [headerTitle, setHeaderTitle] = useState('');
 
-  const calendarView: any = useSelector((state: any) => state.calendarView);
-  const selectedDate: DateTime = useSelector((state: any) => state.selectedDate);
+  const calendarView: CalendarView = useSelector(
+    (state: any) => state.calendarView
+  );
+  const selectedDate: DateTime = useSelector(
+    (state: any) => state.selectedDate
+  );
 
   const events: any = useSelector((state: any) => state.events);
 
-  const isAgenda: boolean = calendarView === 'agenda';
+  const isAgenda: boolean = calendarView === CALENDAR_AGENDA_VIEW;
 
   const changeHeaderTitle = (value: string) => {
     setHeaderTitle(value);
@@ -156,32 +149,31 @@ const CalendarView = (props: ICalendarViewProps) => {
             title={headerTitle}
             hasHeaderShadow={isAgenda}
             icons={[
-              <IconButton key={'bell'} onClick={() => history.push('/notifications')}>
+              <IconButton
+                key={'bell'}
+                onClick={() => history.push('/notifications')}
+              >
                 <EvaIcons.Bell className={parseCssDark('icon-svg', isDark)} />
               </IconButton>,
             ]}
           />
           <div className={'calendar__row'}>
             {!isMobile ? (
-              <CalendarDrawer
-                initCalendar={initCalendar}
-                handleClose={() => toggleDrawer(false)}
-              />
+              <CalendarDrawer handleClose={() => toggleDrawer(false)} />
             ) : null}
             {events ? (
               <CalendarType
                 headerTitle={headerTitle}
                 openNewEvent={openNewEvent}
-                getNewCalendarDays={getNewCalendarDays}
                 changeHeaderTitle={changeHeaderTitle}
               />
             ) : null}
           </div>
           <Router history={history}>
             <Route path={'/event'}>
-                <Modal {...props} handleClose={() => history.goBack()}>
-                  <EditEvent isNewEvent={true} newEventTime={newEventIsOpen} />
-                </Modal>
+              <Modal {...props} handleClose={() => history.goBack()}>
+                <EditEvent isNewEvent={true} newEventTime={newEventIsOpen} />
+              </Modal>
             </Route>
             <Route path={'/event/:id'}>
               <Modal handleClose={() => history.goBack()}>
@@ -195,11 +187,11 @@ const CalendarView = (props: ICalendarViewProps) => {
             </Route>
             <Route path={'/notifications'}>
               {isMobile ? (
-                  <Modal>
-                    <Notifications />
-                  </Modal>
-              ) : (
+                <Modal>
                   <Notifications />
+                </Modal>
+              ) : (
+                <Notifications />
               )}
             </Route>
           </Router>
@@ -231,12 +223,10 @@ const CalendarView = (props: ICalendarViewProps) => {
               isExpandable={false}
               onClose={() => toggleSettingsOpen(false)}
             >
-              <SettingsCalendar
-                  handleClose={() => toggleSettingsOpen(false)}
-              />
+              <SettingsCalendar handleClose={() => toggleSettingsOpen(false)} />
             </BottomSheet>
           ) : null}
-          {calendarView === 'month' ? (
+          {calendarView === CALENDAR_MONTH_VIEW ? (
             <div
               style={{
                 position: 'absolute',
@@ -261,11 +251,7 @@ const CalendarView = (props: ICalendarViewProps) => {
   );
 };
 
-interface ICalendarProps {
-  getNewCalendarDays: any;
-  initCalendar: any;
-}
-const Calendar = (props: ICalendarProps) => {
+const CalendarComponent = () => {
   const history: any = useHistory();
   const [state, dispatchState]: any = useReducer(
     StateReducer,
@@ -273,16 +259,9 @@ const Calendar = (props: ICalendarProps) => {
   );
 
   const {
-    getNewCalendarDays,
-    initCalendar,
-  } = props;
-
-  const {
     hasHeaderShadow,
     isScrolling,
     isDrawerOpen,
-    typedText,
-    results,
     newEventIsOpen,
     areSettingsOpen,
   } = state;
@@ -322,11 +301,9 @@ const Calendar = (props: ICalendarProps) => {
   };
 
   return (
-    <CalendarView
-      initCalendar={initCalendar}
+    <CalendarViewComponent
       newEventIsOpen={newEventIsOpen}
       openNewEvent={openNewEvent}
-      getNewCalendarDays={getNewCalendarDays}
       toggleDrawer={toggleDrawer}
       toogleSearch={toogleSearch}
       isDrawerOpen={isDrawerOpen}
@@ -336,4 +313,4 @@ const Calendar = (props: ICalendarProps) => {
   );
 };
 
-export default Calendar;
+export default CalendarComponent;

@@ -5,7 +5,7 @@ import { useHistory } from 'react-router';
 import EvaIcons from 'bloben-common/components/eva-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
-import { setCalendarDays, setCalendarView, setSelectedDate } from '../../redux/actions';
+import { setCalendarView, setSelectedDate } from '../../redux/actions';
 import {
   HEADER_HEIGHT_BASE,
   parseEventColor,
@@ -16,15 +16,24 @@ import { HeightHook } from '../../bloben-common/utils/layout';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import { Context } from '../../bloben-package/context/store';
 import { DateTime } from 'luxon';
+import {
+  CALENDAR_3DAYS_VIEW,
+  CALENDAR_AGENDA_VIEW,
+  CALENDAR_DAY_VIEW,
+  CALENDAR_MONTH_VIEW,
+  CALENDAR_WEEK_VIEW,
+} from '../../utils/contants';
+import { CalendarView, ReduxState } from '../../types/types';
+import { initCalendarAction } from '../../utils/initCalendarAction';
 
-interface IDrawerItemProps {
+interface DrawerItemProps {
   icon?: any;
   text: string;
   onClick: any;
   isSelected?: boolean;
   isDark: boolean;
 }
-const DrawerItem = (props: IDrawerItemProps) => {
+const DrawerItem = (props: DrawerItemProps) => {
   const { icon, text, onClick, isSelected, isDark } = props;
 
   return (
@@ -43,12 +52,14 @@ const DrawerItem = (props: IDrawerItemProps) => {
   );
 };
 
-interface IViewSwitcherProps {
+interface ViewSwitcherProps {
   changeCalendarView: any;
 }
-const ViewSwitcher = (props: IViewSwitcherProps) => {
+const ViewSwitcher = (props: ViewSwitcherProps) => {
   const { changeCalendarView } = props;
-  const calendarView: any = useSelector((state: any) => state.calendarView);
+  const calendarView: CalendarView = useSelector(
+    (state: any) => state.calendarView
+  );
 
   const [store] = useContext(Context);
   const { isDark } = store;
@@ -65,8 +76,8 @@ const ViewSwitcher = (props: IViewSwitcherProps) => {
             className={iconClassName}
           />
         }
-        onClick={() => changeCalendarView('agenda')}
-        isSelected={calendarView === 'agenda'}
+        onClick={() => changeCalendarView(CALENDAR_AGENDA_VIEW)}
+        isSelected={calendarView === CALENDAR_AGENDA_VIEW}
         text={'Agenda'}
         isDark={isDark}
       />
@@ -78,8 +89,8 @@ const ViewSwitcher = (props: IViewSwitcherProps) => {
             className={iconClassName}
           />
         }
-        onClick={() => changeCalendarView('day')}
-        isSelected={calendarView === 'day'}
+        onClick={() => changeCalendarView(CALENDAR_DAY_VIEW)}
+        isSelected={calendarView === CALENDAR_DAY_VIEW}
         text={'Day'}
         isDark={isDark}
       />
@@ -91,8 +102,8 @@ const ViewSwitcher = (props: IViewSwitcherProps) => {
             className={iconClassName}
           />
         }
-        onClick={() => changeCalendarView('3days')}
-        isSelected={calendarView === '3days'}
+        onClick={() => changeCalendarView(CALENDAR_3DAYS_VIEW)}
+        isSelected={calendarView === CALENDAR_3DAYS_VIEW}
         text={'3 days'}
         isDark={isDark}
       />
@@ -104,8 +115,8 @@ const ViewSwitcher = (props: IViewSwitcherProps) => {
             className={iconClassName}
           />
         }
-        onClick={() => changeCalendarView('week')}
-        isSelected={calendarView === 'week'}
+        onClick={() => changeCalendarView(CALENDAR_WEEK_VIEW)}
+        isSelected={calendarView === CALENDAR_WEEK_VIEW}
         text={'Week'}
         isDark={isDark}
       />
@@ -117,8 +128,8 @@ const ViewSwitcher = (props: IViewSwitcherProps) => {
             className={iconClassName}
           />
         }
-        onClick={() => changeCalendarView('month')}
-        isSelected={calendarView === 'month'}
+        onClick={() => changeCalendarView(CALENDAR_MONTH_VIEW)}
+        isSelected={calendarView === CALENDAR_MONTH_VIEW}
         text={'Month'}
         isDark={isDark}
       />
@@ -126,13 +137,13 @@ const ViewSwitcher = (props: IViewSwitcherProps) => {
   );
 };
 
-interface ICalendarItemProps {
+interface CalendarItemProps {
   key: number;
   calendar: any;
   isDark: boolean;
   navToCalendarEdit: any;
 }
-const CalendarItem = (props: ICalendarItemProps) => {
+const CalendarItem = (props: CalendarItemProps) => {
   const { calendar, isDark, navToCalendarEdit } = props;
 
   const { id, color, name } = calendar;
@@ -163,10 +174,10 @@ const renderCalendar = (data: any, isDark: boolean, navToCalendarEdit: any) =>
     />
   ));
 
-interface ICalendarsProps {
+interface CalendarsProps {
   handleClose: any;
 }
-const Calendars = (props: ICalendarsProps) => {
+const Calendars = (props: CalendarsProps) => {
   const { handleClose } = props;
 
   const calendars: any = useSelector((state: any) => state.calendars);
@@ -200,10 +211,10 @@ const DesktopNewCalendar = () => {
   );
 };
 
-interface IDrawerSubtitleProps {
+interface DrawerSubtitleProps {
   subtitle: string;
 }
-const DrawerSubtitle = (props: IDrawerSubtitleProps) => {
+const DrawerSubtitle = (props: DrawerSubtitleProps) => {
   const [store] = useContext(Context);
   const { isDark, isMobile } = store;
 
@@ -224,22 +235,25 @@ const DrawerSubtitle = (props: IDrawerSubtitleProps) => {
   );
 };
 
-interface ICalendarDrawerProps {
-    handleClose: any;
-    initCalendar?: any;
+interface CalendarDrawerProps {
+  handleClose: any;
 }
-const CalendarDrawer = (props: ICalendarDrawerProps) => {
-  const { handleClose, initCalendar } = props;
+const CalendarDrawer = (props: CalendarDrawerProps) => {
+  const { handleClose } = props;
 
   const dispatch: Dispatch = useDispatch();
-  const selectedDate: DateTime = useSelector((state: any) => state.selectedDate);
-
+  const selectedDate: DateTime = useSelector(
+    (state: any) => state.selectedDate
+  );
+  const calendarView: CalendarView = useSelector(
+    (state: ReduxState): CalendarView => state.calendarView
+  );
   const [store] = useContext(Context);
   const { isMobile, isDark } = store;
 
   const drawerHeight: number = HeightHook() - HEADER_HEIGHT_BASE;
 
-  const changeCalendarView = (view: string) => {
+  const changeCalendarView = (view: CalendarView) => {
     dispatch(setCalendarView(view));
     if (isMobile) {
       handleClose();
@@ -247,7 +261,7 @@ const CalendarDrawer = (props: ICalendarDrawerProps) => {
   };
 
   const selectDate = (date: DateTime): void => {
-    initCalendar(date);
+    initCalendarAction(dispatch, { calendarView, date });
     dispatch(setSelectedDate(date));
   };
 
@@ -268,7 +282,7 @@ const CalendarDrawer = (props: ICalendarDrawerProps) => {
       {!isMobile ? <DrawerSeparator /> : null}
       {!isMobile ? (
         <DatePicker
-            keyPrefix={'drawer_calendar'}
+          keyPrefix={'drawer_calendar'}
           selectDate={selectDate}
           selectedDate={selectedDate.toString()}
           width={214}

@@ -1,47 +1,44 @@
-import { stompClient } from '../layers/AuthenticatedLayer';
-import { reduxStore } from '../bloben-package/layers/ReduxLayer';
-import Crypto from '../bloben-package/utils/encryption';
+import { reduxStore } from '../bloben-package/layers/ReduxProvider';
 import {
-  addCalendar,
   addNotification,
-  setCalendars, setCalendarSettings,
+  setCalendarSettings,
   setEvents,
-  setNotifications, setUserProfile
+  setNotifications,
+  setUserProfile,
 } from '../redux/actions';
 import EventStateEntity from '../bloben-utils/models/event.entity';
-import {
-  cloneDeep,
-  findInArrayById,
-  findInEvents,
-} from './common';
+import { cloneDeep, findInArrayById, findInEvents } from './common';
 import CalendarApi, {
   sendWebsocketMessage,
-  WEBSOCKET_GET_ONE_CALENDAR, WEBSOCKET_GET_ONE_CONTACT,
-  WEBSOCKET_GET_ONE_EVENT,
-  WEBSOCKET_GET_ONE_NOTIFICATION,
+  WEBSOCKET_GET_ONE_CONTACT,
 } from '../api/calendar';
-import { GetEventWebsocketByIdDTO } from '../types/types';
-import { isBefore, parseISO } from 'date-fns';
-import CalendarStateEntity from '../data/models/state/calendar.entity';
 import OpenPgp, { PgpKeys } from '../bloben-utils/utils/OpenPgp';
-import { LocalForage } from '../bloben-package/utils/LocalForage';
 import LuxonHelper from '../bloben-utils/utils/LuxonHelper';
-import { DateTime } from 'luxon';
 import CalendarSync from './sync/CalendarSync';
 import SyncCalendars from './sync/CalendarSync';
 import SyncEvents from './sync/EventsSync';
 import { AxiosResponse } from 'axios';
 import AccountApi from '../bloben-package/api/account.api';
 import SyncNotification from '../bloben-package/sync/NotificationSync';
+import { Calendar } from '../bloben-utils/models/Calendar';
+import { ReduxState } from '../types/types';
+import { stompClient } from '../bloben-package/layers/WebsocketProvider';
 
 // Message constants
 const WEBSOCKET_EVENT_MESSAGE: WebsocketMessageType = 'event';
 const WEBSOCKET_CALENDAR_MESSAGE: WebsocketMessageType = 'calendar';
 const WEBSOCKET_NOTIFICATION_MESSAGE: WebsocketMessageType = 'notification';
-const WEBSOCKET_CALENDAR_SETTINGS_MESSAGE: WebsocketMessageType = 'calendarSettings';
+const WEBSOCKET_CALENDAR_SETTINGS_MESSAGE: WebsocketMessageType =
+  'calendarSettings';
 const WEBSOCKET_USER_SETTINGS_MESSAGE: WebsocketMessageType = 'userProfile';
 const WEBSOCKET_CONTACT_MESSAGE: WebsocketMessageType = 'contact';
-type WebsocketMessageType = 'event' | 'calendar' | 'notification' | 'calendarSettings' | 'userProfile' | 'contact';
+type WebsocketMessageType =
+  | 'event'
+  | 'calendar'
+  | 'notification'
+  | 'calendarSettings'
+  | 'userProfile'
+  | 'contact';
 
 // Action constants
 const WEBSOCKET_CREATE_ACTION: WebsocketCrudAction = 'create';
@@ -182,58 +179,62 @@ const WebsocketHandler = {
     }
   },
   handleCreateCalendarMessage: async (item: any): Promise<void> => {
-    const store: any = reduxStore.getState();
+    const store: ReduxState = reduxStore.getState();
     const { calendars } = store;
-    const calendarInState: CalendarStateEntity | null = await findInArrayById(
+    const calendarInState: Calendar | null = await findInArrayById(
       calendars,
       item.id
     );
 
     if (!calendarInState) {
-      await CalendarSync.addCalendar(item.id)
+      await CalendarSync.addCalendar(item.id);
     }
   },
   handleUpdateCalendarMessage: async (item: any): Promise<void> => {
-    const store: any = reduxStore.getState();
+    const store: ReduxState = reduxStore.getState();
     const { calendars } = store;
 
     const { id, updatedAt } = item;
 
     // Find if calendar is in state
-    const calendarInState: CalendarStateEntity | null = await findInArrayById(
+    const calendarInState: Calendar | null = await findInArrayById(
       calendars,
       id
     );
     // Get calendar from server if not found or if it is older
-    if (
-      !calendarInState) {
-      await CalendarSync.addCalendar(item.id)
-    } else if (LuxonHelper.isBefore(LuxonHelper.parseToString(calendarInState.updatedAt), updatedAt)) {
-      await CalendarSync.updateCalendar(item.id)
+    if (!calendarInState) {
+      await CalendarSync.addCalendar(item.id);
+    } else if (
+      LuxonHelper.isBefore(
+        LuxonHelper.parseToString(calendarInState.updatedAt),
+        updatedAt
+      )
+    ) {
+      await CalendarSync.updateCalendar(item.id);
     } else {
       // Flag found state item as synced
-      const calendarToUpdate: CalendarStateEntity = CalendarStateEntity.flagAsSynced(
-        calendarInState
-      );
+      // const calendarToUpdate: Calendar = CalendarStateEntity.flagAsSynced(
+      //   calendarInState
+      // );
     }
   },
   handleDeleteCalendarMessage: async (item: any): Promise<void> => {
-    const store: any = reduxStore.getState();
+    const store: ReduxState = reduxStore.getState();
     const { calendars } = store;
 
     const { id } = item;
 
-    const calendarInState: CalendarStateEntity | null = await findInArrayById(
+    const calendarInState: Calendar | null = await findInArrayById(
       calendars,
       id
     );
 
     if (calendarInState) {
-      SyncCalendars.deleteCalendar(id)
+      SyncCalendars.deleteCalendar(id);
     }
   },
   handleCreateEventMessage: async (item: any): Promise<void> => {
-    const store: any = reduxStore.getState();
+    const store: ReduxState = reduxStore.getState();
     const { rangeFrom, rangeTo } = store;
     const { id, updatedAt } = item;
     // Find if event is in state
@@ -247,7 +248,6 @@ const WebsocketHandler = {
     ) {
       // Construct request event body
       await SyncEvents.addEvent(id);
-
     } else {
       // Flag found state item as synced
       // TODO flag as synced
@@ -262,14 +262,16 @@ const WebsocketHandler = {
     // Find if event is in state
     const eventInState: EventStateEntity | null = await findInEvents(id);
     // Get event from server if not found, if needed to fetch all occurrences or is older
-    if (
-        !eventInState) {
-      await SyncEvents.addEvent(item.id)
-    } else if (LuxonHelper.isBefore(LuxonHelper.parseToString(eventInState.updatedAt), updatedAt)) {
-
-      await SyncEvents.updateEvent(item.id)
+    if (!eventInState) {
+      await SyncEvents.addEvent(item.id);
+    } else if (
+      LuxonHelper.isBefore(
+        LuxonHelper.parseToString(eventInState.updatedAt),
+        updatedAt
+      )
+    ) {
+      await SyncEvents.updateEvent(item.id);
     } else {
-
       // Flag found state item as synced
       // TODO flag as synced
       // eventInState.flagAsSynced();
@@ -325,8 +327,8 @@ const WebsocketHandler = {
     const store: any = reduxStore.getState();
     const { notifications } = store;
     const notificationInState: any = await findInArrayById(
-        notifications,
-        item.id
+      notifications,
+      item.id
     );
 
     if (!notificationInState) {
@@ -342,7 +344,7 @@ const WebsocketHandler = {
     );
 
     if (!notificationInState) {
-      await SyncNotification.addNotification(item.id)
+      await SyncNotification.addNotification(item.id);
     }
   },
   handleCalendarSettingsSync: async (messageObj: any): Promise<void> => {
@@ -351,7 +353,6 @@ const WebsocketHandler = {
     reduxStore.dispatch(setCalendarSettings(response.data));
   },
   handleUserSettingsSync: async (messageObj: any): Promise<void> => {
-
     const response: AxiosResponse = await AccountApi.getUserProfile();
 
     reduxStore.dispatch(setUserProfile(response.data));
@@ -367,13 +368,13 @@ const WebsocketHandler = {
     const { data } = objParsed;
 
     const decryptNotification = async (item: any) => {
-      const {id} = item;
+      const { id } = item;
 
       let decryptedData: any = await OpenPgp.decrypt(
-          pgpKeys.publicKey,
-          pgpKeys.privateKey,
-          password,
-          item.data
+        pgpKeys.publicKey,
+        pgpKeys.privateKey,
+        password,
+        item.data
       );
       decryptedData = JSON.parse(decryptedData);
 
@@ -382,10 +383,7 @@ const WebsocketHandler = {
       // Merge
       const notification: any = { ...item, ...decryptedData };
 
-      const notificationInState: any = await findInArrayById(
-          stateClone,
-          id
-      );
+      const notificationInState: any = await findInArrayById(stateClone, id);
 
       // Create notification
       if (!notificationInState) {
@@ -393,12 +391,12 @@ const WebsocketHandler = {
       } else {
         // Update notification in state
         const newState: any = stateClone.filter((clonedItem: any) =>
-                                                    clonedItem.id === id ? notification : clonedItem
+          clonedItem.id === id ? notification : clonedItem
         );
 
         reduxStore.dispatch(setNotifications(newState));
       }
-    }
+    };
 
     if (Array.isArray(data)) {
       for (const item of data) {
@@ -407,7 +405,6 @@ const WebsocketHandler = {
     } else {
       await decryptNotification(data);
     }
-
   },
 };
 

@@ -12,6 +12,7 @@ import { parseCssDark } from '../../bloben-common/utils/common';
 import { Context } from '../../bloben-package/context/store';
 import { DateTime } from 'luxon';
 import { formatTimestampToDate } from '../../bloben-utils/utils/common';
+import { CalendarDays } from '../../types/types';
 
 const renderOneDay = (
   calendarDays: DateTime[],
@@ -34,10 +35,10 @@ const renderOneDay = (
     );
   });
 
-interface IHoursTextProps {
+interface HoursTextProps {
   width: number;
 }
-const HoursText = (props: IHoursTextProps) => {
+const HoursText = (props: HoursTextProps) => {
   const { width } = props;
 
   const [store] = useContext(Context);
@@ -61,18 +62,18 @@ const HoursText = (props: IHoursTextProps) => {
   return hours;
 };
 
-interface ICalendarBodyProps {
+interface CalendarBodyProps {
   openNewEvent: any;
   index: number;
   daysNum: number;
 }
-const CalendarBody = (props: ICalendarBodyProps) => {
+const CalendarBody = (props: CalendarBodyProps) => {
   const { openNewEvent, index, daysNum } = props;
 
   const [store] = useContext(Context);
   const { isMobile } = store;
 
-  const calendarDays: DateTime[][] = useSelector(
+  const calendarDays: CalendarDays = useSelector(
     (state: any) => state.calendarDays
   );
   const calendarBodyWidth: number = useSelector(
@@ -99,7 +100,6 @@ const CalendarBody = (props: ICalendarBodyProps) => {
     width: calendarBodyWidth,
     height: calendarBodyHeight,
   };
-
 
   /**
    * Adjust scroll position for all screens

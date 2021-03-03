@@ -1,82 +1,60 @@
-// TODO: Add new type Date as JSON string Date
+import { DateTime } from 'luxon';
+import { IUser } from '../bloben-utils/models/User';
+import { IUserProfile } from '../bloben-package/types/common.types';
+import { IContact } from '../bloben-utils/models/Contact';
+import { PgpKeys } from '../bloben-utils/utils/OpenPgp';
+import { INotification } from '../bloben-utils/models/Notification';
 
-export type encryptedType = {
-  id: string;
-  type: string;
-  data: string;
-  createdAt: string;
-  updatedAt: string;
-  needSync: boolean;
-  isLocal: boolean;
-  parent: string;
-  isShared: boolean;
-  deleted: boolean;
-};
-
-export type localSettingType = {
+export interface localSettingType {
   key: string;
   value: string;
-};
+}
 
-export type cryptoDatabaseType = {
-  key: string;
-  cryptoPassword: string;
-  pinCode: boolean;
-  pinAttempts: number;
-};
-
-export type dummyDataType = {
+export interface dummyDataType {
   dummy: string;
-};
+}
 
 // Data types
-export type calendarColorType = {
+export interface calendarColorType {
   name: string;
   light: string;
   dark: string;
-};
+}
 
-export type calendarType = {
+export interface calendarType {
   name: string;
   notifications: any;
   checked: boolean;
-};
+}
+
+export type CalendarView = 'WEEK' | 'MONTH' | 'DAY' | '3DAYS' | 'AGENDA';
+
+export type CalendarDays = [DateTime[], DateTime[], DateTime[]];
 
 export type TCalendarTimeUnit = 'MINUTES' | 'HOURS' | 'DAYS' | 'WEEKS';
 
-export type TCalendarAlarmType =
-  | TCalendarPushAlarm
-  | TCalendarEmailAlarm;
-
-export type TCalendarPushAlarm = {
+export interface TCalendarPushAlarm {
   id: string;
   alarmType: 'push';
   amount: number;
   timeUnit: TCalendarTimeUnit;
   payload: null;
-};
-export type TCalendarEmailAlarm = {
+}
+export interface TCalendarEmailAlarm {
   id: string;
   alarmType: 'email';
   amount: number;
   timeUnit: TCalendarTimeUnit;
   payload: string;
-};
+}
 
-export type GetEventWebsocketByIdDTO = {
+export interface GetEventWebsocketByIdDTO {
   id: string;
   rangeFrom: string;
   rangeTo: string;
-};
-
-type TCryptoPasswordKey = 'cryptoPassword';
-
-export type TCryptoPasswordObject = {
-  key: TCryptoPasswordKey;
-  cryptoPassword: string;
-  pinAttempts: number;
-  pinCode: number | null;
 }
+
+export type TCalendarAlarmType = TCalendarPushAlarm | TCalendarEmailAlarm;
 
 export interface ICalendarSettings {
   defaultCalendar: any;
@@ -85,9 +63,45 @@ export interface ICalendarSettings {
   autoUpdateTimezone: boolean;
 }
 export interface ISyncLog {
-  calendars: string,
-  events: string,
-  eventsAll: string,
-  contacts: string,
-  notifications: string,
+  calendars: string;
+  events: string;
+  eventsAll: string;
+  contacts: string;
+  notifications: string;
+}
+
+export interface ReduxState {
+  user: IUser;
+  userProfile: IUserProfile;
+  syncLog: ISyncLog;
+  contacts: IContact[];
+  calendarSettings: ICalendarSettings;
+  timezones: string[];
+  defaultTimezone: string;
+  pgpKeys: PgpKeys;
+  defaultCalendar: any;
+  password: string;
+  rangeFrom: string;
+  rangeTo: string;
+  calendarDays: CalendarDays;
+  events: any;
+  eventsToImport: any;
+  calendarView: CalendarView;
+  selectedEvent: any;
+  calendars: any;
+  isLoading: boolean;
+  isAppStarting: boolean;
+  notifications: INotification[];
+  selectedDate: DateTime;
+  eventsAreFetching: boolean;
+  calendarBodyWidth: number;
+  calendarBodyHeight: number;
+  calendarDaysCurrentIndex: number;
+  allEvents: any;
+  isFirstLogin: boolean;
+}
+
+export interface InitCalendarDaysAction {
+  calendarView: CalendarView;
+  date: DateTime;
 }

@@ -8,7 +8,8 @@ import EventStateEntity, {
 } from '../../../bloben-utils/models/event.entity';
 import {
   addAlarm,
-  findInArrayById, findInArrayByKeyValue,
+  findInArrayById,
+  findInArrayByKeyValue,
   findInEvents,
   handleEventReduxDelete,
   handleEventReduxUpdate,
@@ -457,8 +458,6 @@ const EditEvent = (props: IEditEventProps) => {
       }
     }
 
-    console.log('newEvent,', newEvent);
-
     // Encrypt data
     const bodyToSend: EventBodyToSend = await newEvent.formatBodyToSendOpenPgp(
       pgpKeys
@@ -489,8 +488,7 @@ const EditEvent = (props: IEditEventProps) => {
         };
         console.log(inviteData);
 
-          CalendarApi.sendInvite(inviteData);
-
+        CalendarApi.sendInvite(inviteData);
       }
 
       // Create contacts
@@ -498,15 +496,16 @@ const EditEvent = (props: IEditEventProps) => {
       if (attendees.length > 1) {
         for (const item of attendees) {
           if (item.mailto !== userProfile.appEmail) {
-
-            const contactInState: any = await findInArrayByKeyValue(contacts, 'email', item.mailto)
-
-            console.log('contact in state', contactInState);
+            const contactInState: any = await findInArrayByKeyValue(
+              contacts,
+              'email',
+              item.mailto
+            );
 
             if (!contactInState) {
               const newContact = new Contact(item);
               const contactBodyToSend: any = await newContact.formatBodyToEncrypt(
-                  pgpKeys.publicKey
+                pgpKeys.publicKey
               );
               console.log('contactBodyToSend', contactBodyToSend);
               await ContactApi.createContact(contactBodyToSend);

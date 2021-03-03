@@ -3,9 +3,7 @@ import './Search.scss';
 import IconButton from '@material-ui/core/IconButton';
 import EvaIcons from '../../bloben-common/components/eva-icons';
 import { useSelector } from 'react-redux';
-import {
-  parseEventColor
-} from '../../components/calendarView/calendar-common';
+import { parseEventColor } from '../../components/calendarView/calendar-common';
 import { HeightHook } from '../../bloben-common/utils/layout';
 import { Input } from '../../bloben-package/components/input/Input';
 import { Context } from '../../bloben-package/context/store';
@@ -25,51 +23,50 @@ const SearchImage = () => (
   </div>
 );
 
-
 export const EventDateText = (props: any) => {
-  const {event} = props;
+  const { event } = props;
 
   const humanDate: any = formatEventDate(event);
-  const {dates, time} = humanDate;
+  const { dates, time } = humanDate;
 
-  return <div style={{display: 'flex', flexDirection: 'column'}}>
-    <p className={'search-item__text'}>{dates}</p>
-    <p className={'search-item__text'}>
-      {time}
-    </p>
-  </div>
-}
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      <p className={'search-item__text'}>{dates}</p>
+      <p className={'search-item__text'}>{time}</p>
+    </div>
+  );
+};
 
 const SearchItem = (props: any) => {
-  const {item, isDark, history} = props;
-  const {id, startAt, timezoneStart, endAt, summary, color} = item;
+  const { item, isDark, history } = props;
+  const { id, startAt, timezoneStart, endAt, summary, color } = item;
   const calendarColor: string = parseEventColor(color, isDark);
 
-
   const handleClick: any = () => {
-    history.push(`/event/${id}`)
-  }
+    history.push(`/event/${id}`);
+  };
 
-  return <ButtonBase className={'search-item__wrapper'} onClick={handleClick}>
-    <div className={'search-item__container'}>
-      <div className={'search-item__color'} style={{ background: calendarColor}}/>
-      <div className={'search-item__content'}>
-      <h5 className={'search-item__title'}>{summary}</h5>
-      <EventDateText event={item}/>
+  return (
+    <ButtonBase className={'search-item__wrapper'} onClick={handleClick}>
+      <div className={'search-item__container'}>
+        <div
+          className={'search-item__color'}
+          style={{ background: calendarColor }}
+        />
+        <div className={'search-item__content'}>
+          <h5 className={'search-item__title'}>{summary}</h5>
+          <EventDateText event={item} />
+        </div>
       </div>
-    </div>
-  </ButtonBase>
-}
+    </ButtonBase>
+  );
+};
 
 const renderResults = (events: any, isDark: boolean, history: any) => {
   return events.map((event: any) => {
-    return <SearchItem
-        item={event}
-        isDark={isDark}
-        history={history}
-    />
-  })
-}
+    return <SearchItem item={event} isDark={isDark} history={history} />;
+  });
+};
 
 interface IResultsProps {
   results: any;
@@ -79,16 +76,12 @@ const Results = (props: IResultsProps) => {
 
   const [store] = useContext(Context);
 
-  const {isDark} = store;
+  const { isDark } = store;
 
   const height: number = HeightHook() - 56;
   const history: any = useHistory();
 
-  const renderedResults: any = renderResults(
-    results,
-    isDark,
-    history
-  );
+  const renderedResults: any = renderResults(results, isDark, history);
 
   return (
     <div className={'search__container-results'} style={{ height }}>
@@ -106,7 +99,7 @@ const SearchInput = (props: ISearchInputProps) => {
 
   const [store] = useContext(Context);
 
-  const {isMobile, isDark} = store;
+  const { isMobile, isDark } = store;
 
   return (
     <div className={'search__input-wrapper'}>
@@ -135,7 +128,7 @@ const SearchHeader = (props: ISearchHeaderProps) => {
   const history: any = useHistory();
   const [store] = useContext(Context);
 
-  const {isMobile, isDark} = store;
+  const { isMobile, isDark } = store;
 
   const goBack: any = () => history.goBack();
 
@@ -193,11 +186,7 @@ interface IDesktopViewProps {
 const DesktopView = (props: IDesktopViewProps) => {
   const { results } = props;
 
-  console.log('RRRR', results)
-
-  return results.length > 0 ? (
-    <Results results={results} />
-  ) : null;
+  return results.length > 0 ? <Results results={results} /> : null;
 };
 
 interface ISearchViewProps {
@@ -207,16 +196,11 @@ interface ISearchViewProps {
   handleClearSearch: any;
 }
 const SearchView = (props: ISearchViewProps) => {
-  const {
-    typedText,
-    results,
-    onSearchInput,
-    handleClearSearch,
-  } = props;
+  const { typedText, results, onSearchInput, handleClearSearch } = props;
 
   const [store] = useContext(Context);
 
-  const {isMobile} = store;
+  const { isMobile } = store;
 
   return (
     <div className={'search__wrapper'}>
@@ -255,7 +239,7 @@ const Search = () => {
    */
   useEffect(() => {
     SyncEvents.getAllLastSync();
-  },        []);
+  }, []);
 
   const onSearchInput = (event: any) => {
     setTypedText(event.target.value);
@@ -275,21 +259,21 @@ const Search = () => {
     const foundItems: any[] = search(typedText);
 
     setResults(foundItems);
-  },        [typedText]);
+  }, [typedText]);
 
   const search = (keyWord: string) => {
     const result: any = [];
 
     for (const item of allEvents) {
-        const { startAt, summary, location, description } = item;
+      const { startAt, summary, location, description } = item;
 
-        if (
-          summary.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
-          location.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
-            description.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1
-        ) {
-          result.push(item)
-        }
+      if (
+        summary.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
+        location.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1 ||
+        description.toLowerCase().indexOf(keyWord.toLowerCase()) !== -1
+      ) {
+        result.push(item);
+      }
     }
 
     return result;
