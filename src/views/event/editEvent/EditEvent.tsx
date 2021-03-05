@@ -364,7 +364,7 @@ const EditEvent = (props: EditEventProps) => {
   const saveEvent = async () => {
     const newEvent: EventDecrypted = createEvent(
       form,
-      { ...rRuleState, ...{ dtstart: form.startAt } },
+      isRepeated ? { ...rRuleState, ...{ dtstart: form.startAt } } : null,
       calendarSettings.defaultTimezone,
       user.username as string
     );
