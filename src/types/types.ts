@@ -1,9 +1,10 @@
 import { DateTime } from 'luxon';
-import { IUser } from '../bloben-utils/models/User';
-import { IUserProfile } from '../bloben-package/types/common.types';
-import { IContact } from '../bloben-utils/models/Contact';
+import { User } from '../bloben-utils/models/User';
+import { UserProfile } from '../bloben-package/types/common.types';
 import { PgpKeys } from '../bloben-utils/utils/OpenPgp';
 import { INotification } from '../bloben-utils/models/Notification';
+import { Contact } from '../bloben-utils/models/Contact';
+import { Calendar } from '../bloben-utils/models/Calendar';
 
 export interface localSettingType {
   key: string;
@@ -71,10 +72,10 @@ export interface ISyncLog {
 }
 
 export interface ReduxState {
-  user: IUser;
-  userProfile: IUserProfile;
+  user: User;
+  userProfile: UserProfile;
   syncLog: ISyncLog;
-  contacts: IContact[];
+  contacts: Contact[];
   calendarSettings: ICalendarSettings;
   timezones: string[];
   defaultTimezone: string;
@@ -88,7 +89,7 @@ export interface ReduxState {
   eventsToImport: any;
   calendarView: CalendarView;
   selectedEvent: any;
-  calendars: any;
+  calendars: Calendar[];
   isLoading: boolean;
   isAppStarting: boolean;
   notifications: INotification[];

@@ -12,7 +12,7 @@ import {
   CalendarEncrypted,
   createCalendarEncrypted,
 } from '../../../bloben-utils/models/CalendarEncrypted';
-import { IUser } from '../../../bloben-utils/models/User';
+import { User } from '../../../bloben-utils/models/User';
 import { ReduxState } from '../../../types/types';
 import {
   Calendar,
@@ -46,7 +46,7 @@ const EditCalendar = (props: NewCalendarProps) => {
   const { id } = params;
 
   const dispatch: any = useDispatch();
-  const user: IUser = useSelector((state: ReduxState): IUser => state.user);
+  const user: User = useSelector((state: ReduxState): User => state.user);
   const calendars: Calendar[] = useSelector(
     (state: ReduxState): Calendar[] => state.calendars
   );

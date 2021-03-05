@@ -23,6 +23,7 @@ import SyncNotification from '../bloben-package/sync/NotificationSync';
 import { Calendar } from '../bloben-utils/models/Calendar';
 import { ReduxState } from '../types/types';
 import { stompClient } from '../bloben-package/layers/WebsocketProvider';
+import { EventDecrypted } from '../bloben-utils/models/Event';
 
 // Message constants
 const WEBSOCKET_EVENT_MESSAGE: WebsocketMessageType = 'event';
@@ -238,7 +239,7 @@ const WebsocketHandler = {
     const { rangeFrom, rangeTo } = store;
     const { id, updatedAt } = item;
     // Find if event is in state
-    const eventInState: EventStateEntity | null = await findInEvents(id);
+    const eventInState: EventDecrypted | null = await findInEvents(id);
 
     // Get event from server if not found, if needed to fetch all occurrences or is older
     if (
@@ -260,7 +261,7 @@ const WebsocketHandler = {
     const { id, updatedAt } = item;
 
     // Find if event is in state
-    const eventInState: EventStateEntity | null = await findInEvents(id);
+    const eventInState: EventDecrypted | null = await findInEvents(id);
     // Get event from server if not found, if needed to fetch all occurrences or is older
     if (!eventInState) {
       await SyncEvents.addEvent(item.id);

@@ -2,6 +2,10 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './EventView.scss';
 import { useParams } from 'react-router';
+import { DateTime } from 'luxon';
+import { useHistory } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+
 import {
   cloneDeep,
   findInArrayById,
@@ -10,29 +14,35 @@ import {
   handleEventReduxDelete,
 } from '../../../utils/common';
 import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
-import { useHistory } from 'react-router-dom';
 import CalendarApi from '../../../api/calendar';
-import { DateTime } from 'luxon';
 import EvaIcons from '../../../bloben-common/components/eva-icons';
-import ICalHelper, {
-  IAttendee,
-} from '../../../bloben-package/utils/ICalHelper';
+import ICalHelper from '../../../bloben-package/utils/ICalHelper';
 import AttendeeSettings, {
   AttendeeActions,
-} from '../../attendeeSettings/AttendeeSettings';
-import { Calendar, Title } from '../eventDetail/EventDetail';
+} from '../../../components/attendeeSettings/AttendeeSettings';
+import { CalendarRow, Title } from '../eventDetail/EventDetail';
 import { parseCssDark } from '../../../bloben-common/utils/common';
-import MySwitch from '../../Switch';
 import { Context } from '../../../bloben-package/context/store';
-import CalendarIcon from '@material-ui/icons/DateRange';
-import { IUserProfile } from '../../../bloben-package/types/common.types';
-import { useSelector } from 'react-redux';
+import { UserProfile } from '../../../bloben-package/types/common.types';
 import EventStateEntity, {
   EventBodyToSend,
 } from '../../../bloben-utils/models/event.entity';
 import { PgpKeys } from '../../../bloben-utils/utils/OpenPgp';
+import { ReduxState } from '../../../types/types';
+import { Calendar } from '../../../bloben-utils/models/Calendar';
+import { EventDecrypted } from '../../../bloben-utils/models/Event';
+import { Attendee, Partstat } from '../../../bloben-utils/models/Attendee';
+import {
+  createEventEncrypted,
+  EventEncrypted,
+} from '../../../bloben-utils/models/EventEncrypted';
+import User from '../../../bloben-utils/models/User';
 
-const EventDates = (props: any) => {
+interface EventDatesProps {
+  event: EventDecrypted;
+  isSmall?: boolean;
+}
+const EventDates = (props: EventDatesProps) => {
   const { event } = props;
 
   const [store] = useContext(Context);
@@ -63,20 +73,26 @@ const EventModel = {
 };
 
 const EventView = () => {
-  const [event, setEvent] = useState(EventModel);
-  const [calendar, setCalendar] = useState({ name: null });
+  const [event, setEvent] = useState();
+  const [calendar, setCalendar] = useState();
   const params: any = useParams();
   const history: any = useHistory();
 
-  const userProfile: IUserProfile = useSelector(
-    (state: any) => state.userProfile
+  const user: User = useSelector((state: ReduxState) => state.user);
+  const userProfile: UserProfile = useSelector(
+    (state: ReduxState) => state.userProfile
   );
-  const calendars: any = useSelector((state: any) => state.calendars);
-  const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
+  const calendars: Calendar[] = useSelector(
+    (state: ReduxState) => state.calendars
+  );
 
-  const isOrganizer: boolean = event.organizer.mailto === userProfile.appEmail;
+  const isOrganizer: boolean =
+    event && event.organizer && event.organizer.mailto === userProfile.appEmail;
 
-  const getCalendar = async (eventItem: any) => {
+  const getCalendar = async (eventItem: EventDecrypted) => {
+    if (!eventItem) {
+      return;
+    }
     const thisCalendar: any = await findInArrayById(
       calendars,
       eventItem.calendarId
@@ -84,24 +100,28 @@ const EventView = () => {
     setCalendar(thisCalendar);
   };
 
-  const loadEvent = async () => {
+  const loadEvent = async (): Promise<void> => {
     // Find event
-    const eventItem: any = await findInEvents(params.id);
+    const eventItem: EventDecrypted | null = await findInEvents(params.id);
 
-    const calendar: any = await getCalendar(eventItem);
-    setEvent(eventItem);
+    if (eventItem) {
+      await getCalendar(eventItem);
+      setEvent(eventItem);
+    }
   };
+
   const handleClose = () => {
     history.goBack();
   };
   const handleEdit = () => {
     history.push(`/event/edit/${event.id}`);
   };
-  const changeAttendeeStatus = async (value: string) => {
-    let attendeesClone: any = cloneDeep(event.attendees);
-    attendeesClone = attendeesClone.map((item: IAttendee) => {
+
+  const changeAttendeeStatus = async (value: string): Promise<void> => {
+    let attendeesClone: Attendee[] = cloneDeep(event.attendees);
+    attendeesClone = attendeesClone.map((item: Attendee) => {
       if (item.mailto === userProfile.appEmail) {
-        item.partstat = value;
+        item.partstat = value as Partstat;
       }
 
       return item;
@@ -110,13 +130,15 @@ const EventView = () => {
     event.attendees = attendeesClone;
 
     const eventModel: any = new EventStateEntity(event);
-    const bodyToSend: EventBodyToSend = await eventModel.formatBodyToSendOpenPgp(
-      pgpKeys
+
+    const encryptedEvent: EventEncrypted = await createEventEncrypted(
+      user.publicKey,
+      event
     );
 
-    console.log('bodyyy', bodyToSend);
+    console.log('bodyyy', encryptedEvent);
     // Update event
-    await CalendarApi.updateEvent(bodyToSend);
+    await CalendarApi.updateEvent(encryptedEvent);
 
     // Send response to organizer
     const icalTest: any = new ICalHelper(
@@ -138,9 +160,8 @@ const EventView = () => {
     await CalendarApi.sendInvite(inviteData);
   };
 
-  const deleteEvent = async () => {
+  const deleteEvent = async (): Promise<void> => {
     if (event) {
-      // @ts-ignore
       event.deletedAt = DateTime.local().toUTC().toString();
 
       await CalendarApi.deleteEvent(event);
@@ -175,7 +196,9 @@ const EventView = () => {
         isEditable={false}
         changeAttendeeStatus={changeAttendeeStatus}
       />
-      {calendar.name ? <Calendar calendar={calendar} disabled /> : null}
+      {calendar && calendar.name ? (
+        <CalendarRow calendar={calendar} disabled />
+      ) : null}
       {event.attendees.length > 0 ? <AttendeeActions /> : null}
     </div>
   ) : null;

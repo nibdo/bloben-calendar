@@ -14,7 +14,7 @@ import { DateTime } from 'luxon';
 import AccountApi from '../bloben-package/api/account.api';
 import { AxiosResponse } from 'axios';
 import { verifyUser } from '../bloben-utils/utils/getAccount';
-import { IUser } from '../bloben-utils/models/User';
+import { User } from '../bloben-utils/models/User';
 import CalendarLayout from './CalendarLayout';
 import CalendarLogic from './CalendarLogic';
 
@@ -31,7 +31,7 @@ const AuthorizedProvider = () => {
   );
   const selectedDate: any = useSelector((state: any) => state.selectedDate);
   const isDark: boolean = useSelector((state: any) => state.isDark);
-  const user: IUser = useSelector((state: any) => state.user);
+  const user: User = useSelector((state: any) => state.user);
 
   /*
    * First initialization of app

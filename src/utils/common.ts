@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { reduxStore } from '../bloben-package/layers/ReduxProvider';
-import { TCalendarAlarmType } from '../types/types';
+import { ReduxState, TCalendarAlarmType } from '../types/types';
 import { v4 } from 'uuid';
 import {
   differenceInCalendarDays,
@@ -15,6 +15,7 @@ import Interval from 'luxon/src/interval.js';
 import { formatTimestampToDate } from '../bloben-utils/utils/common';
 import LuxonHelper from '../bloben-utils/utils/LuxonHelper';
 import { parseToDateTime } from '../bloben-package/utils/datetimeParser';
+import { EventDecrypted } from '../bloben-utils/models/Event';
 export const mapTags = (tags: any) => {
   const tagsObj: any = {};
 
@@ -97,15 +98,15 @@ export const findInState = (item: any, stateString: any) =>
     }
   });
 
-export const findInEvents = (id: string): Promise<EventStateEntity | null> =>
+export const findInEvents = (id: string): Promise<EventDecrypted | null> =>
   new Promise((resolve) => {
-    const store: any = reduxStore.getState();
-    const dataState: any = store.events;
+    const store: ReduxState = reduxStore.getState();
+    const dataState: EventDecrypted[] = store.events;
     if (dataState) {
       for (const [key, value] of Object.entries(dataState)) {
         const dayEvents: any = value;
         for (const event of dayEvents) {
-          const eventObj: EventStateEntity = event;
+          const eventObj: EventDecrypted = event;
           if (eventObj.id === id) {
             resolve(eventObj);
           }
@@ -145,9 +146,9 @@ const removeFromArray = (item: any, array: any) =>
 
 export const handleEventReduxUpdate = async (
   prevItem: any,
-  newItem: EventStateEntity
+  newItem: EventDecrypted
 ) => {
-  const store: any = reduxStore.getState();
+  const store: ReduxState = reduxStore.getState();
   const stateClone: any = cloneDeep(store.events);
 
   const result: any = {};
@@ -164,17 +165,17 @@ export const handleEventReduxUpdate = async (
       stateClone[getDateKey(prevItem)]
     );
     // Save updated version
-    stateClone[newItem.getDateKey()].push(newItem.getReduxStateObj());
+    stateClone[getDateKey(newItem)].push(newItem);
   }
 
   reduxStore.dispatch(setEvents(stateClone));
 };
-export const getDateKey = (event: EventStateEntity): string =>
+export const getDateKey = (event: EventDecrypted): string =>
   formatTimestampToDate(event.startAt);
 
 export const handleEventReduxDelete = async (
   prevItem: any,
-  newItem?: EventStateEntity
+  newItem?: EventDecrypted
 ) => {
   const store: any = reduxStore.getState();
   const stateClone: any = cloneDeep(store.events);
@@ -328,7 +329,9 @@ export const checkOverlappingEvents = (firstDate: any, secondDate: any) => {
   );
 };
 
-export const createMultiDayClone = (event: EventStateEntity) => {
+export const createMultiDayClone = (
+  event: EventDecrypted
+): EventDecrypted[] => {
   const data: any = [];
 
   const daysBetween: number | undefined = DateTime.fromISO(event.endAt)

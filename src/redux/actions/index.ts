@@ -3,11 +3,12 @@ import {
   CalendarView,
   ICalendarSettings,
 } from '../../types/types';
-import { IUserProfile } from '../../bloben-package/types/common.types';
-import { IUser } from '../../bloben-utils/models/User';
+import { UserProfile } from '../../bloben-package/types/common.types';
+import { User } from '../../bloben-utils/models/User';
 import { Calendar } from '../../bloben-utils/models/Calendar';
+import { Contact } from '../../bloben-utils/models/Contact';
 
-export const setUser = (user: IUser) => {
+export const setUser = (user: User) => {
   return {
     type: 'SET_USER',
     payload: user,
@@ -32,13 +33,13 @@ export const setPassword = (password: string) => {
     payload: password,
   };
 };
-export const setUserProfile = (userProfile: IUserProfile) => {
+export const setUserProfile = (userProfile: UserProfile) => {
   return {
     type: 'SET_USER_PROFILE',
     payload: userProfile,
   };
 };
-export const setContacts = (contacts: any) => {
+export const setContacts = (contacts: Contact[]) => {
   return {
     type: 'SET_CONTACTS',
     payload: contacts,

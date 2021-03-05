@@ -2,7 +2,7 @@ import React, { useState, useEffect, useReducer } from 'react';
 import './CalendarEvent.scss';
 import dateFns, { isFuture, parseISO } from 'date-fns';
 import { formReducer, stateReducer } from 'utils/reducer/baseReducer';
-import { calendarColors } from '../../calendarView/calendar-common';
+import { calendarColors } from '../../../components/calendarView/calendar-common';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
 import { parseCssDark } from '../../../bloben-common/utils/common';

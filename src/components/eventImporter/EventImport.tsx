@@ -18,12 +18,12 @@ import {
   sendWebsocketMessage,
   WEBSOCKET_IMPORT_EVENTS,
 } from '../../api/calendar';
-import { Calendar } from '../event/eventDetail/EventDetail';
 import { useHistory } from 'react-router-dom';
 import { setEventsToImport } from '../../redux/actions';
 import { Context } from '../../bloben-package/context/store';
 import Modal from '../../bloben-package/components/modal/Modal';
 import HeaderModal from '../../bloben-package/components/headerModal/HeaderModal';
+import { CalendarRow } from '../../views/event/eventDetail/EventDetail';
 
 interface IResultsProps {
   results: any;
@@ -75,11 +75,11 @@ const ImportedEvents = (props: IImportedEventsProps) => {
     changeCalendar,
     coordinates,
     setCoordinates,
-    selectCalendar
+    selectCalendar,
   } = props;
 
   return (
-    <Modal handleClose={clearData} >
+    <Modal handleClose={clearData}>
       <div
         style={{
           display: 'flex',
@@ -93,10 +93,7 @@ const ImportedEvents = (props: IImportedEventsProps) => {
           handleSave={handleSave}
           onClose={clearData}
         />
-        <Calendar
-          calendar={calendar}
-          selectCalendar={selectCalendar}
-        />
+        <CalendarRow calendar={calendar} selectCalendar={selectCalendar} />
         <Results results={data} />
       </div>
     </Modal>
@@ -174,8 +171,8 @@ const EventImport = () => {
   };
 
   const selectCalendar = (calendarObj: any) => {
-    setCalendar(calendarObj.id)
-  }
+    setCalendar(calendarObj.id);
+  };
 
   const changeCalendar = async (itemName: string, calendarId: string) => {
     const calendarSelected: any = await findInArrayById(calendars, calendarId);

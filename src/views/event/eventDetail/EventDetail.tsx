@@ -1,49 +1,48 @@
 /* tslint:disable:no-magic-numbers */
 import React, { useContext, useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import CalendarIcon from '@material-ui/icons/DateRange';
+import MySwitch from 'components/Switch';
+import { ButtonBase } from '@material-ui/core';
+import { DateTime } from 'luxon';
+import BottomSheet from 'bottom-sheet-react';
+
 import './EventDetail.scss';
 
 import { Input } from 'bloben-package/components/input/Input';
-import CalendarIcon from '@material-ui/icons/DateRange';
-import MySwitch from 'components/Switch';
-
 import PickerModal from '../../../bloben-package/components/pickerModal/PickerModal';
 import { HeightHook, WidthHook } from '../../../bloben-common/utils/layout';
 import Dropdown from '../../../bloben-package/components/dropdown/Dropdown';
-import { ButtonBase } from '@material-ui/core';
 import {
   calendarColors,
   HEADER_HEIGHT_SMALL,
-} from '../../calendarView/calendar-common';
+} from '../../../components/calendarView/calendar-common';
 import DatePicker from '../../../bloben-package/components/datePicker/DatePicker';
 import TimePicker from '../../../bloben-package/components/timePicker/TimePicker';
 import {
   DATE_FORMAT,
   DATE_MONTH_YEAR_FORMAT,
-  TIME_FORMAT, WEEK_DAY_FORMAT_MEDIUM,
-  WEEK_DAY_FORMAT_SHORT,
+  TIME_FORMAT,
+  WEEK_DAY_FORMAT_MEDIUM,
 } from '../../../bloben-package/utils/date';
 import EvaIcons from '../../../bloben-common/components/eva-icons';
-import { useSelector } from 'react-redux';
-import NotificationSettings from '../../../bloben-package/components/alarmSettings/AlarmSettings';
-import {
-  MAX_REPEAT_UNTIL,
-  MAX_REPEAT_UNTIL_STRING
-} from '../../../bloben-utils/models/event.entity';
+import { MAX_REPEAT_UNTIL_STRING } from '../../../bloben-utils/models/event.entity';
 import DropdownWrapper from '../../../bloben-package/components/dropdownWrapper/DropdownWrapper';
 import BottomSheetDropdownSwitcher from '../../../bloben-package/components/bottomSheetDropdownSwitcher/BottomSheetDropdownSwitcher';
 import ModalSmall from '../../../bloben-package/components/modalSmall/ModalSmall';
 import { parseCssDark } from '../../../bloben-common/utils/common';
-import BottomSheet from 'bottom-sheet-react';
 import { Context } from '../../../bloben-package/context/store';
 import MyMenu from '../../../bloben-package/components/myMenu/MyMenu';
 import TimezoneRow from '../../../bloben-package/components/timezoneRow/TimezoneRow';
 import Modal from '../../../bloben-package/components/modal/Modal';
 import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
-import { DateTime } from 'luxon';
-import { DatetimeParser, parseToDateTime } from '../../../bloben-package/utils/datetimeParser';
+import { parseToDateTime } from '../../../bloben-package/utils/datetimeParser';
 import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
 import AlarmSettings from '../../../bloben-package/components/alarmSettings/AlarmSettings';
-import AttendeeSettings from '../../attendeeSettings/AttendeeSettings';
+import AttendeeSettings from '../../../components/attendeeSettings/AttendeeSettings';
+import { Calendar } from '../../../bloben-utils/models/Calendar';
+import { ReduxState } from '../../../types/types';
+import { Attendee } from '../../../bloben-utils/models/Attendee';
 
 const repeatOptions: any = [
   { label: 'No repeat', value: 'none' },
@@ -53,27 +52,32 @@ const repeatOptions: any = [
   { label: 'custom', value: 'custom' },
 ];
 
-interface ITitleProps {
+interface TitleProps {
   isNewEvent: boolean;
   value: string;
   handleChange?: any;
   disabled?: boolean;
 }
-export const Title = (props: ITitleProps) => {
+export const Title = (props: TitleProps) => {
   const { isNewEvent, value, handleChange, disabled } = props;
 
   const [store] = useContext(Context);
   const { isDark } = store;
 
   return (
-    <div className={parseCssDark(`event_detail__row ${disabled ? 'no-row' : ''}`, isDark)}>
+    <div
+      className={parseCssDark(
+        `event_detail__row ${disabled ? 'no-row' : ''}`,
+        isDark
+      )}
+    >
       <div className={'event_detail__container--icon'}>
         <CalendarIcon className={'event_detail__icon--hidden'} />
       </div>
       <Input
-        placeholder='Add event'
-        type='text'
-        name='summary'
+        placeholder="Add event"
+        type="text"
+        name="summary"
         autoFocus={isNewEvent}
         multiline={true}
         value={value}
@@ -113,7 +117,7 @@ const parseRepeatTill = (until: DateTime, count: any): string => {
 const parseRRuleText = (rRule: any) => {
   const { freq, interval, until, count } = rRule;
 
-  const isInfinite: boolean = !(
+  const isInfinite = !(
     (until && LuxonHelper.isBefore(until, MAX_REPEAT_UNTIL_STRING)) ||
     count
   );
@@ -125,17 +129,19 @@ const parseRRuleText = (rRule: any) => {
   `;
 };
 
-interface ICalendarProps {
-  calendar: any;
+interface CalendarRow {
+  calendar: Calendar;
   selectCalendar?: any;
   disabled?: boolean;
 }
-export const Calendar = (props: ICalendarProps) => {
+export const CalendarRow = (props: CalendarRow) => {
   const { calendar, disabled, selectCalendar } = props;
 
   const [isOpen, openMenu] = useState(false);
 
-  const calendars: any = useSelector((state: any) => state.calendars);
+  const calendars: Calendar[] = useSelector(
+    (state: ReduxState) => state.calendars
+  );
 
   const [store] = useContext(Context);
   const { isDark, isMobile } = store;
@@ -148,14 +154,19 @@ export const Calendar = (props: ICalendarProps) => {
   const handleMenuClose = () => {
     openMenu(false);
   };
-  const selectOption = (item: any) => {
-    selectCalendar(item);
+  const selectOption = (item: Calendar) => {
+    if (selectCalendar) {
+      selectCalendar(item);
+    }
     handleMenuClose();
   };
 
   return (
     <div
-      className={parseCssDark(`event_detail__row ${disabled ? 'no-row': ''}`, isDark)}
+      className={parseCssDark(
+        `event_detail__row ${disabled ? 'no-row' : ''}`,
+        isDark
+      )}
       onClick={!disabled ? handleMenuOpen : undefined}
     >
       <div className={'event_detail__container--icon'}>
@@ -164,31 +175,35 @@ export const Calendar = (props: ICalendarProps) => {
           fill={calendarColors[calendar.color][isDark ? 'dark' : 'light']}
         />
       </div>
-      <div className={'event_detail__button'} onClick={!disabled ? handleMenuOpen : undefined}>
+      <div
+        className={'event_detail__button'}
+        onClick={!disabled ? handleMenuOpen : undefined}
+      >
         <p className={parseCssDark('event_detail__input', isDark)}>
           {calendar.name}
         </p>
       </div>
       {isOpen ? (
         !isMobile ? (
-            <Dropdown
-                isOpen={isOpen}
+          <Dropdown
+            isOpen={isOpen}
+            handleClose={handleMenuClose}
+            values={
+              <MyMenu
+                variant="calendar"
+                select={selectOption}
+                selected={calendar}
                 handleClose={handleMenuClose}
-                values={<MyMenu
-                    variant='calendar'
-                    select={selectOption}
-                    selected={calendar}
-                    handleClose={handleMenuClose}
-                    data={calendars}
-                />}
-                onClick={selectOption}
-                type={'children'}
-            >
-            </Dropdown>
+                data={calendars}
+              />
+            }
+            onClick={selectOption}
+            type={'children'}
+          />
         ) : (
           <ModalSmall isOpen={isOpen} handleClose={handleMenuClose}>
             <MyMenu
-              variant='calendar'
+              variant="calendar"
               select={selectOption}
               selected={calendar}
               handleClose={handleMenuClose}
@@ -201,7 +216,7 @@ export const Calendar = (props: ICalendarProps) => {
   );
 };
 
-interface IDateFromProps {
+interface DateFromProps {
   openDateFrom: any;
   openTimeFrom: any;
   isStartDateValid?: boolean;
@@ -209,14 +224,14 @@ interface IDateFromProps {
   allDay: boolean;
   timezoneStart: string;
 }
-const DateFrom = (props: IDateFromProps) => {
+const DateFrom = (props: DateFromProps) => {
   const {
     isStartDateValid,
     openDateFrom,
     startDate,
     allDay,
     openTimeFrom,
-    timezoneStart
+    timezoneStart,
   } = props;
 
   const [store] = useContext(Context);
@@ -242,7 +257,11 @@ const DateFrom = (props: IDateFromProps) => {
               isDark
             )} ${!isStartDateValid ? 'date-error' : ''}`}
           >
-            ({parseToDateTime(startDate, timezoneStart).toFormat(WEEK_DAY_FORMAT_MEDIUM)})
+            (
+            {parseToDateTime(startDate, timezoneStart).toFormat(
+              WEEK_DAY_FORMAT_MEDIUM
+            )}
+            )
           </p>
         </ButtonBase>
         {!allDay ? (
@@ -279,7 +298,7 @@ const DateTill = (props: IDateTillProps) => {
     endDate,
     allDay,
     openTimeTill,
-    timezoneStart
+    timezoneStart,
   } = props;
 
   const [store] = useContext(Context);
@@ -305,7 +324,11 @@ const DateTill = (props: IDateTillProps) => {
               isDark
             )} ${!isStartDateValid ? 'date-error' : ''}`}
           >
-            ({parseToDateTime(endDate, timezoneStart).toFormat(WEEK_DAY_FORMAT_MEDIUM)})
+            (
+            {parseToDateTime(endDate, timezoneStart).toFormat(
+              WEEK_DAY_FORMAT_MEDIUM
+            )}
+            )
           </p>
         </ButtonBase>
         {!allDay ? (
@@ -350,11 +373,7 @@ const AllDay = (props: IAllDayProps) => {
         <p className={parseCssDark('event_detail__input', isDark)}>All day</p>
       </div>
       <div className={'event_detail__col--right'}>
-        <MySwitch
-          value={allDay}
-          checked={allDay}
-          onValueChange={handleClick}
-        />
+        <MySwitch value={allDay} checked={allDay} onValueChange={handleClick} />
       </div>
     </div>
   );
@@ -376,7 +395,7 @@ const RepeatValueButton = (props: IRepeatValueButtonProps) => {
     <div className={'repeat__value-wrapper'}>
       <p className={parseCssDark('repeat__value-label', isDark)}>{label}</p>
       <ButtonBase
-          className={parseCssDark('repeat__value-container', isDark)}
+        className={parseCssDark('repeat__value-container', isDark)}
         style={style}
         onClick={handleClick}
       >
@@ -409,27 +428,26 @@ export const RepeatValueDropDown = (props: IRepeatValueDropdownProps) => {
 
   const [store] = useContext(Context);
 
-  const {isDark} = store;
+  const { isDark } = store;
 
   return (
     <div className={'repeat__value-wrapper'}>
       <p className={parseCssDark('repeat__value-label', isDark)}>{label}</p>
       <ButtonBase
-          className={parseCssDark('repeat__value-container', isDark)}
+        className={parseCssDark('repeat__value-container', isDark)}
         style={style}
         onClick={handleOpen}
       >
         <p className={parseCssDark('repeat__value-text', isDark)}>{value}</p>
-
       </ButtonBase>
       <Dropdown
-          isOpen={isOpen}
-          handleClose={handleClose}
-          selectedValue={value}
-          values={values}
-          onClick={handleSelect}
-          variant={'simple'}
-          className={'dropdown__align-bottom'}
+        isOpen={isOpen}
+        handleClose={handleClose}
+        selectedValue={value}
+        values={values}
+        onClick={handleSelect}
+        variant={'simple'}
+        className={'dropdown__align-bottom'}
       />
     </div>
   );
@@ -476,11 +494,11 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
 
   const [store] = useContext(Context);
 
-  const {isDark} = store;
+  const { isDark } = store;
 
   const { freq, interval, until, count } = rRuleState;
 
-  const DEFAULT_FREQ_OPEN_VALUE: any = {clientX: null}
+  const DEFAULT_FREQ_OPEN_VALUE: any = { clientX: null };
 
   const [freqIsOpen, openFreq] = useState(DEFAULT_FREQ_OPEN_VALUE);
   const [untilIsOpen, openUntil] = useState(false);
@@ -492,14 +510,14 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
       setRRule('freq', 'weekly');
       setRRule('interval', 1);
     }
-  },        []);
+  }, []);
 
   const selectFreq = (value: any) => {
     setRRule('freq', value);
     if (value === 'none') {
       setRRule('interval', '');
-      setRRule('until', '');
-      setRRule('count', '');
+      setRRule('until', null);
+      setRRule('count', null);
     } else {
       if (value === 'count') {
         setRRule('count', 7);
@@ -514,7 +532,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
     if (value === 'date') {
       setRRule('count', null);
       // TODO default date until
-      setRRule('until', DateTime.local().plus({years: 1}));
+      setRRule('until', DateTime.local().plus({ years: 1 }));
       setRepeatTillValue('date');
     } else if (value === 'count') {
       setRRule('count', 7);
@@ -602,7 +620,9 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
         ) : null}
       </div>
       {freq !== 'none' ? (
-              <h4 className={parseCssDark('repeat__subtitle', isDark)}>Repeat until</h4>
+        <h4 className={parseCssDark('repeat__subtitle', isDark)}>
+          Repeat until
+        </h4>
       ) : null}
       <div className={'repeat__row'}>
         {freq !== 'none' ? (
@@ -724,7 +744,7 @@ const Repeat = (props: IRepeatProps) => {
         isMobile ? (
           <ModalSmall isOpen={isOpen} handleClose={handleMenuClose}>
             <MyMenu
-              variant='radio'
+              variant="radio"
               select={selectOption}
               selected={{ label: isRepeated, value: isRepeated }}
               handleClose={handleMenuClose}
@@ -738,7 +758,7 @@ const Repeat = (props: IRepeatProps) => {
             handleClose={handleMenuClose}
           >
             <MyMenu
-              variant='radio'
+              variant="radio"
               select={selectOption}
               selected={{ label: isRepeated, value: isRepeated }}
               handleClose={handleMenuClose}
@@ -767,11 +787,11 @@ const Repeat = (props: IRepeatProps) => {
   );
 };
 
-interface ILocationProps {
+interface LocationProps {
   handleChange: any;
   value: string;
 }
-const Location = (props: ILocationProps) => {
+const Location = (props: LocationProps) => {
   const { handleChange, value } = props;
 
   const [store] = useContext(Context);
@@ -783,9 +803,9 @@ const Location = (props: ILocationProps) => {
         <EvaIcons.Pin className={'svg-icon event-content-svg'} />
       </div>
       <Input
-        type='text'
-        name='location'
-        placeholder='Add location'
+        type="text"
+        name="location"
+        placeholder="Add location"
         autoComplete={'off'}
         className={parseCssDark('event_detail__input', isDark)}
         onChange={handleChange}
@@ -796,11 +816,11 @@ const Location = (props: ILocationProps) => {
   );
 };
 
-interface INotesProps {
+interface NotesProps {
   handleChange: any;
   value: string;
 }
-const Notes = (props: INotesProps) => {
+const Notes = (props: NotesProps) => {
   const { handleChange, value } = props;
 
   const [store] = useContext(Context);
@@ -812,9 +832,9 @@ const Notes = (props: INotesProps) => {
         <EvaIcons.Note className={'svg-icon event-content-svg'} />
       </div>
       <Input
-        type='text'
-        name='description'
-        placeholder='Add notes'
+        type="text"
+        name="description"
+        placeholder="Add notes"
         autoComplete={'off'}
         className={parseCssDark('event_detail__input', isDark)}
         onChange={handleChange}
@@ -825,10 +845,10 @@ const Notes = (props: INotesProps) => {
   );
 };
 
-interface IEventDetailProps {
+interface EventDetailProps {
   summary: string;
   handleChange: any;
-  calendar: any;
+  calendar: Calendar;
   location: string;
   startDate: string;
   endDate: string;
@@ -849,13 +869,13 @@ interface IEventDetailProps {
   timezoneStart: string;
   setStartTimezone: any;
   selectCalendar: any;
-  organizer: any;
-  attendees: any;
+  organizer: Attendee;
+  attendees: Attendee[];
   addAttendee: any;
   removeAttendee: any;
   makeOptional: any;
 }
-const EventDetail = (props: IEventDetailProps) => {
+const EventDetail = (props: EventDetailProps) => {
   const [isDateFromVisible, openDateFrom] = useState(false);
   const [isTimeFromVisible, openTimeFrom] = useState(false);
   const [isDateTillVisible, openDateTill] = useState(false);
@@ -894,10 +914,10 @@ const EventDetail = (props: IEventDetailProps) => {
     setStartTimezone,
     selectCalendar,
     attendees,
-      addAttendee,
-      removeAttendee,
+    addAttendee,
+    removeAttendee,
     makeOptional,
-    organizer
+    organizer,
   } = props;
 
   /**
@@ -915,7 +935,7 @@ const EventDetail = (props: IEventDetailProps) => {
     return () => {
       document.removeEventListener('click', handleNewCoordinates);
     };
-  },        []);
+  }, []);
 
   const wrapperStyle: any = {
     height: isMobile ? height - HEADER_HEIGHT_SMALL : height / 2,
@@ -935,11 +955,12 @@ const EventDetail = (props: IEventDetailProps) => {
       style={wrapperStyle}
       onScroll={handleScroll}
     >
-      <Title value={summary} handleChange={handleChange} isNewEvent={isNewEvent} />
-      <Calendar
-        calendar={calendar}
-        selectCalendar={selectCalendar}
+      <Title
+        value={summary}
+        handleChange={handleChange}
+        isNewEvent={isNewEvent}
       />
+      <CalendarRow calendar={calendar} selectCalendar={selectCalendar} />
       <DateFrom
         startDate={startDate}
         allDay={allDay}
@@ -964,7 +985,12 @@ const EventDetail = (props: IEventDetailProps) => {
         timezoneStart={timezoneStart}
       />
       <AllDay allDay={allDay} setForm={setForm} />
-      {!allDay ? <TimezoneRow timezone={timezoneStart} openTimezoneModal={ () => openTimezoneModal(true)}/> : null }
+      {!allDay ? (
+        <TimezoneRow
+          timezone={timezoneStart}
+          openTimezoneModal={() => openTimezoneModal(true)}
+        />
+      ) : null}
       <Repeat
         setForm={setForm}
         isRepeated={isRepeated}
@@ -974,12 +1000,12 @@ const EventDetail = (props: IEventDetailProps) => {
         setCoordinates={setCoordinates}
       />
       <AttendeeSettings
-          organizer={organizer}
-          attendees={attendees}
-          addAttendee={addAttendee}
-          removeAttendee={removeAttendee}
-          makeOptional={makeOptional}
-          isEditable={true}
+        organizer={organizer}
+        attendees={attendees}
+        addAttendee={addAttendee}
+        removeAttendee={removeAttendee}
+        makeOptional={makeOptional}
+        isEditable={true}
       />
       <AlarmSettings
         alarms={alarms}
@@ -1004,7 +1030,7 @@ const EventDetail = (props: IEventDetailProps) => {
         >
           {isDateFromVisible && startDate ? (
             <DatePicker
-                keyPrefix={'dateFrom'}
+              keyPrefix={'dateFrom'}
               width={isMobile ? width - 48 : 250}
               sideMargin={24}
               height={(height / 6) * 3}
@@ -1022,7 +1048,7 @@ const EventDetail = (props: IEventDetailProps) => {
           ) : null}
           {isDateTillVisible ? (
             <DatePicker
-                keyPrefix={'dateTill'}
+              keyPrefix={'dateTill'}
               width={isMobile ? width - 48 : 250}
               sideMargin={24}
               height={(height / 6) * 2}
@@ -1038,17 +1064,16 @@ const EventDetail = (props: IEventDetailProps) => {
               timezone={timezoneStart}
             />
           ) : null}
-
         </BottomSheetDropdownSwitcher>
       ) : null}
-      {timezoneModalIsOpen
-          ? <Modal>
-            <TimeZonePicker
-                selectTimezone={setStartTimezone}
-                onClose={() => openTimezoneModal(false)}/>
-          </Modal>
-          : null
-      }
+      {timezoneModalIsOpen ? (
+        <Modal>
+          <TimeZonePicker
+            selectTimezone={setStartTimezone}
+            onClose={() => openTimezoneModal(false)}
+          />
+        </Modal>
+      ) : null}
     </div>
   );
 };

@@ -77,7 +77,7 @@ const Event = (props: IEventProps) => {
         className={`event__text${isDark ? '--dark' : ''}`}
         style={eventTextStyle}
       >
-        {event.text}{' '}
+        {event.summary}{' '}
       </p>
     </ButtonBase>
   );

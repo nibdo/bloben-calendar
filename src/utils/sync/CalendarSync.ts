@@ -1,3 +1,5 @@
+import { AxiosResponse } from 'axios';
+
 import { reduxStore } from '../../bloben-package/layers/ReduxProvider';
 import OpenPgp from '../../bloben-utils/utils/OpenPgp';
 import { cloneDeep, findInArrayById } from '../common';
@@ -9,15 +11,15 @@ import {
   setEvents,
   updateCalendar,
 } from '../../redux/actions';
-import { AxiosResponse } from 'axios';
 import CalendarApi from '../../api/calendar';
 import { ISyncLog, ReduxState } from '../../types/types';
-import { IUser } from '../../bloben-utils/models/User';
+import { User } from '../../bloben-utils/models/User';
 import { Calendar, createCalendar } from '../../bloben-utils/models/Calendar';
+import { CalendarEncrypted } from 'bloben-utils/models/CalendarEncrypted';
 
 const decryptCalendar = async (
-  item: any,
-  user: IUser,
+  item: CalendarEncrypted,
+  user: User,
   password: string
 ): Promise<Calendar> => {
   let decryptedData: any = await OpenPgp.decrypt(
@@ -38,7 +40,7 @@ const SyncCalendars: any = {
   getAll: async (): Promise<void> => {
     const store: ReduxState = reduxStore.getState();
     const password: string = store.password;
-    const user: IUser = store.user;
+    const user: User = store.user;
     const syncLog: ISyncLog = store.syncLog;
     const stateClone: Calendar[] = cloneDeep(store.calendars);
 
@@ -76,7 +78,7 @@ const SyncCalendars: any = {
   addCalendar: async (id: string): Promise<void> => {
     const store: ReduxState = reduxStore.getState();
     const password: string = store.password;
-    const user: IUser = store.user;
+    const user: User = store.user;
 
     const response: AxiosResponse = await CalendarApi.getCalendarById(id);
 
@@ -91,7 +93,7 @@ const SyncCalendars: any = {
   updateCalendar: async (id: string): Promise<void> => {
     const store: ReduxState = reduxStore.getState();
     const password: string = store.password;
-    const user: IUser = store.user;
+    const user: User = store.user;
 
     const response: AxiosResponse = await CalendarApi.getCalendarById(id);
 

@@ -19,14 +19,14 @@ import CalendarDrawer from '../../components/calendarDrawer/CalendarDrawer';
 import MonthView from '../../components/calendarView/monthView/MonthView';
 import Agenda from '../../components/calendarView/agenda/Agenda';
 import SettingsCalendar from '../../components/settingsCalendar/SettingsCalendar';
-import EditEvent from '../../components/event/editEvent/EditEvent';
+import EditEvent from '../event/editEvent/EditEvent';
 import CalendarDesktopNavigation from '../../components/CalendarDesktopNavigation/calendar-desktop-navigation';
 import Modal from '../../bloben-package/components/modal/Modal';
 import CalendarNavbar from '../../components/calendarNavbar/CalendarNavbar';
 import { Context } from '../../bloben-package/context/store';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import Notifications from '../../bloben-package/views/notifications/Notifications';
-import EventView from '../../components/event/eventView/EventView';
+import EventView from '../event/eventView/EventView';
 import { CalendarDays, CalendarView, ReduxState } from '../../types/types';
 import {
   CALENDAR_3DAYS_VIEW,

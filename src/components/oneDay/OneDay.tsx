@@ -10,7 +10,7 @@ import {
 } from 'date-fns';
 
 import { WidthHook } from 'bloben-common/utils/layout';
-import CalendarEvent from '../event/calendarEvent/CalendarEvent';
+import CalendarEvent from '../../views/event/calendarEvent/CalendarEvent';
 import { useSelector } from 'react-redux';
 import { parseCssDark } from '../../bloben-common/utils/common';
 import { checkOverlappingEvents } from '../../utils/common';
@@ -37,7 +37,7 @@ const renderEvents = (
         (item: any) =>
           !item.allDay &&
           // @ts-ignore
-            parseToDateTime(item.endAt, item.timezoneStart)
+          parseToDateTime(item.endAt, item.timezoneStart)
             .diff(parseToDateTime(item.startAt, item.timezoneStart), 'days')
             .toObject().days < 1
       )
@@ -51,8 +51,11 @@ const renderEvents = (
             if (
               checkOverlappingEvents(event, item2) &&
               // @ts-ignore
-                parseToDateTime(item2.endAt, item2.timezoneStart)
-                .diff(parseToDateTime(item2.startAt, item2.timezoneStart), 'days')
+              parseToDateTime(item2.endAt, item2.timezoneStart)
+                .diff(
+                  parseToDateTime(item2.startAt, item2.timezoneStart),
+                  'days'
+                )
                 .toObject().days < 1
             ) {
               width = width + 1; //add width for every overlapping item
@@ -80,18 +83,26 @@ const renderEvents = (
           // @ts-ignore
           parseToDateTime(event.startAt, event.timezoneStart, defaultTimezone)
             .diff(
-                parseToDateTime(event.startAt, event.timezoneStart, defaultTimezone).set({
+              parseToDateTime(
+                event.startAt,
+                event.timezoneStart,
+                defaultTimezone
+              ).set({
                 hour: 0,
                 minute: 0,
                 second: 0,
-              }), 'minutes'
+              }),
+              'minutes'
             )
             .toObject().minutes / 1.5;
 
         const eventHeight: any =
           // @ts-ignore
           parseToDateTime(event.endAt, event.timezoneStart)
-            .diff(parseToDateTime(event.startAt, event.timezoneStart), 'minutes')
+            .diff(
+              parseToDateTime(event.startAt, event.timezoneStart),
+              'minutes'
+            )
             .toObject().minutes / 1.5;
         const eventWidth: any = tableWidth / width - 1; ///event.width.toString() + "%"
         //event.left
@@ -150,7 +161,9 @@ const OneDay = (props: IOneDayProps) => {
   const [store] = useContext(Context);
   const { isDark } = store;
 
-  const calendarSettings: ICalendarSettings = useSelector((state: any) => state.calendarSettings);
+  const calendarSettings: ICalendarSettings = useSelector(
+    (state: any) => state.calendarSettings
+  );
   const calendars: any = useSelector((state: any) => state.calendars);
   const calendarBodyWidth: number = useSelector(
     (state: any) => state.calendarBodyWidth
