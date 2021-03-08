@@ -2,21 +2,17 @@ import React, { useContext, useState } from 'react';
 import './CalendarContent.scss';
 import { useHistory } from 'react-router';
 import { ButtonBase } from '@material-ui/core';
-import EvaIcons from 'bloben-common/components/eva-icons';
-import ModalSmall from '../../../bloben-package/components/modalSmall/ModalSmall';
+import { EvaIcons, HeaderModal, Input, ModalSmall, Modal } from 'bloben-react';
 import CalendarIcon from '@material-ui/icons/DateRange';
 import {
   calendarColors,
   parseEventColor,
 } from '../../../components/calendarView/calendar-common';
 import { useSelector } from 'react-redux';
-import { Input } from '../../../bloben-package/components/input/Input';
-import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
-import { Context } from '../../../bloben-package/context/store';
-import { parseCssDark } from '../../../bloben-common/utils/common';
-import Modal from '../../../bloben-package/components/modal/Modal';
-import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
-import TimezoneRow from '../../../bloben-package/components/timezoneRow/TimezoneRow';
+import { parseCssDark } from 'bloben-react';
+import { Context } from 'bloben-module/context/store';
+import TimezoneRow from 'components/timezoneRow/TimezoneRow';
+import TimeZonePicker from 'components/timezonePicker/TimeZonePicker';
 
 interface CalendarColorProps {
   color: any;
@@ -91,7 +87,7 @@ const CalendarContentView = (props: CalendarContentViewProps) => {
   const { id, timezone, alarms, name, color } = calendarState;
 
   const [store] = useContext(Context);
-  const { isDark } = store;
+  const { isDark, isMobile } = store;
 
   const defaultCalendar: string = useSelector(
     (state: any) => state.defaultCalendar
@@ -106,6 +102,8 @@ const CalendarContentView = (props: CalendarContentViewProps) => {
         title={'Calendar'}
         handleDelete={defaultCalendar !== id ? deleteCalendar : null}
         icons={[]}
+        isDark={isDark}
+        isMobile={isMobile}
       />
       <div className={'event_detail__wrapper'} style={{ padding: 0 }}>
         <div className={parseCssDark('event_detail__row', isDark)}>
@@ -121,6 +119,7 @@ const CalendarContentView = (props: CalendarContentViewProps) => {
             autoFocus={true}
             onChange={handleChange}
             multiline={false}
+            isDark={isDark}
           />
         </div>
         {/*
@@ -144,7 +143,7 @@ const CalendarContentView = (props: CalendarContentViewProps) => {
         {/*/>*/}
       </div>
       {timezoneModalIsOpen ? (
-        <Modal>
+        <Modal isDark={isDark}>
           <TimeZonePicker
             selectTimezone={selectTimezone}
             onClose={() => openTimezoneModal(false)}
@@ -153,6 +152,7 @@ const CalendarContentView = (props: CalendarContentViewProps) => {
       ) : null}
       <ModalSmall
         isOpen={colorModalIsOpen}
+        isDark={isDark}
         handleClose={() => toggleColorModal(false)}
       >
         {renderCalendarColors(handleColorClick, isDark)}

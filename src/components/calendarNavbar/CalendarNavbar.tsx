@@ -1,13 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react';
 import IconButton from '@material-ui/core/IconButton';
-import { ButtonBase, Fab } from '@material-ui/core';
+import { Fab } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import './CalendarNavbar.scss';
 import { useHistory } from 'react-router';
-import EvaIcons from 'bloben-common/components/eva-icons';
-import { isCalendarApp } from '../../bloben-package/utils/common';
-import { useSelector } from 'react-redux';
-import { Context } from '../../bloben-package/context/store';
+import { EvaIcons, ButtonIcon } from 'bloben-react';
+import { Context } from 'bloben-module/context/store';
+import { isCalendarApp } from 'utils/common';
 
 const NavbarView = (props: any) => {
   const {
@@ -20,12 +19,9 @@ const NavbarView = (props: any) => {
   return (
     <div className={`navbar__container${isDark ? '-dark' : ''}`}>
       <div className={'navbar__button-container'}>
-        <IconButton
-          className={'navbar__button--left'}
-          onClick={handleLeftClick}
-        >
-          <EvaIcons.Menu className={`navbar__icon${isDark ? '-dark' : ''}`} />
-        </IconButton>
+        <ButtonIcon onClick={handleLeftClick} isDark={isDark}>
+          <EvaIcons.Menu />
+        </ButtonIcon>
       </div>
       <div className={'navbar__button-container--center'}>
         <Fab className={`navbar__fab${isDark ? '-dark' : ''}`}>
@@ -64,32 +60,42 @@ const NavbarViewCalendar = (props: any) => {
   return (
     <div className={`navbar__container${isDark ? '-dark' : ''}`}>
       <div className={'navbar__button-container'}>
-        <ButtonBase
-          className={'navbar__button--left'}
+        <ButtonIcon
           onClick={handleLeftClick}
+          isDark={isDark}
+          backdropClassName={'navbar__backdrop-150'}
+          noActive={true}
+          size={'full'}
+          iconSize={'normal'}
         >
-          <EvaIcons.Calendar
-            className={`navbar__icon${isDark ? '-dark' : ''}`}
-          />
-        </ButtonBase>
+          <EvaIcons.Calendar />
+        </ButtonIcon>
       </div>
 
       <div className={'navbar__button-container'}>
-        <ButtonBase
-            className={'navbar__button--left'}
+        <ButtonIcon
           onClick={handleCenterClick}
+          isDark={isDark}
+          backdropClassName={'navbar__backdrop-150'}
+          noActive={true}
+          size={'full'}
+          iconSize={'normal'}
         >
-          <EvaIcons.Search className={`navbar__icon${isDark ? '-dark' : ''}`} />
-        </ButtonBase>
+          <EvaIcons.Search />
+        </ButtonIcon>
       </div>
 
       <div className={'navbar__button-container'}>
-        <IconButton
-          className={'navbar__button--right'}
+        <ButtonIcon
           onClick={handleRightClick}
+          isDark={isDark}
+          backdropClassName={'navbar__backdrop-150'}
+          noActive={true}
+          size={'full'}
+          iconSize={'normal'}
         >
-          <EvaIcons.Menu className={`navbar__icon${isDark ? '-dark' : ''}`} />
-        </IconButton>
+          <EvaIcons.Menu />
+        </ButtonIcon>
       </div>
     </div>
   );
@@ -104,7 +110,7 @@ const getCurrentPath = (pathName: string) => {
 const CalendarNavbar = (props: any) => {
   const [store] = useContext(Context);
 
-  const {isDark} = store;
+  const { isDark } = store;
 
   const history = useHistory();
   const [currentPath, setCurrentPath] = useState('');

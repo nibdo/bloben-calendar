@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from 'react';
+import React, { useContext } from 'react';
 import { Route } from 'react-router-dom';
 import { Redirect, Router, useHistory } from 'react-router';
 import { useSelector } from 'react-redux';
@@ -6,21 +6,21 @@ import { DateTime } from 'luxon';
 
 import Settings from '../views/settings/Settings';
 import Search from '../views/search/Search';
-import { Context } from 'bloben-package/context/store';
-import Modal from 'bloben-package/components/modal/Modal';
 import EventImport from '../components/eventImporter/EventImport';
 import EventImportButton from '../components/eventImporter/eventImporterButton/EventImportButton';
 import EditCalendar from '../views/calendarEdit/editCalendar/EditCalendar';
 import { CalendarDays, CalendarView, ReduxState } from '../types/types';
 import { CALENDAR_AGENDA_VIEW } from 'utils/contants';
 import CalendarComponent from 'views/calendar/Calendar';
-import { Calendar } from '../bloben-utils/models/Calendar';
+import { Context } from 'bloben-module/context/store';
+import { Calendar } from 'bloben-utils';
+import { Modal } from 'bloben-react';
 
 const CalendarRouter = () => {
   const history: any = useHistory();
 
   const [store] = useContext(Context);
-  const { isMobile } = store;
+  const { isMobile, isDark } = store;
 
   const calendars: Calendar[] = useSelector(
     (state: ReduxState) => state.calendars
@@ -56,7 +56,7 @@ const CalendarRouter = () => {
         <Redirect to={'/'} />
         <Route exact path={'/search'}>
           {isMobile ? (
-            <Modal>
+            <Modal isDark={isDark}>
               <Search />
             </Modal>
           ) : (
@@ -69,7 +69,7 @@ const CalendarRouter = () => {
                 width: '30%',
               }}
             >
-              <Modal>
+              <Modal isDark={isDark}>
                 <Search />
               </Modal>
             </div>
@@ -77,7 +77,7 @@ const CalendarRouter = () => {
         </Route>
         <Route path={'/settings'}>
           {isMobile ? (
-            <Modal>
+            <Modal isDark={isDark}>
               <Settings />
             </Modal>
           ) : (
@@ -88,22 +88,22 @@ const CalendarRouter = () => {
           {isCalendarReady ? <CalendarComponent /> : null}
         </Route>
         <Route exact path={'/calendar/new'}>
-          <Modal>
+          <Modal isDark={isDark}>
             <EditCalendar isNewCalendar={true} />
           </Modal>
         </Route>
         <Route exact path={'/calendar/edit/:id'}>
-          <Modal>
+          <Modal isDark={isDark}>
             <EditCalendar isNewCalendar={false} />
           </Modal>
         </Route>
         <Route path={'/events/import'}>
-          <Modal>
+          <Modal isDark={isDark}>
             <EventImportButton autoFocus={true} />
           </Modal>
         </Route>
         <Route path={'/events/import/ics'}>
-          <Modal>
+          <Modal isDark={isDark}>
             <EventImport />
           </Modal>
         </Route>

@@ -18,8 +18,8 @@ import {
   getDayTimeStart,
 } from './common';
 import SyncEvents from './sync/EventsSync';
-import { reduxStore } from '../bloben-package/layers/ReduxProvider';
 import { getEventsInRange } from './getEventsInRange';
+import { reduxStore } from 'bloben-module/layers/ReduxProvider';
 
 /**
  * Calculate new calendar days and get events

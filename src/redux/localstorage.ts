@@ -1,11 +1,11 @@
-import { logger } from 'bloben-common/utils/common';
-import { LocalForage } from '../bloben-package/utils/LocalForage';
-import { setIsLoading } from './actions';
-import OpenPgp, { PgpKeys } from '../bloben-utils/utils/OpenPgp';
+import { LocalForage, logger } from 'bloben-react';
+import { OpenPgp } from 'bloben-utils';
 
-export const loadState =  async (state?: any) => {
+export const loadState = async (state?: any) => {
   try {
-    const isStorageEncrypted: boolean | null = await LocalForage.getItem("isStorageEncrypted");
+    const isStorageEncrypted: boolean | null = await LocalForage.getItem(
+      'isStorageEncrypted'
+    );
 
     let decryptedState: any;
 
@@ -38,7 +38,7 @@ export const saveState = async (root: any) => {
       // Encrypt storage
       const encrypted: any = await OpenPgp.encrypt(publicKey, root);
 
-      await LocalForage.setItem('root', encrypted)
+      await LocalForage.setItem('root', encrypted);
     } else {
       await LocalForage.setItem('root', root);
     }
@@ -55,20 +55,25 @@ const parseEventDates = (event: any) => {
   event.endAt = new Date(event.endAt);
 
   return event;
-}
+};
 const parseCalendarDays = (calendar: any) => {
   calendar.createdAt = new Date(calendar.createdAt);
   calendar.updatedAt = new Date(calendar.updatedAt);
   calendar.deletedAt = calendar.deletedAt ? new Date(calendar.deletedAt) : null;
 
   return calendar;
-}
+};
 const parseStringDateToDate = (state: any) => {
   const result: any = {};
 
-  const dateKeysSimple: any = ["rangeFrom", "rangeTo", 'selectedDate', 'eventsLastSynced'];
-  const dateKeysArraySimple: any = ["calendarDays"];
-  const dateKeysNested: any = ["events", "calendars", "allEvents"];
+  const dateKeysSimple: any = [
+    'rangeFrom',
+    'rangeTo',
+    'selectedDate',
+    'eventsLastSynced',
+  ];
+  const dateKeysArraySimple: any = ['calendarDays'];
+  const dateKeysNested: any = ['events', 'calendars', 'allEvents'];
 
   for (const [key, value] of Object.entries(state)) {
     const keyType: string = key;
@@ -80,10 +85,8 @@ const parseStringDateToDate = (state: any) => {
       const calendarDaysAny: any = [];
 
       for (const item of valueAny) {
-        const calendarDaysDate: any = item.map((day: any) =>
-          new Date(day)
-        )
-        calendarDaysAny.push(calendarDaysDate)
+        const calendarDaysDate: any = item.map((day: any) => new Date(day));
+        calendarDaysAny.push(calendarDaysDate);
       }
 
       result[keyType] = calendarDaysAny;
@@ -94,7 +97,7 @@ const parseStringDateToDate = (state: any) => {
         const valueEventsAny: any = valueEvents;
         eventsObj[keyEvents] = valueEventsAny.map((item: any) => {
           return parseEventDates(item);
-        })
+        });
       }
 
       result[keyType] = eventsObj;
@@ -106,8 +109,7 @@ const parseStringDateToDate = (state: any) => {
       }
 
       result[keyType] = eventsArray;
-    }
-    else if (keyType === 'calendars') {
+    } else if (keyType === 'calendars') {
       const calendarsArray: any = [];
 
       for (const item of valueAny) {
@@ -115,8 +117,7 @@ const parseStringDateToDate = (state: any) => {
       }
 
       result[keyType] = calendarsArray;
-    }
-    else {
+    } else {
       result[keyType] = valueAny;
     }
   }

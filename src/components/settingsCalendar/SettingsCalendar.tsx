@@ -1,15 +1,15 @@
 import React, { useContext } from 'react';
 import './SettingsCalendar.scss';
 import { ButtonBase } from '@material-ui/core';
-import { useHistory, useParams } from 'react-router';
-import { Context } from '../../bloben-package/context/store';
+import { useHistory } from 'react-router';
+import { Context } from 'bloben-module/context/store';
 
-interface ICalendarSettingsItemProps {
+interface CalendarSettingsItemProps {
   onClick: any;
   title: string;
   isDisabled?: boolean;
 }
-const CalendarSettingsItem = (props: ICalendarSettingsItemProps) => {
+const CalendarSettingsItem = (props: CalendarSettingsItemProps) => {
   const { onClick, title, isDisabled } = props;
 
   const [store] = useContext(Context);
@@ -33,13 +33,11 @@ const CalendarSettingsItem = (props: ICalendarSettingsItemProps) => {
   );
 };
 
-interface ICalendarSettingsViewProps {
+interface CalendarSettingsViewProps {
   navigateTo: any;
 }
-const CalendarSettingsView = (props: ICalendarSettingsViewProps) => {
-  const {
-    navigateTo,
-  } = props;
+const CalendarSettingsView = (props: CalendarSettingsViewProps) => {
+  const { navigateTo } = props;
 
   return (
     <div className={'calendar-settings__container'}>
@@ -48,8 +46,8 @@ const CalendarSettingsView = (props: ICalendarSettingsViewProps) => {
         onClick={() => navigateTo('/calendar/new')}
       />
       <CalendarSettingsItem
-          title={'Import events'}
-          onClick={() => navigateTo('/events/import')}
+        title={'Import events'}
+        onClick={() => navigateTo('/events/import')}
       />
       <CalendarSettingsItem
         title={'Settings'}
@@ -59,10 +57,10 @@ const CalendarSettingsView = (props: ICalendarSettingsViewProps) => {
   );
 };
 
-interface ICalendarSettingsProps {
+interface CalendarSettingsProps {
   handleClose: any;
 }
-const SettingsCalendar = (props: ICalendarSettingsProps) => {
+const SettingsCalendar = (props: CalendarSettingsProps) => {
   const { handleClose } = props;
 
   const history = useHistory();
@@ -72,11 +70,7 @@ const SettingsCalendar = (props: ICalendarSettingsProps) => {
     history.push(path);
   };
 
-  return (
-    <CalendarSettingsView
-      navigateTo={navigateTo}
-    />
-  );
+  return <CalendarSettingsView navigateTo={navigateTo} />;
 };
 
 export default SettingsCalendar;

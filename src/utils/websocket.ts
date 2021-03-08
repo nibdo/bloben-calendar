@@ -1,4 +1,3 @@
-import { reduxStore } from '../bloben-package/layers/ReduxProvider';
 import {
   addNotification,
   setCalendarSettings,
@@ -6,25 +5,35 @@ import {
   setNotifications,
   setUserProfile,
 } from '../redux/actions';
-import EventStateEntity from '../bloben-utils/models/event.entity';
 import { cloneDeep, findInArrayById, findInEvents } from './common';
 import CalendarApi, {
   sendWebsocketMessage,
   WEBSOCKET_GET_ONE_CONTACT,
 } from '../api/calendar';
-import OpenPgp, { PgpKeys } from '../bloben-utils/utils/OpenPgp';
-import LuxonHelper from '../bloben-utils/utils/LuxonHelper';
 import CalendarSync from './sync/CalendarSync';
 import SyncCalendars from './sync/CalendarSync';
 import SyncEvents from './sync/EventsSync';
 import { AxiosResponse } from 'axios';
-import AccountApi from '../bloben-package/api/account.api';
-import SyncNotification from '../bloben-package/sync/NotificationSync';
-import { Calendar } from '../bloben-utils/models/Calendar';
 import { ReduxState } from '../types/types';
-import { stompClient } from '../bloben-package/layers/WebsocketProvider';
-import { EventDecrypted } from '../bloben-utils/models/Event';
+import { reduxStore } from 'bloben-module/layers/ReduxProvider';
+import {
+  Calendar,
+  LuxonHelper,
+  EventDecrypted,
+  AccountApi,
+  PgpKeys,
+  OpenPgp,
+} from 'bloben-utils';
+import SyncNotification from 'sync/NotificationSync';
+import { stompClient } from 'bloben-module/layers/WebsocketProvider';
 
+type WebsocketMessageType =
+  | 'event'
+  | 'calendar'
+  | 'notification'
+  | 'calendarSettings'
+  | 'userProfile'
+  | 'contact';
 // Message constants
 const WEBSOCKET_EVENT_MESSAGE: WebsocketMessageType = 'event';
 const WEBSOCKET_CALENDAR_MESSAGE: WebsocketMessageType = 'calendar';
@@ -33,20 +42,13 @@ const WEBSOCKET_CALENDAR_SETTINGS_MESSAGE: WebsocketMessageType =
   'calendarSettings';
 const WEBSOCKET_USER_SETTINGS_MESSAGE: WebsocketMessageType = 'userProfile';
 const WEBSOCKET_CONTACT_MESSAGE: WebsocketMessageType = 'contact';
-type WebsocketMessageType =
-  | 'event'
-  | 'calendar'
-  | 'notification'
-  | 'calendarSettings'
-  | 'userProfile'
-  | 'contact';
 
 // Action constants
+type WebsocketCrudAction = 'create' | 'update' | 'delete' | 'sync';
 const WEBSOCKET_CREATE_ACTION: WebsocketCrudAction = 'create';
 const WEBSOCKET_UPDATE_ACTION: WebsocketCrudAction = 'update';
 const WEBSOCKET_DELETE_ACTION: WebsocketCrudAction = 'delete';
 const WEBSOCKET_SYNC_ACTION: WebsocketCrudAction = 'sync';
-type WebsocketCrudAction = 'create' | 'update' | 'delete' | 'sync';
 
 const WebsocketHandler = {
   /**

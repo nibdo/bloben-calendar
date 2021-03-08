@@ -9,40 +9,41 @@ import BottomSheet from 'bottom-sheet-react';
 
 import './EventDetail.scss';
 
-import { Input } from 'bloben-package/components/input/Input';
-import PickerModal from '../../../bloben-package/components/pickerModal/PickerModal';
-import { HeightHook, WidthHook } from '../../../bloben-common/utils/layout';
-import Dropdown from '../../../bloben-package/components/dropdown/Dropdown';
 import {
   calendarColors,
   HEADER_HEIGHT_SMALL,
 } from '../../../components/calendarView/calendar-common';
-import DatePicker from '../../../bloben-package/components/datePicker/DatePicker';
-import TimePicker from '../../../bloben-package/components/timePicker/TimePicker';
 import {
-  DATE_FORMAT,
-  DATE_MONTH_YEAR_FORMAT,
-  TIME_FORMAT,
-  WEEK_DAY_FORMAT_MEDIUM,
-} from '../../../bloben-package/utils/date';
-import EvaIcons from '../../../bloben-common/components/eva-icons';
-import { MAX_REPEAT_UNTIL_STRING } from '../../../bloben-utils/models/event.entity';
-import DropdownWrapper from '../../../bloben-package/components/dropdownWrapper/DropdownWrapper';
-import BottomSheetDropdownSwitcher from '../../../bloben-package/components/bottomSheetDropdownSwitcher/BottomSheetDropdownSwitcher';
-import ModalSmall from '../../../bloben-package/components/modalSmall/ModalSmall';
-import { parseCssDark } from '../../../bloben-common/utils/common';
-import { Context } from '../../../bloben-package/context/store';
-import MyMenu from '../../../bloben-package/components/myMenu/MyMenu';
-import TimezoneRow from '../../../bloben-package/components/timezoneRow/TimezoneRow';
-import Modal from '../../../bloben-package/components/modal/Modal';
-import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
-import { parseToDateTime } from '../../../bloben-package/utils/datetimeParser';
-import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
-import AlarmSettings from '../../../bloben-package/components/alarmSettings/AlarmSettings';
+  useHeight,
+  useWidth,
+  parseCssDark,
+  Input,
+  Dropdown,
+  ModalSmall,
+  DropdownWrapper,
+  BottomSheetDropdownSwitcher,
+  Modal,
+  MyMenu,
+} from 'bloben-react';
 import AttendeeSettings from '../../../components/attendeeSettings/AttendeeSettings';
-import { Calendar } from '../../../bloben-utils/models/Calendar';
 import { ReduxState } from '../../../types/types';
-import { Attendee } from '../../../bloben-utils/models/Attendee';
+import { EvaIcons } from 'bloben-react';
+import { Context } from 'bloben-module/context/store';
+import LuxonHelper, {
+  DATE_MONTH_YEAR_FORMAT,
+  DATE_FORMAT,
+  WEEK_DAY_FORMAT_MEDIUM,
+  TIME_FORMAT,
+} from 'bloben-utils/dates/LuxonHelper';
+import { MAX_REPEAT_UNTIL_STRING } from 'bloben-utils/models/Event';
+import { Calendar, Attendee } from 'bloben-utils';
+import { parseToDateTime } from 'bloben-utils/dates/datetimeParser';
+import PickerModal from 'components/pickerModal/PickerModal';
+import TimezoneRow from 'components/timezoneRow/TimezoneRow';
+import AlarmSettings from 'components/alarmSettings/AlarmSettings';
+import DatePicker from 'components/datePicker/DatePicker';
+import TimeZonePicker from 'components/timezonePicker/TimeZonePicker';
+import TimePicker from 'components/timePicker/TimePicker';
 
 const repeatOptions: any = [
   { label: 'No repeat', value: 'none' },
@@ -84,6 +85,7 @@ export const Title = (props: TitleProps) => {
         className={parseCssDark('event_detail__input--big', isDark)}
         onChange={handleChange}
         disabled={disabled}
+        isDark={isDark}
       />
     </div>
   );
@@ -186,10 +188,12 @@ export const CalendarRow = (props: CalendarRow) => {
       {isOpen ? (
         !isMobile ? (
           <Dropdown
+            isDark={isDark}
             isOpen={isOpen}
             handleClose={handleMenuClose}
             values={
               <MyMenu
+                isDark={isDark}
                 variant="calendar"
                 select={selectOption}
                 selected={calendar}
@@ -201,8 +205,13 @@ export const CalendarRow = (props: CalendarRow) => {
             type={'children'}
           />
         ) : (
-          <ModalSmall isOpen={isOpen} handleClose={handleMenuClose}>
+          <ModalSmall
+            isOpen={isOpen}
+            handleClose={handleMenuClose}
+            isDark={isDark}
+          >
             <MyMenu
+              isDark={isDark}
               variant="calendar"
               select={selectOption}
               selected={calendar}
@@ -283,7 +292,7 @@ const DateFrom = (props: DateFromProps) => {
   );
 };
 
-interface IDateTillProps {
+interface DateTillProps {
   openDateTill: any;
   openTimeTill: any;
   isStartDateValid?: boolean;
@@ -291,7 +300,7 @@ interface IDateTillProps {
   allDay: boolean;
   timezoneStart: string;
 }
-const DateTill = (props: IDateTillProps) => {
+const DateTill = (props: DateTillProps) => {
   const {
     isStartDateValid,
     openDateTill,
@@ -350,11 +359,11 @@ const DateTill = (props: IDateTillProps) => {
   );
 };
 
-interface IAllDayProps {
+interface AllDayProps {
   allDay: boolean;
   setForm: any;
 }
-const AllDay = (props: IAllDayProps) => {
+const AllDay = (props: AllDayProps) => {
   const { allDay, setForm } = props;
 
   const [store] = useContext(Context);
@@ -379,13 +388,13 @@ const AllDay = (props: IAllDayProps) => {
   );
 };
 
-interface IRepeatValueButtonProps {
+interface RepeatValueButtonProps {
   label: string;
   handleClick: any;
   value: any;
   style: any;
 }
-const RepeatValueButton = (props: IRepeatValueButtonProps) => {
+const RepeatValueButton = (props: RepeatValueButtonProps) => {
   const { label, handleClick, value, style } = props;
 
   const [store] = useContext(Context);
@@ -404,7 +413,7 @@ const RepeatValueButton = (props: IRepeatValueButtonProps) => {
     </div>
   );
 };
-interface IRepeatValueDropdownProps {
+interface RepeatValueDropdownProps {
   isOpen: any;
   label: string;
   handleOpen: any;
@@ -414,7 +423,7 @@ interface IRepeatValueDropdownProps {
   values: any;
   style: any;
 }
-export const RepeatValueDropDown = (props: IRepeatValueDropdownProps) => {
+export const RepeatValueDropDown = (props: RepeatValueDropdownProps) => {
   const {
     isOpen,
     label,
@@ -441,6 +450,7 @@ export const RepeatValueDropDown = (props: IRepeatValueDropdownProps) => {
         <p className={parseCssDark('repeat__value-text', isDark)}>{value}</p>
       </ButtonBase>
       <Dropdown
+        isDark={isDark}
         isOpen={isOpen}
         handleClose={handleClose}
         selectedValue={value}
@@ -453,7 +463,7 @@ export const RepeatValueDropDown = (props: IRepeatValueDropdownProps) => {
   );
 };
 
-interface IRepeatValueInputProps {
+interface RepeatValueInputProps {
   defaultValue?: any;
   label: string;
   type: string;
@@ -462,7 +472,7 @@ interface IRepeatValueInputProps {
   style: any;
   value: any;
 }
-export const RepeatValueInput = (props: IRepeatValueInputProps) => {
+export const RepeatValueInput = (props: RepeatValueInputProps) => {
   const { label, defaultValue, type, name, value, onChange, style } = props;
 
   const [store] = useContext(Context);
@@ -484,12 +494,12 @@ export const RepeatValueInput = (props: IRepeatValueInputProps) => {
   );
 };
 
-interface IRepeatOptionsProps {
+interface RepeatOptionsProps {
   rRuleState: any;
   setRRule: any;
   handleClose: any;
 }
-const RepeatOptions = (props: IRepeatOptionsProps) => {
+const RepeatOptions = (props: RepeatOptionsProps) => {
   const { rRuleState, setRRule, handleClose } = props;
 
   const [store] = useContext(Context);
@@ -669,7 +679,7 @@ const RepeatOptions = (props: IRepeatOptionsProps) => {
   );
 };
 
-interface IRepeatProps {
+interface RepeatProps {
   setForm: any;
   isRepeated: boolean;
   setRRule: any;
@@ -677,7 +687,7 @@ interface IRepeatProps {
   coordinates: any;
   setCoordinates: any;
 }
-const Repeat = (props: IRepeatProps) => {
+const Repeat = (props: RepeatProps) => {
   const {
     setForm,
     isRepeated,
@@ -694,7 +704,7 @@ const Repeat = (props: IRepeatProps) => {
   const [store] = useContext(Context);
   const { isDark, isMobile } = store;
 
-  const height: number = HeightHook();
+  const height: number = useHeight();
   const handleMenuOpen = (e: any) => {
     if (!isOpen) {
       setAnchor(e.currentTarget);
@@ -742,8 +752,13 @@ const Repeat = (props: IRepeatProps) => {
       </div>
       {isOpen ? (
         isMobile ? (
-          <ModalSmall isOpen={isOpen} handleClose={handleMenuClose}>
+          <ModalSmall
+            isOpen={isOpen}
+            handleClose={handleMenuClose}
+            isDark={isDark}
+          >
             <MyMenu
+              isDark={isDark}
               variant="radio"
               select={selectOption}
               selected={{ label: isRepeated, value: isRepeated }}
@@ -758,6 +773,7 @@ const Repeat = (props: IRepeatProps) => {
             handleClose={handleMenuClose}
           >
             <MyMenu
+              isDark={isDark}
               variant="radio"
               select={selectOption}
               selected={{ label: isRepeated, value: isRepeated }}
@@ -811,6 +827,7 @@ const Location = (props: LocationProps) => {
         onChange={handleChange}
         value={value}
         multiline={true}
+        isDark={isDark}
       />
     </div>
   );
@@ -840,6 +857,7 @@ const Notes = (props: NotesProps) => {
         onChange={handleChange}
         value={value}
         multiline={true}
+        isDark={isDark}
       />
     </div>
   );
@@ -883,11 +901,11 @@ const EventDetail = (props: EventDetailProps) => {
   const [coordinates, setCoordinates] = useState({ x: null, y: null });
   const [timezoneModalIsOpen, openTimezoneModal] = useState(false);
 
-  const height: any = HeightHook();
-  const width: number = WidthHook();
+  const height: any = useHeight();
+  const width: number = useWidth();
 
   const [store] = useContext(Context);
-  const { isMobile } = store;
+  const { isMobile, isDark } = store;
 
   const {
     summary,
@@ -1027,6 +1045,8 @@ const EventDetail = (props: EventDetailProps) => {
           setCoordinates={setCoordinates}
           handleClose={closePickers}
           dropdownOffset={'bottom'}
+          isMobile={isMobile}
+          isDark={isDark}
         >
           {isDateFromVisible && startDate ? (
             <DatePicker
@@ -1067,7 +1087,7 @@ const EventDetail = (props: EventDetailProps) => {
         </BottomSheetDropdownSwitcher>
       ) : null}
       {timezoneModalIsOpen ? (
-        <Modal>
+        <Modal isDark={isDark}>
           <TimeZonePicker
             selectTimezone={setStartTimezone}
             onClose={() => openTimezoneModal(false)}

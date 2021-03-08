@@ -5,16 +5,11 @@ import _ from 'lodash';
 import { DateTime } from 'luxon';
 import { Dispatch } from 'redux';
 
-import {
-  formReducer,
-  REPLACE_STATE,
-  stateReducer,
-} from 'utils/reducer/baseReducer';
+import { REPLACE_STATE, stateReducer } from 'utils/reducer/baseReducer';
 import EventDetail from '../eventDetail/EventDetail';
 import {
   addAlarm,
   findInArrayById,
-  findInArrayByKeyValue,
   findInEvents,
   handleEventReduxDelete,
   handleEventReduxUpdate,
@@ -23,32 +18,7 @@ import {
 import CalendarApi from '../../../api/calendar';
 import { calculateNewEventTime, setDefaultReminder } from '../event.utils';
 import { mergeEvent } from '../../../redux/actions';
-import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
-import { Context } from '../../../bloben-package/context/store';
-import { DatetimeParser } from '../../../bloben-package/utils/datetimeParser';
-import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
 import { ICalendarSettings, ReduxState } from '../../../types/types';
-import { getLocalTimezone } from '../../../bloben-package/utils/common';
-import { UserProfile } from '../../../bloben-package/types/common.types';
-import { createEmailAlarm } from '../../../bloben-utils/models/EmailAlarm';
-import ICalHelper from '../../../bloben-package/utils/ICalHelper';
-import ContactApi from '../../../bloben-package/api/contact.api';
-import User from '../../../bloben-utils/models/User';
-import {
-  createEvent,
-  EventDecrypted,
-  parseRRuleFromString,
-} from '../../../bloben-utils/models/Event';
-import {
-  createEventEncrypted,
-  EventEncrypted,
-} from '../../../bloben-utils/models/EventEncrypted';
-import { Calendar } from '../../../bloben-utils/models/Calendar';
-import { Contact, createContact } from '../../../bloben-utils/models/Contact';
-import {
-  ContactEncrypted,
-  encryptContact,
-} from '../../../bloben-utils/models/ContactEncrypted';
 import {
   initialFormState,
   initialRRulState,
@@ -59,7 +29,32 @@ import {
   createOrganizerAttendee,
   ROLE_OPT,
   ROLE_REQ,
-} from '../../../bloben-utils/models/Attendee';
+} from 'bloben-utils/models/Attendee';
+import {
+  Calendar,
+  User,
+  getLocalTimezone,
+  DatetimeParser,
+  LuxonHelper,
+  createEmailAlarm,
+  EventEncrypted,
+  encryptEvent,
+  ICalHelper,
+  createContact,
+  Contact,
+  encryptContact,
+  ContactEncrypted,
+  ContactApi,
+} from 'bloben-utils';
+import { UserProfile } from 'bloben-react/types/common.types';
+import { Context } from 'bloben-module/context/store';
+import {
+  parseRRuleFromString,
+  EventDecrypted,
+  createEvent,
+} from 'bloben-utils/models/Event';
+import { HeaderModal } from 'bloben-react';
+import { findInArrayByKeyValue } from 'bloben-utils/utils/common';
 
 interface EditEventProps {
   isNewEvent: boolean;
@@ -110,6 +105,7 @@ const EditEvent = (props: EditEventProps) => {
   };
 
   const [store, dispatchContext] = useContext(Context);
+  const { isDark, isMobile } = store;
   const setContext = (type: string, payload: any) => {
     dispatchContext({ type, payload });
   };
@@ -396,7 +392,7 @@ const EditEvent = (props: EditEventProps) => {
       }
     }
 
-    const bodyToSend: EventEncrypted = await createEventEncrypted(
+    const bodyToSend: EventEncrypted = await encryptEvent(
       user.publicKey,
       newEvent
     );
@@ -498,8 +494,11 @@ const EditEvent = (props: EditEventProps) => {
       <HeaderModal
         hasHeaderShadow={hasHeaderShadow}
         onClose={handleClose}
+        goBack={handleClose}
         handleSave={saveEvent}
         handleDelete={isNewEvent ? null : deleteEvent}
+        isDark={isDark}
+        isMobile={isMobile}
       />
       {calendar && startAt && endAt ? (
         <EventDetail

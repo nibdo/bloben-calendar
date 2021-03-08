@@ -3,38 +3,33 @@ import './EventImport.scss';
 import '../settingsCalendar/SettingsCalendar.scss';
 import IcsParser from '../../utils/IcsParser';
 import { useDispatch, useSelector } from 'react-redux';
-import { HeightHook } from '../../bloben-common/utils/layout';
 import { renderAgendaEvents } from '../calendarView/agenda/Agenda';
-import EventStateEntity, {
-  EventBodyToSend,
-} from '../../bloben-utils/models/event.entity';
 import {
   cloneDeep,
   findInArrayById,
   mapEventsToDates,
 } from '../../utils/common';
-import { PgpKeys } from 'bloben-utils/utils/OpenPgp';
 import {
   sendWebsocketMessage,
   WEBSOCKET_IMPORT_EVENTS,
 } from '../../api/calendar';
 import { useHistory } from 'react-router-dom';
 import { setEventsToImport } from '../../redux/actions';
-import { Context } from '../../bloben-package/context/store';
-import Modal from '../../bloben-package/components/modal/Modal';
-import HeaderModal from '../../bloben-package/components/headerModal/HeaderModal';
+import { useHeight, HeaderModal, Modal } from 'bloben-react';
 import { CalendarRow } from '../../views/event/eventDetail/EventDetail';
+import { Context } from 'bloben-module/context/store';
+import { User, EventEncrypted, encryptEvent } from 'bloben-utils';
 
-interface IResultsProps {
+interface ResultsProps {
   results: any;
 }
-const Results = (props: IResultsProps) => {
+const Results = (props: ResultsProps) => {
   const { results } = props;
 
   const [store] = useContext(Context);
   const { isDark } = store;
 
-  const height: number = HeightHook() - 56;
+  const height: number = useHeight() - 56;
 
   const emptyFunc: any = () => {};
 
@@ -56,7 +51,7 @@ const Results = (props: IResultsProps) => {
   );
 };
 
-interface IImportedEventsProps {
+interface ImportedEventsProps {
   data: any;
   handleSave: any;
   clearData: any;
@@ -66,20 +61,15 @@ interface IImportedEventsProps {
   setCoordinates: any;
   selectCalendar: any;
 }
-const ImportedEvents = (props: IImportedEventsProps) => {
-  const {
-    data,
-    handleSave,
-    clearData,
-    calendar,
-    changeCalendar,
-    coordinates,
-    setCoordinates,
-    selectCalendar,
-  } = props;
+const ImportedEvents = (props: ImportedEventsProps) => {
+  const { data, handleSave, clearData, calendar, selectCalendar } = props;
+
+  const [store] = useContext(Context);
+
+  const { isDark, isMobile } = store;
 
   return (
-    <Modal handleClose={clearData}>
+    <Modal handleClose={clearData} isDark={isDark}>
       <div
         style={{
           display: 'flex',
@@ -89,6 +79,8 @@ const ImportedEvents = (props: IImportedEventsProps) => {
         }}
       >
         <HeaderModal
+          isDark={isDark}
+          isMobile={isMobile}
           title={'Import events'}
           handleSave={handleSave}
           onClose={clearData}
@@ -105,7 +97,7 @@ const EventImport = () => {
   const dispatch: any = useDispatch();
 
   const cryptoPassword: any = useSelector((state: any) => state.cryptoPassword);
-  const pgpKeys: PgpKeys = useSelector((state: any) => state.pgpKeys);
+  const user: User = useSelector((state: any) => state.user);
   const calendars: any = useSelector((state: any) => state.calendars);
 
   const eventsToImport: string = useSelector(
@@ -124,12 +116,10 @@ const EventImport = () => {
       for (const [key, value] of Object.entries(data)) {
         for (const item of value as any) {
           // Encrypt data
-          const bodyToSend: EventBodyToSend =
-            pgpKeys && pgpKeys.publicKey
-              ? await item.formatBodyToSendOpenPgp(pgpKeys)
-              : await item.formatBodyToSend(cryptoPassword);
-
-          const simpleObj: EventStateEntity = item.getReduxStateObj();
+          const bodyToSend: EventEncrypted = await encryptEvent(
+            user.publicKey,
+            item
+          );
 
           // Save to redux store
           // dispatch(mergeEvent(simpleObj));

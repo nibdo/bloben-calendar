@@ -1,21 +1,6 @@
 /* tslint:disable:no-magic-numbers */
-import {
-  addDays,
-  addMonths,
-  format,
-  formatISO,
-  getDay,
-  getMonth,
-  getYear,
-  lastDayOfMonth,
-  parseISO,
-  subDays,
-  subMonths,
-} from 'date-fns';
-import { reduxStore } from '../../bloben-package/layers/ReduxProvider';
 import { setSelectedDate } from '../../redux/actions';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
 import {
   CALENDAR_3DAYS_VIEW,
   CALENDAR_DAY_VIEW,
@@ -23,6 +8,8 @@ import {
   CALENDAR_WEEK_VIEW,
 } from '../../utils/contants';
 import { CalendarView } from '../../types/types';
+import { LuxonHelper } from 'bloben-utils';
+import { reduxStore } from 'bloben-module/layers/ReduxProvider';
 
 const ONE_DAY = 1;
 const THREE_DAYS = 3;

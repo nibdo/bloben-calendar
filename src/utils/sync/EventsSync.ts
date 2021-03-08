@@ -1,7 +1,5 @@
 import { AxiosResponse } from 'axios';
 
-import { reduxStore } from '../../bloben-package/layers/ReduxProvider';
-import OpenPgp from '../../bloben-utils/utils/OpenPgp';
 import {
   cloneDeep,
   createMultiDayClone,
@@ -18,17 +16,14 @@ import {
 import CalendarApi from '../../api/calendar';
 import { ICalendarSettings, ISyncLog, ReduxState } from '../../types/types';
 import { EventResultDTO } from '../../data/types';
-import EventStateEntity from '../../bloben-utils/models/event.entity';
 import { findInArrayWithIndex } from '../filter/findInArray';
-import Crypto from '../../bloben-utils/utils/encryption';
-import { User } from '../../bloben-utils/models/User';
+import { reduxStore } from 'bloben-module/layers/ReduxProvider';
+import { User, EventEncrypted, OpenPgp } from 'bloben-utils';
 import {
-  createEvent,
   EventData,
   EventDecrypted,
-} from '../../bloben-utils/models/Event';
-import { CalendarEncrypted } from '../../bloben-utils/models/CalendarEncrypted';
-import { EventEncrypted } from '../../bloben-utils/models/EventEncrypted';
+  createEvent,
+} from 'bloben-utils/models/Event';
 
 export const decryptEvents = async (data: any): Promise<void> => {
   const store: ReduxState = reduxStore.getState();
@@ -70,14 +65,14 @@ export const decryptEvents = async (data: any): Promise<void> => {
     /**
      * Logic for saving event
      */
-    const handleEventSave = async (date: any) => {
-      const eventsArray: EventDecrypted[] = stateClone[date];
+    const handleEventSave = async (date: any): Promise<any> => {
+      const eventsArray: any = stateClone[date];
       // Check if there is date in redux store with event datekey
       // Datekey exists, add new item or update existing
       if (eventsArray && eventsArray.length > 0) {
         const itemInState: any = await findInArrayWithIndex(eventsArray, event);
         // Item exists, update it
-        if (itemInState.children) {
+        if (itemInState && itemInState.children) {
           stateClone[date][itemInState.index] = event;
           if (i + 1 === data.length) {
             reduxStore.dispatch(setEvents(stateClone));
@@ -139,13 +134,13 @@ const decryptEventPgp = async (
     ...eventResultDTO,
     ...decryptedData,
   };
-  const newEvent: EventStateEntity = new EventStateEntity(
+  const newEvent: EventDecrypted = createEvent(
     finalForm,
     undefined,
     defaultTimezone
   );
 
-  return newEvent.getReduxStateObj();
+  return newEvent;
 };
 
 const SyncEvents: any = {

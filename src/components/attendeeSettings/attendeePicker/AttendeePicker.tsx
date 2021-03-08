@@ -4,13 +4,10 @@ import { useSelector } from 'react-redux';
 
 import './AttendeePicker.scss';
 
-import { parseCssDark } from '../../../bloben-common/utils/common';
-import ScrollView from '../../../bloben-common/components/scrollView/ScrollView';
-import { Context } from '../../../bloben-package/context/store';
-import SearchHeader from '../../../bloben-package/components/searchHeader/SearchHeader';
-import Validator from '../../../bloben-package/utils/Validator';
-import ContactSync from '../../../bloben-package/utils/sync/ContactSync';
-import { Attendee } from '../../../bloben-utils/models/Attendee';
+import { ScrollView, parseCssDark, SearchHeader } from 'bloben-react';
+import { Attendee, Validator } from 'bloben-utils';
+import { Context } from 'bloben-module/context/store';
+import ContactSync from '../../../sync/ContactSync';
 
 interface OneAttendeeProps {
   item: any;
@@ -87,7 +84,7 @@ interface AttendeePickerViewProps {
 const AttendeePickerView = (props: AttendeePickerViewProps) => {
   const [store] = useContext(Context);
 
-  const { isDark } = store;
+  const { isDark, isMobile } = store;
 
   const {
     onClose,
@@ -131,6 +128,8 @@ const AttendeePickerView = (props: AttendeePickerViewProps) => {
         onSearchInput={onSearchInput}
         placeholder={'Add people'}
         submitEnter={handleSearchSubmit}
+        isMobile={isMobile}
+        isDark={isDark}
       />
       <ScrollView isDark={isDark}>
         {typedText.length > 0 ||

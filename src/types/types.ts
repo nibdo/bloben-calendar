@@ -1,10 +1,7 @@
 import { DateTime } from 'luxon';
-import { User } from '../bloben-utils/models/User';
-import { UserProfile } from '../bloben-package/types/common.types';
-import { PgpKeys } from '../bloben-utils/utils/OpenPgp';
-import { INotification } from '../bloben-utils/models/Notification';
-import { Contact } from '../bloben-utils/models/Contact';
-import { Calendar } from '../bloben-utils/models/Calendar';
+import { User, PgpKeys, Contact, Calendar } from 'bloben-utils';
+import { UserProfile } from 'bloben-react/types/common.types';
+import { INotification } from 'bloben-utils/models/Notification';
 
 export interface localSettingType {
   key: string;

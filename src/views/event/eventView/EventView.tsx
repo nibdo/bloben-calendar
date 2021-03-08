@@ -5,6 +5,7 @@ import { useParams } from 'react-router';
 import { DateTime } from 'luxon';
 import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { parseCssDark, EvaIcons, HeaderModal } from 'bloben-react';
 
 import {
   cloneDeep,
@@ -13,30 +14,26 @@ import {
   formatEventDate,
   handleEventReduxDelete,
 } from '../../../utils/common';
-import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
 import CalendarApi from '../../../api/calendar';
-import EvaIcons from '../../../bloben-common/components/eva-icons';
-import ICalHelper from '../../../bloben-package/utils/ICalHelper';
 import AttendeeSettings, {
   AttendeeActions,
 } from '../../../components/attendeeSettings/AttendeeSettings';
 import { CalendarRow, Title } from '../eventDetail/EventDetail';
-import { parseCssDark } from '../../../bloben-common/utils/common';
-import { Context } from '../../../bloben-package/context/store';
-import { UserProfile } from '../../../bloben-package/types/common.types';
-import EventStateEntity, {
-  EventBodyToSend,
-} from '../../../bloben-utils/models/event.entity';
-import { PgpKeys } from '../../../bloben-utils/utils/OpenPgp';
 import { ReduxState } from '../../../types/types';
-import { Calendar } from '../../../bloben-utils/models/Calendar';
-import { EventDecrypted } from '../../../bloben-utils/models/Event';
-import { Attendee, Partstat } from '../../../bloben-utils/models/Attendee';
 import {
-  createEventEncrypted,
+  EventDecrypted,
+  User,
+  Calendar,
+  Attendee,
+  createEvent,
   EventEncrypted,
-} from '../../../bloben-utils/models/EventEncrypted';
-import User from '../../../bloben-utils/models/User';
+  encryptEvent,
+  ICalHelper,
+} from 'bloben-utils';
+import { Context } from 'bloben-module/context/store';
+import { UserProfile } from 'bloben-react/types/common.types';
+import calendars from 'redux/reducers/calendars';
+import { Partstat } from 'bloben-utils/models/Attendee';
 
 interface EventDatesProps {
   event: EventDecrypted;
@@ -73,6 +70,9 @@ const EventModel = {
 };
 
 const EventView = () => {
+  const [store, dispatchContext] = useContext(Context);
+  const { isDark, isMobile } = store;
+
   const [event, setEvent] = useState();
   const [calendar, setCalendar] = useState();
   const params: any = useParams();
@@ -129,9 +129,9 @@ const EventView = () => {
 
     event.attendees = attendeesClone;
 
-    const eventModel: any = new EventStateEntity(event);
+    const eventModel: EventDecrypted = createEvent(event);
 
-    const encryptedEvent: EventEncrypted = await createEventEncrypted(
+    const encryptedEvent: EventEncrypted = await encryptEvent(
       user.publicKey,
       event
     );
@@ -141,9 +141,7 @@ const EventView = () => {
     await CalendarApi.updateEvent(encryptedEvent);
 
     // Send response to organizer
-    const icalTest: any = new ICalHelper(
-      eventModel.getReduxStateObj()
-    ).parseTo();
+    const icalTest: any = new ICalHelper(eventModel).parseTo();
     console.log(icalTest);
     const inviteData: any = {
       attendee: event.attendees
@@ -182,6 +180,8 @@ const EventView = () => {
   return event && event.id ? (
     <div className={'full-screen'}>
       <HeaderModal
+        isMobile={isMobile}
+        isDark={isDark}
         hasHeaderShadow={false}
         onClose={handleClose}
         handleEdit={isOrganizer ? handleEdit : undefined}

@@ -1,16 +1,14 @@
-import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
-import { parseToDateTime } from '../../../bloben-package/utils/datetimeParser';
 import React from 'react';
-import './EventDates.scss'
+import './EventDates.scss';
+import { LuxonHelper } from 'bloben-utils';
+import { parseToDateTime } from 'bloben-utils/dates/datetimeParser';
 
-interface IEventDatesProps {
-    event: any;
-    isSmall: boolean;
+interface EventDatesProps {
+  event: any;
+  isSmall: boolean;
 }
 
-
-
-export const EventDates = (props: IEventDatesProps) => {
+export const EventDates = (props: EventDatesProps) => {
   const { event, isSmall } = props;
   const { startAt, endAt, timezoneStart } = event;
 
@@ -23,15 +21,23 @@ export const EventDates = (props: IEventDatesProps) => {
   const dateToString: string = !isSameDay
     ? ` - ${parseToDateTime(endAt, timezoneStart).toFormat('d LLL yyyy')}`
     : '';
-  const dates: string = `${dateFromString}${dateToString}`;
+  const dates = `${dateFromString}${dateToString}`;
 
-  const timeFrom: string = parseToDateTime(startAt, timezoneStart).toFormat('hh:mm');
-  const timeTo: string = parseToDateTime(endAt, timezoneStart).toFormat('hh:mm');
-  const time: string = `${timeFrom}${timeTo}`
+  const timeFrom: string = parseToDateTime(startAt, timezoneStart).toFormat(
+    'hh:mm'
+  );
+  const timeTo: string = parseToDateTime(endAt, timezoneStart).toFormat(
+    'hh:mm'
+  );
+  const time = `${timeFrom}${timeTo}`;
 
   return (
-    <div className={isSmall ? 'search-item__container' : 'event-dates__container'}>
-      <p className={isSmall ? 'search-item__text' : 'event-dates__text-date'}>{dates}</p>
+    <div
+      className={isSmall ? 'search-item__container' : 'event-dates__container'}
+    >
+      <p className={isSmall ? 'search-item__text' : 'event-dates__text-date'}>
+        {dates}
+      </p>
       <p className={isSmall ? 'search-item__text' : 'event-dates__text-hour'}>
         {time}
       </p>

@@ -1,7 +1,5 @@
-import {
-  formatIsoStringDate,
-} from '../components/calendarView/calendar-common';
-import { formatTimestampToDate } from '../bloben-utils/utils/common';
+import { formatIsoStringDate } from '../components/calendarView/calendar-common';
+import { formatTimestampToDate } from 'bloben-utils';
 
 const StateReducer: any = (state: any, action: any): any => {
   // Replace whole state

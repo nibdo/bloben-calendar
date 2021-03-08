@@ -1,9 +1,6 @@
-import {
-  findInEvents,
-  parseStartAtDateForNotification
-} from "./common";
-import { checkIfIsSafari } from 'bloben-common/utils/common';
-import { logger } from 'bloben-common/utils/common';
+import { findInEvents, parseStartAtDateForNotification } from './common';
+import { checkIfIsSafari } from 'bloben-utils/utils/common';
+import { logger } from 'bloben-react';
 
 const isSafari = checkIfIsSafari();
 
@@ -20,19 +17,16 @@ const sendMsgToServiceWorker = (body) => {
  * Find obj by type and id and show notification
  * @returns {Promise<function(*): Promise<void>>}
  */
-export const setServiceWorkerLister = async (
-) => {
+export const setServiceWorkerLister = async () => {
   // Receive notification from service worker
   return (swListener.onmessage = async (e) => {
     const notification = e.data;
-    logger('notification', notification)
+    logger('notification', notification);
 
     // Try to find item from notification in state
-    if (
-      notification.type === EVENT_TYPE
-    ) {
+    if (notification.type === EVENT_TYPE) {
       // Find event
-      const event = await findInEvents(notification.id)
+      const event = await findInEvents(notification.id);
 
       if (!event) {
         // TODO Try to fetch task from server

@@ -1,21 +1,15 @@
 import React, { useContext, useEffect, useState } from 'react';
 import './Search.scss';
 import IconButton from '@material-ui/core/IconButton';
-import EvaIcons from '../../bloben-common/components/eva-icons';
+import { EvaIcons, Input } from 'bloben-react';
 import { useSelector } from 'react-redux';
 import { parseEventColor } from '../../components/calendarView/calendar-common';
-import { HeightHook } from '../../bloben-common/utils/layout';
-import { Input } from '../../bloben-package/components/input/Input';
-import { Context } from '../../bloben-package/context/store';
+import { useHeight, parseCssDark } from 'bloben-react';
 import { useHistory } from 'react-router-dom';
-import { parseCssDark } from '../../bloben-common/utils/common';
 import SyncEvents from '../../utils/sync/EventsSync';
-import EventStateEntity from '../../bloben-utils/models/event.entity';
-import { DateTime } from 'luxon';
-import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
-import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
 import { ButtonBase } from '@material-ui/core';
 import { formatEventDate } from '../../utils/common';
+import { Context } from 'bloben-module/context/store';
 
 const SearchImage = () => (
   <div className={'search_empty__wrapper'}>
@@ -78,7 +72,7 @@ const Results = (props: IResultsProps) => {
 
   const { isDark } = store;
 
-  const height: number = HeightHook() - 56;
+  const height: number = useHeight() - 56;
   const history: any = useHistory();
 
   const renderedResults: any = renderResults(results, isDark, history);
@@ -90,11 +84,11 @@ const Results = (props: IResultsProps) => {
   );
 };
 
-interface ISearchInputProps {
+interface SearchInputProps {
   typedText: string;
   onChange: any;
 }
-const SearchInput = (props: ISearchInputProps) => {
+const SearchInput = (props: SearchInputProps) => {
   const { typedText, onChange } = props;
 
   const [store] = useContext(Context);
@@ -112,17 +106,18 @@ const SearchInput = (props: ISearchInputProps) => {
         value={typedText}
         onChange={onChange}
         multiline={false}
+        isDark={isDark}
       />
     </div>
   );
 };
 
-interface ISearchHeaderProps {
+interface SearchHeaderProps {
   typedText: string;
   onSearchInput: any;
   handleClearSearch: any;
 }
-const SearchHeader = (props: ISearchHeaderProps) => {
+const SearchHeader = (props: SearchHeaderProps) => {
   const { typedText, onSearchInput, handleClearSearch } = props;
 
   const history: any = useHistory();
@@ -172,30 +167,30 @@ const SearchHeader = (props: ISearchHeaderProps) => {
   );
 };
 
-interface IMobileViewProps {
+interface MobileViewProps {
   results: any;
 }
-const MobileView = (props: IMobileViewProps) => {
+const MobileView = (props: MobileViewProps) => {
   const { results } = props;
 
   return results.length > 0 ? <Results results={results} /> : <SearchImage />;
 };
-interface IDesktopViewProps {
+interface DesktopViewProps {
   results: any;
 }
-const DesktopView = (props: IDesktopViewProps) => {
+const DesktopView = (props: DesktopViewProps) => {
   const { results } = props;
 
   return results.length > 0 ? <Results results={results} /> : null;
 };
 
-interface ISearchViewProps {
+interface SearchViewProps {
   typedText: string;
   results: any;
   onSearchInput: any;
   handleClearSearch: any;
 }
-const SearchView = (props: ISearchViewProps) => {
+const SearchView = (props: SearchViewProps) => {
   const { typedText, results, onSearchInput, handleClearSearch } = props;
 
   const [store] = useContext(Context);

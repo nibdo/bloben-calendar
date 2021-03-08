@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import './CalendarDrawer.scss';
 import { ButtonBase, IconButton } from '@material-ui/core';
 import { useHistory } from 'react-router';
-import EvaIcons from 'bloben-common/components/eva-icons';
+import { EvaIcons } from 'bloben-react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { setCalendarView, setSelectedDate } from '../../redux/actions';
@@ -11,10 +11,7 @@ import {
   parseEventColor,
 } from '../calendarView/calendar-common';
 import CalendarDrawerIcon from '../../assets/icons/CalendarDrawerIcon';
-import DatePicker from '../../bloben-package/components/datePicker/DatePicker';
-import { HeightHook } from '../../bloben-common/utils/layout';
-import { parseCssDark } from '../../bloben-common/utils/common';
-import { Context } from '../../bloben-package/context/store';
+import { useHeight, parseCssDark } from 'bloben-react';
 import { DateTime } from 'luxon';
 import {
   CALENDAR_3DAYS_VIEW,
@@ -25,6 +22,8 @@ import {
 } from '../../utils/contants';
 import { CalendarView, ReduxState } from '../../types/types';
 import { initCalendarAction } from '../../utils/initCalendarAction';
+import { Context } from 'bloben-module/context/store';
+import DatePicker from 'components/datePicker/DatePicker';
 
 interface DrawerItemProps {
   icon?: any;
@@ -251,7 +250,7 @@ const CalendarDrawer = (props: CalendarDrawerProps) => {
   const [store] = useContext(Context);
   const { isMobile, isDark } = store;
 
-  const drawerHeight: number = HeightHook() - HEADER_HEIGHT_BASE;
+  const drawerHeight: number = useHeight() - HEADER_HEIGHT_BASE;
 
   const changeCalendarView = (view: CalendarView) => {
     dispatch(setCalendarView(view));

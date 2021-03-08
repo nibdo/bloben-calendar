@@ -1,5 +1,5 @@
 import { cloneDeep } from '../../utils/common';
-import { formatTimestampToDate } from '../../bloben-utils/utils/common';
+import { formatTimestampToDate } from 'bloben-utils';
 
 const events = (state: any = {}, action: any) => {
   switch (action.type) {

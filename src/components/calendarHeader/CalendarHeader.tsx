@@ -4,21 +4,19 @@ import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import './CalendarHeader.scss';
-import { WidthHook } from 'bloben-common/utils/layout';
 import {
   CALENDAR_DRAWER_DESKTOP_WIDTH,
   CALENDAR_OFFSET_LEFT,
   calendarColors,
   daysText,
 } from '../calendarView/calendar-common';
-import { parseCssDark } from '../../bloben-common/utils/common';
 import { checkOverlappingEvents } from '../../utils/common';
-import { Context } from '../../bloben-package/context/store';
-import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
-import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
-import { formatTimestampToDate } from '../../bloben-utils/utils/common';
+import { useWidth, parseCssDark } from 'bloben-react';
 import { CalendarDays, CalendarView, ReduxState } from '../../types/types';
 import { CALENDAR_DAY_VIEW, CALENDAR_MONTH_VIEW } from '../../utils/contants';
+import { Context } from 'bloben-module/context/store';
+import { LuxonHelper, formatTimestampToDate } from 'bloben-utils';
+import { parseToDateTime } from 'bloben-utils/dates/datetimeParser';
 
 interface EventHeaderProps {
   calendarColor: string;
@@ -235,11 +233,11 @@ const HeaderDays = (props: HeaderDaysProps) => {
   );
 };
 
-interface IHeaderEventsProps {
+interface HeaderEventsProps {
   daysNum: number;
   calendarDays: any;
 }
-const HeaderEvents = (props: IHeaderEventsProps) => {
+const HeaderEvents = (props: HeaderEventsProps) => {
   const { daysNum, calendarDays } = props;
 
   const [store] = useContext(Context);
@@ -386,7 +384,7 @@ interface CalendarHeaderProps {
   daysNum: number;
 }
 const CalendarHeader = (props: CalendarHeaderProps) => {
-  const width: number = WidthHook();
+  const width: number = useWidth();
   const { daysNum, index } = props;
 
   const [store] = useContext(Context);

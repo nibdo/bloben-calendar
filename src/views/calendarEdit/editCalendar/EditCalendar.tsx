@@ -6,21 +6,19 @@ import { addAlarm, findInArrayById, removeAlarm } from '../../../utils/common';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCalendar, updateCalendar } from '../../../redux/actions';
 import CalendarContent from '../calendarContent/CalendarContent';
-import { getLocalTimezone } from '../../../bloben-package/utils/common';
 import CalendarApi from '../../../api/calendar';
-import {
-  CalendarEncrypted,
-  createCalendarEncrypted,
-} from '../../../bloben-utils/models/CalendarEncrypted';
-import { User } from '../../../bloben-utils/models/User';
 import { ReduxState } from '../../../types/types';
-import {
-  Calendar,
-  createCalendar,
-} from '../../../bloben-utils/models/Calendar';
-import { Context } from '../../../bloben-package/context/store';
-import { logger } from '../../../bloben-common/utils/common';
 import SyncCalendars from '../../../utils/sync/CalendarSync';
+import { logger } from 'bloben-react';
+import { Context } from 'bloben-module/context/store';
+import {
+  User,
+  Calendar,
+  getLocalTimezone,
+  createCalendar,
+  CalendarEncrypted,
+  encryptCalendar,
+} from 'bloben-utils';
 
 interface NewCalendarProps {
   isNewCalendar: boolean;
@@ -123,7 +121,7 @@ const EditCalendar = (props: NewCalendarProps) => {
     try {
       const calendar: Calendar = createCalendar(calendarState);
 
-      const encryptedCalendar: CalendarEncrypted = await createCalendarEncrypted(
+      const encryptedCalendar: CalendarEncrypted = await encryptCalendar(
         user.publicKey,
         calendar
       );

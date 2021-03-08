@@ -2,7 +2,6 @@ import React, { useEffect } from 'react';
 import { Dispatch } from 'redux';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { MOBILE_MAX_WIDTH } from '../bloben-utils/utils/common';
 import {
   setCalendarBodyHeight,
   setCalendarBodyWidth,
@@ -15,8 +14,9 @@ import {
   HEADER_HEIGHT_BASE_DESKTOP,
   NAVBAR_HEIGHT_BASE,
 } from '../components/calendarView/calendar-common';
-import { HeightHook, WidthHook } from '../bloben-utils/utils/layout';
 import { ReduxState } from '../types/types';
+import { useHeight, useWidth } from 'bloben-react';
+import { MOBILE_MAX_WIDTH } from 'bloben-utils/utils/common';
 
 interface CalendarLayout {
   children: any;
@@ -26,8 +26,8 @@ const CalendarLayout = (props: CalendarLayout) => {
   const dispatch: Dispatch = useDispatch();
 
   // Hooks
-  const height = HeightHook();
-  const width = WidthHook();
+  const height = useHeight();
+  const width = useWidth();
 
   const isAppStarting: boolean = useSelector(
     (state: ReduxState): boolean => state.isAppStarting

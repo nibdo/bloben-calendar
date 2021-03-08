@@ -4,7 +4,7 @@ import { getDayTimeEnd, getDayTimeStart } from './common';
 import SyncEvents from './sync/EventsSync';
 import { setRangeFrom, setRangeTo } from '../redux/actions';
 import { ReduxState } from '../types/types';
-import { reduxStore } from '../bloben-package/layers/ReduxProvider';
+import { reduxStore } from 'bloben-module/layers/ReduxProvider';
 
 /**
  * Get events in range

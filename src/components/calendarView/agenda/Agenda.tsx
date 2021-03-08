@@ -11,14 +11,12 @@ import {
   NAVBAR_HEIGHT_BASE,
   parseEventColor,
 } from '../calendar-common';
-import EventStateEntity from '../../../bloben-utils/models/event.entity';
 import { setEventsAreFetching } from '../../../redux/actions';
-import { HeightHook } from '../../../bloben-common/utils/layout';
-import { Context } from '../../../bloben-package/context/store';
-import { parseCssDark } from '../../../bloben-common/utils/common';
-import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
+import { parseCssDark, useHeight } from 'bloben-react';
 import { ReduxState } from '../../../types/types';
 import { getNewCalendarDays } from '../../../utils/getCalendarDaysAndEvents';
+import { LuxonHelper, EventDecrypted } from 'bloben-utils';
+import { Context } from 'bloben-module/context/store';
 
 interface MonthTitleProps {
   isDark: boolean;
@@ -161,7 +159,7 @@ const AgendaComponent = (props: AgendaComponentProps) => {
 
   const history: any = useHistory();
 
-  return events.map((event: EventStateEntity, index: number) => (
+  return events.map((event: EventDecrypted, index: number) => (
     <AgendaEvent
       item={event}
       isFirstForDay={index === 0}
@@ -237,7 +235,7 @@ export const renderAgendaEvents = (
     }
 
     prevMonth = thisMonth;
-    const dayEvents: EventStateEntity[] = item;
+    const dayEvents: EventDecrypted[] = item;
     if (dayEvents && dayEvents.length > 0) {
       // Calculate offset
       if (isNewMonth) {
@@ -314,7 +312,7 @@ const AgendaView = (props: AgendaViewProps) => {
 
   const events: any = useSelector((state: any) => state.events);
 
-  const height: number = HeightHook();
+  const height: number = useHeight();
 
   const daysWithEvents: any = renderAgendaEvents(
     events,

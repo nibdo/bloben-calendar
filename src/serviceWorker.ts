@@ -10,7 +10,7 @@
 // To learn more about the benefits of this model and instructions on how to
 // opt-in, read https://bit.ly/CRA-PWA
 
-import { logger } from 'bloben-common/utils/common';
+import { logger } from 'bloben-react';
 
 const isLocalhost = Boolean(
   window.location.hostname === 'localhost' ||
@@ -22,10 +22,10 @@ const isLocalhost = Boolean(
     )
 );
 
-type Config = {
+interface Config {
   onSuccess?: (registration: ServiceWorkerRegistration) => void;
   onUpdate?: (registration: ServiceWorkerRegistration) => void;
-};
+}
 
 export function register(config?: Config) {
   if (
@@ -135,9 +135,7 @@ function checkValidServiceWorker(swUrl: string, config?: Config) {
       }
     })
     .catch(() => {
-      logger(
-        'No internet connection found. App is running in offline mode.'
-      );
+      logger('No internet connection found. App is running in offline mode.');
     });
 }
 

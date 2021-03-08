@@ -4,13 +4,11 @@ import { Link } from 'react-router-dom';
 import './HeaderCalendar.scss';
 import { useSelector } from 'react-redux';
 
-import EvaIcons from '../../bloben-common/components/eva-icons';
-import Dropdown from '../../bloben-package/components/dropdown/Dropdown';
-import { isCalendarApp } from '../../bloben-package/utils/common';
-import Logo from '../../bloben-common/components/logo/Logo';
+import { EvaIcons, Logo, Dropdown } from 'bloben-react';
 import HeaderCalendarButtons from '../headerCalendarButtons/HeaderCalendarButtons';
 import HeaderCalendarTitle from '../headerCalendarTitle/HeaderCalendarTitle';
-import { Context } from '../../bloben-package/context/store';
+import { Context } from 'bloben-module/context/store';
+import { isCalendarApp } from 'utils/common';
 
 interface ListHeaderIconsProps {
   handleOpenSearch: any;
@@ -44,6 +42,7 @@ const ListHeaderIcons = (props: ListHeaderIconsProps) => {
         >
           <EvaIcons.Grid className={`icon-svg ${isDark ? 'dark-svg' : ''}`} />
           <Dropdown
+            isDark={isDark}
             isOpen={dropdown}
             handleClose={closeDropdown}
             variant={'desktop'}
@@ -197,13 +196,13 @@ const HeaderView = (props: HeaderViewProps) => {
   );
 };
 
-interface IHeaderCalendarProps {
+interface HeaderCalendarProps {
   title: string;
   hasHeaderShadow: boolean;
   icons?: any;
   children: any;
 }
-const HeaderCalendar = (props: IHeaderCalendarProps) => {
+const HeaderCalendar = (props: HeaderCalendarProps) => {
   const { title, hasHeaderShadow, icons, children } = props;
 
   const [animation, setAnimation] = useState('');

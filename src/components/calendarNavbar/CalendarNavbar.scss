@@ -1,4 +1,4 @@
-@import "bloben-common/globals/theme.scss";
+@import "~bloben-react/globals/theme.scss";
 
 .navbar__container {
   height: 50px;
@@ -7,6 +7,7 @@
   bottom: 0;
   position: fixed;
   z-index: 0  ;
+  overflow: hidden;
   display:flex;
   flex-direction: row;
   border-top: solid 0.7px $GRAY_300;
@@ -99,3 +100,29 @@
   fill: $primary !important;
 }
 
+
+.navbar__backdrop-150 {
+  position: absolute;
+  background-color: $GRAY_400;
+  opacity: 0.4;
+  width: 150px;
+  height: 150px;
+  border-radius: 75px;
+  animation-name: navbar__backdrop-animation;
+  animation-delay: 0s;
+  animation-duration: 0.4s;
+}
+@keyframes navbar__backdrop-animation {
+  0% {
+    background-color: $GRAY_100;
+    width: 0;
+    height: 0;
+    border-radius: 0;
+  }
+  100% {
+    background-color: $GRAY_400;
+    width: 150px;
+    height: 150px;
+    border-radius: 75px;
+  }
+}

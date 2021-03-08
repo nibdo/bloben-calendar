@@ -4,10 +4,10 @@ import { ButtonBase } from '@material-ui/core';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { setCalendarView } from '../../redux/actions';
-import { parseCssDark } from '../../bloben-common/utils/common';
-import { Context } from '../../bloben-package/context/store';
+import { parseCssDark } from 'bloben-react';
 import { CalendarView, ReduxState } from '../../types/types';
 import { Dispatch } from 'redux';
+import { Context } from 'bloben-module/context/store';
 
 interface HeaderCalendarButtonProps {
   text: string;

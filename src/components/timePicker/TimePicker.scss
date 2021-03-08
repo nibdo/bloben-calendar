@@ -1,0 +1,99 @@
+@import "~bloben-react/globals/theme.scss";
+
+.time-picker__wrapper {
+  display: flex;
+  flex-direction: row;
+  height: auto;
+  margin-top: 32px;
+  @media (min-width: 750px) {
+    display: flex;
+    flex-direction: column;
+    height: 200px;
+    justify-content: center;
+    align-items: center;
+    width: 150px;
+    margin-top: 0;
+
+  }
+
+}
+
+.time-picker__container-hour {
+  width: 45%;
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  height: 40%;
+  position: fixed;
+  overflow-y: scroll;
+  @media (min-width: 750px) {
+    left: 0;
+    position: absolute;
+    height: 200px;
+    width: 75px;
+  }
+}
+.time-picker__container-minute {
+  width: 45%;
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  flex-direction: column;
+  height: 40%;
+  overflow-y: scroll;
+  right: 0;
+  position: fixed;
+  @media (min-width: 750px) {
+    position: absolute;
+    height: 200px;
+    width: 75px;
+  }
+}
+.time-picker__text {
+  min-height: 60px !important;
+  font-size: 5rem;
+  margin-top: 12px;
+  margin-bottom: 2px;
+  color: $gray !important;
+  @media (min-width: 750px) {
+    font-size: 2rem;
+  }
+}
+.time-picker__text-dark {
+  @extend .time-picker__text;
+  color: $GRAY_400 !important;
+}
+.time-picker__text--selected {
+  @extend .time-picker__text;
+  font-weight: bold;
+  color: $PRIMARY_LIGHT !important;
+}
+.time-picker__text--selected-dark {
+  @extend .time-picker__text--selected;
+  color: $PRIMARY_DARK !important;
+}
+.time-picker__text--hidden {
+  @extend .time-picker__text;
+  color: transparent !important;
+}
+
+.time-picker__separator {
+  width: 10%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 40%;
+  left: 45%;
+  position: fixed;
+  color: $gray;
+  z-index: 9999;
+  font-size: 3.5rem;
+}
+.time-picker__separator-dark {
+  @extend .time-picker__separator;
+  color: $GRAY_500;
+}

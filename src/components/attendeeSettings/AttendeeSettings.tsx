@@ -1,16 +1,11 @@
 import React, { useContext, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ButtonBase, IconButton } from '@material-ui/core';
+import { EvaIcons, parseCssDark, Dropdown, Modal } from 'bloben-react';
 
 import './AttendeeSettings.scss';
 
-import EvaIcons from 'bloben-common/components/eva-icons';
-import { parseCssDark } from 'bloben-common/utils/common';
-import { Context } from 'bloben-package/context/store';
-import Modal from '../../bloben-package/components/modal/Modal';
 import AttendeePicker from './attendeePicker/AttendeePicker';
-import { UserProfile } from '../../bloben-package/types/common.types';
-import Dropdown from '../../bloben-package/components/dropdown/Dropdown';
 import {
   ACCEPTED_ATTENDEE,
   Attendee,
@@ -20,7 +15,9 @@ import {
   ROLE_OPT,
   TENTATIVE_ATTENDEE,
   WAITING_ATTENDEE,
-} from '../../bloben-utils/models/Attendee';
+} from 'bloben-utils/models/Attendee';
+import { Context } from 'bloben-module/context/store';
+import { UserProfile } from 'bloben-react/types/common.types';
 
 export const AttendeeActions = () => {
   return (
@@ -276,6 +273,7 @@ const AttendeeStatus = (props: AttendeeStatusProps) => {
             values={attendeeResponseValues}
             onClick={handleAttendeeStatusChange}
             variant={'simple'}
+            isDark={isDark}
           />
         </ButtonBase>
       </div>
@@ -369,7 +367,7 @@ const AttendeeSettings = (props: AttendeeSettingsProps) => {
         />
       ) : null}
       {pickerIsOpen && isEditable ? (
-        <Modal>
+        <Modal isDark={isDark}>
           <AttendeePicker
             onClose={() => openPicker(false)}
             handleSelect={selectItem}

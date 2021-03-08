@@ -1,9 +1,7 @@
 import React, { useContext } from 'react';
 import './MonthView.scss';
 import CalendarHeader from '../../calendarHeader/CalendarHeader';
-import { getDate, isSameMonth, isToday } from 'date-fns';
 import { ButtonBase } from '@material-ui/core';
-import { HeightHook, WidthHook } from '../../../bloben-common/utils/layout';
 import { useSelector } from 'react-redux';
 import {
   CALENDAR_DRAWER_DESKTOP_WIDTH,
@@ -12,20 +10,19 @@ import {
 } from '../calendar-common';
 import { useHistory } from 'react-router';
 import Slider from 'react-slick';
-import { parseCssDark } from '../../../bloben-common/utils/common';
-import { Context } from '../../../bloben-package/context/store';
+import { useHeight, useWidth, parseCssDark } from 'bloben-react';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../../bloben-utils/utils/LuxonHelper';
-import { formatTimestampToDate } from '../../../bloben-utils/utils/common';
 import { getNewCalendarDays } from '../../../utils/getCalendarDaysAndEvents';
 import { CalendarDays, ReduxState } from '../../../types/types';
+import { Context } from 'bloben-module/context/store';
+import { LuxonHelper, formatTimestampToDate } from 'bloben-utils';
 
-interface IEventProps {
+interface EventProps {
   isDark: boolean;
   event: any;
   eventWidth: number;
 }
-const Event = (props: IEventProps) => {
+const Event = (props: EventProps) => {
   const { isDark, event, eventWidth } = props;
   const eventColor: string = parseEventColor(event.color, isDark);
   const history: any = useHistory();
@@ -83,13 +80,13 @@ const Event = (props: IEventProps) => {
   );
 };
 
-interface IOneDayProps {
+interface OneDayProps {
   height: number;
   data: any;
   borderClass: string;
   day: any;
 }
-const OneDay = (props: IOneDayProps) => {
+const OneDay = (props: OneDayProps) => {
   const { height, data, borderClass, day } = props;
   const selectedDate: DateTime = useSelector(
     (state: any) => state.selectedDate
@@ -281,8 +278,8 @@ const MonthViewContainer = (props: any) => {
   const { isDark, isMobile } = store;
 
   const { daysNum } = props;
-  const width: any = WidthHook();
-  const height: number = HeightHook();
+  const width: any = useWidth();
+  const height: number = useHeight();
   const calendarDaysCurrentIndex: number = useSelector(
     (state: ReduxState) => state.calendarDaysCurrentIndex
   );

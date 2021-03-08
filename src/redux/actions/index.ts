@@ -3,10 +3,8 @@ import {
   CalendarView,
   ICalendarSettings,
 } from '../../types/types';
-import { UserProfile } from '../../bloben-package/types/common.types';
-import { User } from '../../bloben-utils/models/User';
-import { Calendar } from '../../bloben-utils/models/Calendar';
-import { Contact } from '../../bloben-utils/models/Contact';
+import { User, Contact, Calendar } from 'bloben-utils';
+import { UserProfile } from 'bloben-react/types/common.types';
 
 export const setUser = (user: User) => {
   return {

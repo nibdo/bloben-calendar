@@ -1,24 +1,15 @@
 import React, { useContext, useEffect } from 'react';
 import './OneDay.scss';
-import {
-  getYear,
-  getMonth,
-  getDate,
-  isSameDay,
-  differenceInMinutes,
-  differenceInCalendarDays,
-} from 'date-fns';
 
-import { WidthHook } from 'bloben-common/utils/layout';
 import CalendarEvent from '../../views/event/calendarEvent/CalendarEvent';
 import { useSelector } from 'react-redux';
-import { parseCssDark } from '../../bloben-common/utils/common';
 import { checkOverlappingEvents } from '../../utils/common';
-import { Context } from '../../bloben-package/context/store';
+import { parseCssDark } from 'bloben-react';
 import { DateTime } from 'luxon';
-import LuxonHelper from '../../bloben-utils/utils/LuxonHelper';
-import { parseToDateTime } from '../../bloben-package/utils/datetimeParser';
 import { ICalendarSettings } from '../../types/types';
+import { parseToDateTime } from 'bloben-utils/dates/datetimeParser';
+import { Context } from 'bloben-module/context/store';
+import LuxonHelper from 'bloben-utils/dates/LuxonHelper';
 
 const renderEvents = (
   props: any,
@@ -127,11 +118,11 @@ const renderEvents = (
   }
 };
 
-interface ITimeNowLineProps {
+interface TimeNowLineProps {
   daysNum: number;
   nowPosition: any;
 }
-const TimeNowLine = (props: ITimeNowLineProps) => {
+const TimeNowLine = (props: TimeNowLineProps) => {
   const calendarBodyWidth: number = useSelector(
     (state: any) => state.calendarBodyWidth
   );
@@ -147,7 +138,7 @@ const TimeNowLine = (props: ITimeNowLineProps) => {
   );
 };
 
-interface IOneDayProps {
+interface OneDayProps {
   key: string;
   daysNum: number;
   day: any;
@@ -155,7 +146,7 @@ interface IOneDayProps {
   showNewEvent: any;
   data: any;
 }
-const OneDay = (props: IOneDayProps) => {
+const OneDay = (props: OneDayProps) => {
   const { daysNum, day, index, showNewEvent, data } = props;
 
   const [store] = useContext(Context);

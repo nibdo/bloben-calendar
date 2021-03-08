@@ -1,11 +1,9 @@
-import React, { useState, useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import './CalendarEvent.scss';
-import dateFns, { isFuture, parseISO } from 'date-fns';
-import { formReducer, stateReducer } from 'utils/reducer/baseReducer';
+import { stateReducer } from 'utils/reducer/baseReducer';
 import { calendarColors } from '../../../components/calendarView/calendar-common';
-import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router';
-import { parseCssDark } from '../../../bloben-common/utils/common';
+import { parseCssDark } from 'bloben-react';
 //
 // const getNewOffset = (
 //   currentIndex: any,
@@ -71,7 +69,7 @@ const initialState: any = {
   eventHasChanged: false,
 };
 
-interface ICalendarEventProps {
+interface CalendarEventProps {
   offsetTop: number;
   offsetLeft: number;
   index: number;
@@ -81,7 +79,7 @@ interface ICalendarEventProps {
   eventWidth: number;
   event: any;
 }
-const CalendarEvent = (props: ICalendarEventProps) => {
+const CalendarEvent = (props: CalendarEventProps) => {
   const [state, dispatchState] = useReducer(stateReducer, initialState);
 
   const {

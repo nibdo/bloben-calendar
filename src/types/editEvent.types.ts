@@ -1,4 +1,4 @@
-import { Attendee } from '../bloben-utils/models/Attendee';
+import { Attendee } from 'bloben-utils';
 
 export interface InitialFormState {
   prevItem: any;

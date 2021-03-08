@@ -24,10 +24,10 @@ import eventsToImport from './eventsToImport';
 import timezones from './timezones';
 import defaultTimezone from './defaultTimezone';
 import calendarSettings from './calendarSettings';
-import userProfile from '../../bloben-package/redux/reducers/userProfile';
-import contacts from '../../bloben-package/redux/reducers/contacts';
+import userProfile from 'bloben-react/redux/reducers/userProfile';
+import contacts from 'bloben-react/redux/reducers/contacts';
 import syncLog from './syncLog';
-import user from '../../bloben-package/redux/reducers/user';
+import user from 'bloben-react/redux/reducers/user';
 import { ReduxState } from '../../types/types';
 
 export const allReducers: Reducer = combineReducers({

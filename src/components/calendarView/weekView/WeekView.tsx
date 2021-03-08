@@ -7,10 +7,10 @@ import { useSelector } from 'react-redux';
 
 import CalendarHeader from '../../calendarHeader/CalendarHeader';
 import CalendarBody from '../../calendarBody/CalendarBody';
-import { WidthHook } from '../../../bloben-common/utils/layout';
 import { checkIfSwipingForward } from '../calendar-common';
-import { Context } from '../../../bloben-package/context/store';
+import { useWidth } from 'bloben-react';
 import { getNewCalendarDays } from '../../../utils/getCalendarDaysAndEvents';
+import { Context } from 'bloben-module/context/store';
 
 interface WeekViewContainerProps {
   daysNum: number;
@@ -19,7 +19,7 @@ interface WeekViewContainerProps {
 const WeekView = (props: WeekViewContainerProps) => {
   const { daysNum, openNewEvent } = props;
 
-  const width: number = WidthHook();
+  const width: number = useWidth();
   const calendarDaysCurrentIndex: number = useSelector(
     (state: any) => state.calendarDaysCurrentIndex
   );

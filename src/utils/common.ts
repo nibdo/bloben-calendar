@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { reduxStore } from '../bloben-package/layers/ReduxProvider';
 import { ReduxState, TCalendarAlarmType } from '../types/types';
 import { v4 } from 'uuid';
 import {
@@ -7,15 +6,18 @@ import {
   differenceInHours,
   differenceInMinutes,
 } from 'date-fns';
-import EventStateEntity from '../bloben-utils/models/event.entity';
-import { setAllEvents, setCalendars, setEvents } from '../redux/actions';
+import { setEvents } from '../redux/actions';
 import { DateTime } from 'luxon';
 // @ts-ignore
 import Interval from 'luxon/src/interval.js';
-import { formatTimestampToDate } from '../bloben-utils/utils/common';
-import LuxonHelper from '../bloben-utils/utils/LuxonHelper';
-import { parseToDateTime } from '../bloben-package/utils/datetimeParser';
-import { EventDecrypted } from '../bloben-utils/models/Event';
+import { reduxStore } from 'bloben-module/layers/ReduxProvider';
+import {
+  EventDecrypted,
+  formatTimestampToDate,
+  LuxonHelper,
+} from 'bloben-utils';
+import { parseToDateTime } from 'bloben-utils/dates/datetimeParser';
+
 export const mapTags = (tags: any) => {
   const tagsObj: any = {};
 
@@ -43,28 +45,6 @@ export const findInArrayById = (array: any, id: string): any =>
 
     for (let i = 0; i < array.length; i += 1) {
       if (array[i].id === id) {
-        resolve(array[i]);
-      }
-
-      // Handle loop end
-      if (i + 1 === array.length) {
-        resolve(false);
-      }
-    }
-  });
-
-export const findInArrayByKeyValue = (
-  array: any,
-  key: string,
-  value: string
-): any =>
-  new Promise((resolve) => {
-    if (!array || array.length === 0) {
-      resolve(false);
-    }
-
-    for (let i = 0; i < array.length; i += 1) {
-      if (array[i][key] === value) {
         resolve(array[i]);
       }
 
@@ -252,7 +232,7 @@ export const getEventAndCalendarIds = (): any => {
  * Format array of events to object with date keys
  * @param events
  */
-export const mapEventsToDates = (events: EventStateEntity[]): any => {
+export const mapEventsToDates = (events: EventDecrypted[]): any => {
   const result: any = {};
 
   if (events.length === 0) {
@@ -260,8 +240,8 @@ export const mapEventsToDates = (events: EventStateEntity[]): any => {
   }
 
   // Sort events
-  const sortedEvents: EventStateEntity[] = events.sort(
-    (a: EventStateEntity, b: EventStateEntity) =>
+  const sortedEvents: EventDecrypted[] = events.sort(
+    (a: EventDecrypted, b: EventDecrypted) =>
       DateTime.fromISO(a.startAt).millisecond -
       DateTime.fromISO(b.startAt).millisecond
   );
@@ -377,4 +357,159 @@ export const formatEventDate = (event: any) => {
     dates,
     time,
   };
+};
+
+export const TIMEOUT_LONG = 200;
+export const NO_TIMEOUT = 0;
+// export const STATUS_OK: number = 200;
+
+export const STATUS_OK = 'ok';
+export const STATUS_NOK = 'nok';
+export const HTTP_STATUS_BAD_REQUEST = 400;
+
+export const BIOMETRIC_SUPPORT_KEY = 'isBiometricSupported';
+export const CREATE_BIOMETRIC_ENCRYPTION_ACTION = 'createBiometricEncryption';
+export const PREPARE_ENCRYPT_STORAGE_ACTION = 'prepareEncryptStorage';
+export const ENCRYPT_STORAGE_ACTION = 'encryptStorage';
+export const DECRYPT_STORAGE_ACTION = 'decryptStorage';
+export const GET_DECRYPT_PASSWORD_ACTION = 'getDecryptPassword';
+
+export const capitalStart = (text?: string) => {
+  if (!text) {
+    return '';
+  }
+  const stringLength: number = text.length;
+  const firstLetter = text.slice(0, 1).toUpperCase();
+  const restLetters = text.slice(1, stringLength);
+
+  return firstLetter + restLetters;
+};
+
+export const isCalendarApp = (): boolean =>
+  process.env.REACT_APP_URL === 'http://localhost:4103' ||
+  process.env.REACT_APP_URL === 'http://localhost:4003' ||
+  process.env.REACT_APP_URL === 'https://calendar.bloben.com' ||
+  process.env.REACT_APP_URL === 'https://calendar.nibdo.com';
+
+export const parseToDate = (item: string | DateTime): DateTime =>
+  typeof item === 'string' ? DateTime.fromISO(item) : item;
+
+export const parseDateToString = (item: string | Date): string =>
+  typeof item === 'string' ? item : item.toISOString();
+
+export const colorPalette: any = {
+  red: { dark: '#ef9a9a', light: '#e53935' },
+  pink: { dark: '#f48fb1', light: '#d81b60' },
+  purple: { dark: '#ce93d8', light: '#8e24aa' },
+  'deep purple': { dark: '#b39ddb', light: '#5e35b1' },
+  indigo: { dark: '#9fa8da', light: '#3949ab' },
+  blue: { dark: '#90caf9', light: '#1e88e5' },
+  'light blue': { dark: '#81d4fa', light: '#039be5' },
+  cyan: { dark: '#80deea', light: '#00acc1' },
+  teal: { dark: '#80cbc4', light: '#00897b' },
+  green: { dark: '#a5d6a7', light: '#43a047' },
+  'light green': { dark: '#c5e1a5', light: '#7cb342' },
+  yellow: { dark: '#fff59d', light: '#fdd835' },
+  amber: { dark: '#ffe082', light: '#ffb300' },
+  orange: { dark: '#ffcc80', light: '#fb8c00' },
+  'deep orange': { dark: '#ffab91', light: '#f4511e' },
+  brown: { dark: '#bcaaa4', light: '#6d4c41' },
+  'blue grey': { dark: '#b0bec5', light: '#546e7a' },
+};
+export const findIndexById = (array: any, id: string): any =>
+  new Promise((resolve) => {
+    if (!array || array.length === 0) {
+      resolve(false);
+    }
+
+    for (let i = 0; i < array.length; i += 1) {
+      if (array[i].id === id) {
+        resolve(i);
+      }
+
+      // Handle loop end
+      if (i + 1 === array.length) {
+        resolve(false);
+      }
+    }
+  });
+
+export const sendMessageToReactNative = (data: any) => {
+  // @ts-ignore
+  window.ReactNativeWebView.postMessage(JSON.stringify(data));
+};
+
+export const generateRandomString = () => {
+  const stringLength = 256;
+  const charset =
+    "0123456789abcdefghijklmnopqrstuvwxyz,./;']`=-<>?:|}{~_+()*&^%$#@!";
+  let i = 0;
+  let result = '';
+  while (i < stringLength) {
+    result += charset.charAt(Math.random() * charset.length);
+    i += 1;
+  }
+
+  return result;
+};
+
+export const generateRandomDemoString = () => {
+  const stringLength = 16;
+  const charset = '0123456789abcdefghijklmnopqrstuvwxyz';
+  let i = 0;
+  let result = '';
+  while (i < stringLength) {
+    result += charset.charAt(Math.random() * charset.length);
+    i += 1;
+  }
+
+  return result;
+};
+
+export const getLocalTimezone = (): string =>
+  Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+const getTimezoneOffset = (date: Date): string => {
+  const dateString: string = date.toString();
+
+  return dateString.slice(
+    dateString.indexOf('GMT'),
+    dateString.indexOf('GMT') + 8
+  );
+};
+
+export const parseTimezoneText = (zone: string): string => {
+  if (zone === 'device') {
+    const timezoneDevice: string = getLocalTimezone();
+
+    return `Device (${timezoneDevice})`;
+  }
+
+  if (zone === 'floating') {
+    return 'Floating (fixed) time';
+  }
+
+  return zone;
+};
+
+export const parseTimezoneTextWithOffset = (
+  zone: string,
+  currentDate?: Date,
+  localTimezone?: string
+): string => {
+  const date: Date = currentDate ? currentDate : new Date();
+
+  if (zone === localTimezone) {
+    const timezoneOffsetString: string = getTimezoneOffset(date);
+
+    const timezoneDevice: string = getLocalTimezone();
+
+    return `Device (${timezoneDevice}) ${timezoneOffsetString}`;
+  }
+
+  if (zone === 'floating') {
+    return 'Floating fixed time';
+  }
+
+  return `${zone}`;
 };

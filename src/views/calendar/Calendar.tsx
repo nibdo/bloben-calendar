@@ -9,10 +9,15 @@ import BottomSheet from 'bottom-sheet-react';
 import { Fab, IconButton } from '@material-ui/core';
 import { DateTime } from 'luxon';
 import { useSelector } from 'react-redux';
+import {
+  EvaIcons,
+  useHeight,
+  parseCssDark,
+  Modal,
+  Notifications,
+} from 'bloben-react';
 
-import { HeightHook } from 'bloben-common/utils/layout';
 import HeaderCalendar from '../../components/headerCalendar/HeaderCalendar';
-import EvaIcons from '../../bloben-common/components/eva-icons';
 import WeekView from '../../components/calendarView/weekView/WeekView';
 import { getDaysNum } from '../../components/calendarView/calendar-common';
 import CalendarDrawer from '../../components/calendarDrawer/CalendarDrawer';
@@ -21,11 +26,7 @@ import Agenda from '../../components/calendarView/agenda/Agenda';
 import SettingsCalendar from '../../components/settingsCalendar/SettingsCalendar';
 import EditEvent from '../event/editEvent/EditEvent';
 import CalendarDesktopNavigation from '../../components/CalendarDesktopNavigation/calendar-desktop-navigation';
-import Modal from '../../bloben-package/components/modal/Modal';
 import CalendarNavbar from '../../components/calendarNavbar/CalendarNavbar';
-import { Context } from '../../bloben-package/context/store';
-import { parseCssDark } from '../../bloben-common/utils/common';
-import Notifications from '../../bloben-package/views/notifications/Notifications';
 import EventView from '../event/eventView/EventView';
 import { CalendarDays, CalendarView, ReduxState } from '../../types/types';
 import {
@@ -35,6 +36,7 @@ import {
   CALENDAR_MONTH_VIEW,
   CALENDAR_WEEK_VIEW,
 } from '../../utils/contants';
+import { Context } from 'bloben-module/context/store';
 
 interface CalendarTypeProps {
   openNewEvent: any;
@@ -103,13 +105,13 @@ const CalendarViewComponent = (props: CalendarViewProps) => {
   } = props;
 
   const history: any = useHistory();
-  const height: number = HeightHook();
+  const height: number = useHeight();
   const [store] = useContext(Context);
 
   const { isDark, isMobile } = store;
 
   const [headerTitle, setHeaderTitle] = useState('');
-
+  const notifications: any = useSelector((state: any) => state.notifications);
   const calendarView: CalendarView = useSelector(
     (state: any) => state.calendarView
   );
@@ -171,27 +173,43 @@ const CalendarViewComponent = (props: CalendarViewProps) => {
           </div>
           <Router history={history}>
             <Route path={'/event'}>
-              <Modal {...props} handleClose={() => history.goBack()}>
+              <Modal
+                {...props}
+                handleClose={() => history.goBack()}
+                isDark={isDark}
+              >
                 <EditEvent isNewEvent={true} newEventTime={newEventIsOpen} />
               </Modal>
             </Route>
             <Route path={'/event/:id'}>
-              <Modal handleClose={() => history.goBack()}>
+              <Modal handleClose={() => history.goBack()} isDark={isDark}>
                 <EventView />
               </Modal>
             </Route>
             <Route path={'/event/edit/:id'}>
-              <Modal {...props} handleClose={() => history.goBack()}>
+              <Modal
+                {...props}
+                handleClose={() => history.goBack()}
+                isDark={isDark}
+              >
                 <EditEvent isNewEvent={false} />
               </Modal>
             </Route>
             <Route path={'/notifications'}>
               {isMobile ? (
-                <Modal>
-                  <Notifications />
+                <Modal isDark={isDark}>
+                  <Notifications
+                    isDark={isDark}
+                    isMobile={isMobile}
+                    notifications={notifications}
+                  />
                 </Modal>
               ) : (
-                <Notifications />
+                <Notifications
+                  isDark={isDark}
+                  isMobile={isMobile}
+                  notifications={notifications}
+                />
               )}
             </Route>
           </Router>

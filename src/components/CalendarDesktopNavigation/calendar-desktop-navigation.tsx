@@ -3,10 +3,9 @@ import './calendar-desktop-navigation.scss';
 import { IconButton } from '@material-ui/core';
 
 import HeaderCalendarTitle from '../headerCalendarTitle/HeaderCalendarTitle';
-import EvaIcons from '../../bloben-common/components/eva-icons';
-import { Context } from '../../bloben-package/context/store';
-import { parseCssDark } from '../../bloben-common/utils/common';
+import { parseCssDark, EvaIcons } from 'bloben-react';
 import { getNewCalendarDays } from '../../utils/getCalendarDaysAndEvents';
+import { Context } from '../../bloben-module/context/store';
 
 interface CalendarDesktopNavigationProps {
   title: string;

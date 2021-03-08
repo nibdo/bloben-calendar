@@ -1,7 +1,6 @@
-import CalendarApi from '../api/calendar';
-import { reduxStore } from '../bloben-package/layers/ReduxProvider';
-import { addEvents, setEvents } from '../redux/actions';
+import { setEvents } from '../redux/actions';
 import { cloneDeep } from './common';
+import { reduxStore } from 'bloben-module/layers/ReduxProvider';
 
 export const deleteEvent = async (eventToDeleteId: any) => {
   const store: any = reduxStore.getState();

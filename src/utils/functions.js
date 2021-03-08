@@ -1,5 +1,5 @@
-import { parseISO, format, formatISO,  } from 'date-fns';
-import { BASE_URL } from 'bloben-common/globals/url';
+import { parseISO, format, formatISO } from 'date-fns';
+import { BASE_URL } from 'bloben-utils/globals/url';
 
 export const fetchData = async (path) => {
   return new Promise(async (resolve, reject) => {
@@ -28,7 +28,6 @@ export const changeStatusbarColor = (color) => {
     .querySelector('meta[name="theme-color"]')
     .setAttribute('content', color);
 };
-
 
 export const sortData = (data, rule) => {
   let sortedData;

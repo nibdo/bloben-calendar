@@ -1,5 +1,4 @@
-import EventStateEntity from '../bloben-utils/models/event.entity';
-import { Calendar } from '../bloben-utils/models/Calendar';
+import { createEvent, EventDecrypted, Calendar } from 'bloben-utils';
 
 const EVENT_BEGIN_KEY_VALUE = 'BEGIN:VEVENT';
 const EVENT_END_KEY_VALUE = 'END:VEVENT';
@@ -18,7 +17,7 @@ const IcsParser: any = {
         alarms: [],
         isRepeated: false,
       };
-      const event: EventStateEntity = new EventStateEntity(data);
+      const event: EventDecrypted = createEvent(data);
 
       result.push(event);
     }

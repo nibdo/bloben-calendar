@@ -5,14 +5,13 @@ import {
   CALENDAR_OFFSET_LEFT,
   hoursArrayString,
 } from '../calendarView/calendar-common';
-import { WidthHook } from 'bloben-common/utils/layout';
 import { useSelector } from 'react-redux';
 import _ from 'lodash';
-import { parseCssDark } from '../../bloben-common/utils/common';
-import { Context } from '../../bloben-package/context/store';
+import { useWidth, parseCssDark } from 'bloben-react';
 import { DateTime } from 'luxon';
-import { formatTimestampToDate } from '../../bloben-utils/utils/common';
 import { CalendarDays } from '../../types/types';
+import { formatTimestampToDate } from 'bloben-utils';
+import { Context } from 'bloben-module/context/store';
 
 const renderOneDay = (
   calendarDays: DateTime[],
@@ -87,7 +86,7 @@ const CalendarBody = (props: CalendarBodyProps) => {
   );
   const events: any = useSelector((state: any) => state.events);
 
-  const width: number = WidthHook();
+  const width: number = useWidth();
   const days: any = renderOneDay(
     calendarDays[index],
     daysNum,

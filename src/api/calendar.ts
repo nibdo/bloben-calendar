@@ -1,9 +1,8 @@
-import Axios from 'bloben-common/utils/axios';
-import { CALENDAR_URL } from '../bloben-common/globals/url';
 import { AxiosResponse } from 'axios';
-import { IPatchUpdate } from '../bloben-package/types/common.types';
-import { APP_API_VERSION_1 } from '../bloben-package/api/account.api';
-import { stompClient } from '../bloben-package/layers/WebsocketProvider';
+import { stompClient } from 'bloben-module/layers/WebsocketProvider';
+import { Axios, APP_API_VERSION_1 } from 'bloben-utils';
+import { IPatchUpdate } from 'bloben-react/types/common.types';
+import { CALENDAR_URL } from 'bloben-utils/api/common';
 
 export const APP_API_PREFIX = 'calendar-app';
 export const API_GET_CALENDAR_SETTINGS = 'settings';

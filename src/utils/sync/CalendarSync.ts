@@ -1,7 +1,5 @@
 import { AxiosResponse } from 'axios';
 
-import { reduxStore } from '../../bloben-package/layers/ReduxProvider';
-import OpenPgp from '../../bloben-utils/utils/OpenPgp';
 import { cloneDeep, findInArrayById } from '../common';
 import {
   addCalendar,
@@ -13,9 +11,9 @@ import {
 } from '../../redux/actions';
 import CalendarApi from '../../api/calendar';
 import { ISyncLog, ReduxState } from '../../types/types';
-import { User } from '../../bloben-utils/models/User';
-import { Calendar, createCalendar } from '../../bloben-utils/models/Calendar';
 import { CalendarEncrypted } from 'bloben-utils/models/CalendarEncrypted';
+import { OpenPgp, User, Calendar, createCalendar } from 'bloben-utils';
+import { reduxStore } from 'bloben-module/layers/ReduxProvider';
 
 const decryptCalendar = async (
   item: CalendarEncrypted,

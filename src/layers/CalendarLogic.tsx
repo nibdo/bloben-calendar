@@ -22,16 +22,18 @@ import {
   setNullTimeInDate,
 } from '../utils/common';
 import CalendarSync from '../utils/sync/CalendarSync';
-import ContactSync from '../bloben-package/utils/sync/ContactSync';
-import SyncNotification from '../bloben-package/sync/NotificationSync';
 import CalendarApi from '../api/calendar';
-import { getLocalTimezone } from '../bloben-package/utils/common';
-import GeneralApi from '../bloben-common/api/general.api';
-import { checkIfIsSafari } from '../bloben-common/utils/common';
 import { setServiceWorkerLister } from '../utils/ServiceWorkerListener';
-import { subscribeToPush } from '../bloben-package/utils/pushSubscription';
 import { getEventsInRange } from '../utils/getEventsInRange';
 import { initCalendarAction } from '../utils/initCalendarAction';
+import {
+  GeneralApi,
+  getLocalTimezone,
+  checkIfIsSafari,
+  subscribeToPush,
+} from 'bloben-utils';
+import ContactSync from '../sync/ContactSync';
+import SyncNotification from '../sync/NotificationSync';
 
 interface CalendarLogicProps {
   children: any;

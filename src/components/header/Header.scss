@@ -1,0 +1,154 @@
+@import "~bloben-react/globals/theme.scss";
+
+$HEADER_HEIGHT_DESKTOP: 60px;
+$HEADER_HEIGHT_MOBILE: 56px;
+
+.header__wrapper {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: $HEADER_HEIGHT_DESKTOP;
+  background-color: $SURFACE_LIGHT;
+  animation-name: expand-header;
+  animation-duration: 0.3s;
+  @media (min-width: 750px) {
+    border-bottom: solid 0.6px $GRAY_300;
+    padding-left: 32px;
+  }
+  @media (max-width: 750px) {
+    display: flex;
+    top: 0;
+    left: 0;
+    flex-direction: column;
+    height: $HEADER_HEIGHT_MOBILE;
+    padding: 0;
+    //margin-bottom: 2px;
+  }
+}
+.header__wrapper-dark {
+  @extend .header__wrapper;
+  background-color: $MODAL_DARK;
+  //@media (min-width: 750px) {
+  //  border-radius: 32px 0 0 0;
+  //  border-bottom: solid 0.6px $MODAL_DARK;
+  //}
+}
+.with-dark-shadow {
+  background-color: $MODAL_DARK;
+}
+.with-shadow {
+  display: flex;
+  box-shadow: inset 0px -1px 0px $GRAY_300;
+  background-color: $SURFACE_LIGHT;
+}
+
+.header__row {
+  display: flex;
+  flex-direction: row;
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+.header__title-button {
+  max-width: 60%;
+  border-radius: 24px !important;
+  padding: 8px 24px 8px 24px!important;
+  display: flex;
+  align-items: center;
+  @media (min-width: 750px) {
+    max-width: 100%;
+    padding: 8px 12px 8px 24px!important;
+  }
+}
+
+.header__title-button-visible {
+  @extend .header__title-button;
+  display: flex !important;
+  opacity: 1;
+  visibility: visible !important;
+}
+.header__title {
+  font-size: 2.8rem;
+  font-weight: 700;
+  margin: 0;
+  padding: 0;
+  margin-right: 24px;
+  color: $text;
+  padding-left: 24px;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  word-break: break-all;
+  @media (max-width: 750px) {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+    font-size: 2.5rem !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    word-break: break-all;
+  }
+}
+.header__title-dark {
+  @extend .header__title;
+  color: $textDark;
+}
+.header__container--icons {
+  position: absolute;
+  right: 6px;
+  top: 0;
+  height: 100%;
+  width: auto;
+  display: flex;
+  flex-direction: row-reverse;
+  @media (min-width: 750px) {
+    position: relative;
+    justify-content: flex-start;
+    align-items: center;
+    flex-grow: 1;
+    padding-right: 24px;
+  }
+}
+
+
+.header__text-visible {
+  animation-name: show-header;
+  animation-duration: 0.3s;
+  visibility: visible !important;
+  opacity: 1;
+}
+.header__text-hidden {
+  animation-name: hide-header;
+  animation-duration: 0.1s;
+  visibility: hidden !important;
+  opacity: 0;
+}
+@keyframes show-header {
+  0% {
+    bottom: -50px;
+    opacity: 0;
+    visibility: hidden;
+  }
+  100% {
+    bottom: 0;
+    opacity: 1;
+    visibility: visible;
+
+  }
+}
+
+@keyframes hide-header {
+  0% {
+    bottom: 0px;
+    opacity: 1;
+    visibility: visible;
+  }
+  100% {
+    bottom: -50px;
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+

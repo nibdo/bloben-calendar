@@ -1,32 +1,33 @@
 import React, { useContext, useState } from 'react';
-import EvaIcons from '../../../bloben-common/components/eva-icons';
 import { useDispatch, useSelector } from 'react-redux';
 import {
   setDefaultTimezone,
   updateAutoUpdateTimezoneSetting,
   updateTimezoneSetting,
 } from '../../../redux/actions';
-import { Context } from '../../../bloben-package/context/store';
-import HeaderModal from '../../../bloben-package/components/headerModal/HeaderModal';
-import SettingsItem from '../../../bloben-package/components/settingsItem/SettingsItem';
-import MobileTitle from '../../../bloben-package/components/title/Title';
-import SettingsSubtitle from '../../../bloben-package/components/settings/settingsSubtitle/SettingsSubtitle';
-import Modal from '../../../bloben-package/components/modal/Modal';
-import TimeZonePicker from '../../../bloben-package/components/timezonePicker/TimeZonePicker';
 import { ICalendarSettings } from '../../../types/types';
 import CalendarApi from '../../../api/calendar';
-import { STATUS_CODE_OK } from '../../../bloben-common/utils/common';
-import Dropdown from '../../../bloben-package/components/dropdown/Dropdown';
-import { capitalStart } from '../../../bloben-package/utils/common';
-import { UserProfile } from '../../../bloben-package/types/common.types';
+import {
+  EvaIcons,
+  HeaderModal,
+  SettingsSubtitle,
+  SettingsItem,
+  Modal,
+  Dropdown,
+  MobileTitle,
+} from 'bloben-react';
+import { Context } from 'bloben-module/context/store';
+import { STATUS_CODE_OK, capitalStart } from 'bloben-utils/utils/common';
+import TimeZonePicker from 'components/timezonePicker/TimeZonePicker';
+import { UserProfile } from 'bloben-react/types/common.types';
 
-interface ISettingsCalendarViewProps {
+interface SettingsCalendarViewProps {
   alarmDropdownIsVisible: boolean;
   setAlarmDropdown: any;
   alarmDropdownValues: string[];
   selectDefaultAlarm: any;
 }
-const SettingsCalendarView = (props: ISettingsCalendarViewProps) => {
+const SettingsCalendarView = (props: SettingsCalendarViewProps) => {
   const {
     alarmDropdownIsVisible,
     setAlarmDropdown,
@@ -39,7 +40,7 @@ const SettingsCalendarView = (props: ISettingsCalendarViewProps) => {
     dispatchContext({ type, payload });
   };
 
-  const { isDark } = store;
+  const { isDark, isMobile } = store;
 
   const dispatch: any = useDispatch();
   const calendarSettings: ICalendarSettings = useSelector(
@@ -100,11 +101,12 @@ const SettingsCalendarView = (props: ISettingsCalendarViewProps) => {
 
   return (
     <div className={`column${isDark ? '-dark' : ''}`}>
-      <HeaderModal />
+      <HeaderModal isMobile={isMobile} isDark={isDark} />
       <div className={'settings__container'}>
-        <MobileTitle title={'Calendar'} />
-        <SettingsSubtitle text={'Timezones'} />
+        <MobileTitle title={'Calendar'} isDark={isDark} />
+        <SettingsSubtitle text={'Timezones'} isDark={isDark} />
         <SettingsItem
+          isDark={isDark}
           icon={
             <EvaIcons.Globe
               className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}
@@ -115,6 +117,7 @@ const SettingsCalendarView = (props: ISettingsCalendarViewProps) => {
           onClick={() => openTimezoneModal(true)}
         />
         <SettingsItem
+          isDark={isDark}
           icon={<EvaIcons.Globe className={'svg-icon settings__icon-hidden'} />}
           title={'Device timezone'}
           description={'Update to device timezone'}
@@ -123,7 +126,7 @@ const SettingsCalendarView = (props: ISettingsCalendarViewProps) => {
           switchValue={autoUpdateTimezone}
         />
         {timezoneModalIsOpen ? (
-          <Modal>
+          <Modal isDark={isDark}>
             <TimeZonePicker
               selectTimezone={selectTimezone}
               onClose={() => openTimezoneModal(false)}
@@ -131,8 +134,9 @@ const SettingsCalendarView = (props: ISettingsCalendarViewProps) => {
             />
           </Modal>
         ) : null}
-        <SettingsSubtitle text={'Alarms'} />
+        <SettingsSubtitle text={'Alarms'} isDark={isDark} />
         <SettingsItem
+          isDark={isDark}
           icon={
             <EvaIcons.Bell
               className={`svg-icon settings__icon${isDark ? '-dark' : ''}`}
@@ -143,6 +147,7 @@ const SettingsCalendarView = (props: ISettingsCalendarViewProps) => {
           onClick={() => setAlarmDropdown(true)}
           dropdown={
             <Dropdown
+              isDark={isDark}
               isOpen={alarmDropdownIsVisible}
               handleClose={() => setAlarmDropdown(false)}
               selectedValue={defaultAlarmType}

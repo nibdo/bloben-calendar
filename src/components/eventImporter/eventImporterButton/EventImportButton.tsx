@@ -6,12 +6,12 @@ import { useDispatch } from 'react-redux';
 
 import { useHistory } from 'react-router-dom';
 import { setEventsToImport } from '../../../redux/actions';
-import { Context } from '../../../bloben-package/context/store';
+import { Context } from 'bloben-module/context/store';
 
-interface IEventImportButtonProps {
+interface EventImportButtonProps {
   autoFocus?: boolean;
 }
-const EventImportButton = (props: IEventImportButtonProps) => {
+const EventImportButton = (props: EventImportButtonProps) => {
   const { autoFocus } = props;
   const history: any = useHistory();
   const inputFile = useRef(null);

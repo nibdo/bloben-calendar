@@ -13,3 +13,6 @@
 [submodule "src/bloben-components"]
 	path = src/bloben-components
 	url = git@github.com:nibdo/bloben-components.git
+[submodule "src/bloben-module"]
+	path = src/bloben-module
+	url = git@github.com:nibdo/bloben-module.git
