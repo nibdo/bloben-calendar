@@ -208,6 +208,17 @@ export const formatEventDate = (event: any) => {
   };
 };
 
+export const checkHasNewVersion = (
+  dockerVersion: string,
+  serverVersion: string
+) => {
+  return (
+    dockerVersion.length > 1 &&
+    serverVersion.length > 1 &&
+    dockerVersion !== serverVersion
+  );
+};
+
 export const getArrayStart = (array: any) => array[0];
 export const getArrayEnd = (array: any) => array[array.length - 1];
 

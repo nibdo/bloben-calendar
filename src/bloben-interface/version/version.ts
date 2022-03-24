@@ -1,3 +1,4 @@
 export interface GetVersion {
-  version: string;
+  apiVersion: string;
+  dockerImageVersion: string;
 }

@@ -12,16 +12,19 @@ const VersionFooter = (props: VersionFooterProps) => {
 
   const [store] = useContext(Context);
 
-  const { apiVersion } = store;
+  const { version } = store;
 
   return (
     <div className={'VersionFooter__container'}>
       <p
         className={parseCssDark('VersionFooter__text', isDark)}
-      >{`Version ${process.env.REACT_APP_VERSION}`}</p>
+      >{`Docker image version ${version.dockerImageVersion}`}</p>
       <p
         className={parseCssDark('VersionFooter__text', isDark)}
-      >{`Api version ${apiVersion}`}</p>
+      >{`Calendar version ${process.env.REACT_APP_VERSION}`}</p>
+      <p
+        className={parseCssDark('VersionFooter__text', isDark)}
+      >{`Api version ${version.apiVersion}`}</p>
     </div>
   );
 };

@@ -14,14 +14,18 @@ import {
 } from '@chakra-ui/react';
 import { CalendarView } from 'kalend';
 import { Context } from '../../context/store';
+import { checkHasNewVersion } from '../../utils/common';
 import { initialReduxState } from '../../redux/reducers';
 import { replace } from '../../redux/actions';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import ChevronLeft from '../eva-icons/chevron-left';
 import ChevronRight from '../eva-icons/chevron-right';
+import CircleFill from '../eva-icons/circle-fill';
+import NewVersionModal from '../newVersionModal/NewVersionModal';
 import PersonIcon from '../eva-icons/person';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
+import RedCircle from '../redCircle/RedCircle';
 import RefreshIcon from '../eva-icons/refresh';
 import Separator from '../separator/Separator';
 import SettingsIcon from '../eva-icons/settings';
@@ -42,7 +46,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
   const setContext = (type: string, payload: any) => {
     dispatchContext({ type, payload });
   };
-  const { isSyncing, isMobile } = store;
+  const { isSyncing, isMobile, version } = store;
 
   const {
     kalendRef,
@@ -51,6 +55,8 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     selectedView,
     handleRefresh,
   } = props;
+
+  const [versionModalOpen, openVersionModal] = useState(false);
 
   const goForward = () => {
     kalendRef?.current?.navigateForward();
@@ -73,6 +79,11 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     history.push('/calendar');
     setContext('isLogged', false);
   };
+
+  const hasNewVersion = checkHasNewVersion(
+    version.apiVersion,
+    version.dockerImageVersion
+  );
 
   return (
     <Flex
@@ -182,43 +193,63 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
               />
             )}
             <Separator width={20} height={0} />
-            <Menu closeOnSelect={true}>
-              <MenuButton
-                as={IconButton}
-                _focus={{ boxShadow: 'none' }}
-                variant={'ghost'}
-                aria-label="Settings"
-                isRound
-                icon={<SettingsIcon className={'HeaderModal__icon'} />}
-                fontSize={14}
-              />
-              <MenuList zIndex={9991}>
-                <MenuItem
-                  as={Button}
+            <div style={{ position: 'relative' }}>
+              <Menu closeOnSelect={true}>
+                <MenuButton
+                  as={IconButton}
                   _focus={{ boxShadow: 'none' }}
-                  leftIcon={<SettingsIcon className={'SettingsMenu__icon'} />}
                   variant={'ghost'}
-                  onClick={handleOpenSettings}
-                  isFullWidth={true}
-                  justifyContent={'flex-start'}
+                  aria-label="Settings"
+                  isRound
+                  icon={<SettingsIcon className={'HeaderModal__icon'} />}
                   fontSize={14}
-                >
-                  Settings
-                </MenuItem>
-                <MenuItem
-                  as={Button}
-                  _focus={{ boxShadow: 'none' }}
-                  leftIcon={<PersonIcon className={'SettingsMenu__icon'} />}
-                  variant={'ghost'}
-                  onClick={handleLogout}
-                  isFullWidth={true}
-                  justifyContent={'flex-start'}
-                  fontSize={14}
-                >
-                  Logout
-                </MenuItem>
-              </MenuList>
-            </Menu>
+                  style={{ position: 'relative' }}
+                />
+                <MenuList zIndex={9991}>
+                  <MenuItem
+                    as={Button}
+                    _focus={{ boxShadow: 'none' }}
+                    leftIcon={<SettingsIcon className={'SettingsMenu__icon'} />}
+                    variant={'ghost'}
+                    onClick={handleOpenSettings}
+                    isFullWidth={true}
+                    justifyContent={'flex-start'}
+                    fontSize={14}
+                  >
+                    Settings
+                  </MenuItem>
+                  {hasNewVersion ? (
+                    <MenuItem
+                      as={Button}
+                      _focus={{ boxShadow: 'none' }}
+                      leftIcon={
+                        <CircleFill className={'SettingsMenu__icon-red'} />
+                      }
+                      variant={'ghost'}
+                      onClick={() => openVersionModal(true)}
+                      isFullWidth={true}
+                      justifyContent={'flex-start'}
+                      fontSize={14}
+                    >
+                      New version
+                    </MenuItem>
+                  ) : null}
+                  <MenuItem
+                    as={Button}
+                    _focus={{ boxShadow: 'none' }}
+                    leftIcon={<PersonIcon className={'SettingsMenu__icon'} />}
+                    variant={'ghost'}
+                    onClick={handleLogout}
+                    isFullWidth={true}
+                    justifyContent={'flex-start'}
+                    fontSize={14}
+                  >
+                    Logout
+                  </MenuItem>
+                </MenuList>
+              </Menu>
+              {hasNewVersion ? <RedCircle /> : null}
+            </div>
           </Flex>
         </Flex>
       ) : null}
@@ -320,6 +351,10 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
               {/*</Menu>*/}
             </Center>
           </Flex>
+        ) : null}
+
+        {versionModalOpen ? (
+          <NewVersionModal handleClose={() => openVersionModal(false)} />
         ) : null}
       </Flex>
     </Flex>

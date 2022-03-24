@@ -1,4 +1,5 @@
 import { GetUserEmailConfigResponse } from '../bloben-interface/userEmailConfig/userEmailConfig';
+import { GetVersion } from '../bloben-interface/version/version';
 import React, { createContext, useEffect, useReducer } from 'react';
 import Reducer from './reducer';
 
@@ -14,8 +15,9 @@ export interface StoreContext {
   settingsOpen: boolean;
   syncSequence: number;
   isSyncing: boolean;
-  apiVersion: string;
+  version: GetVersion;
   emailConfig: GetUserEmailConfigResponse;
+  latestVersion: string;
 }
 
 const initialContext: StoreContext = {
@@ -30,7 +32,11 @@ const initialContext: StoreContext = {
   settingsOpen: false,
   syncSequence: 0,
   isSyncing: false,
-  apiVersion: '',
+  version: {
+    apiVersion: '',
+    dockerImageVersion: '',
+  },
+  latestVersion: '',
   emailConfig: {
     hasCustomConfig: false,
     hasSystemConfig: false,
