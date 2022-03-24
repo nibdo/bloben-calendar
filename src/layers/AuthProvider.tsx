@@ -61,7 +61,7 @@ const AuthProvider = (props: any) => {
       setContext('isLogged', false);
       return;
     }
-    const response = await GeneralApi.getVersion();
+    const response = await GeneralApi.getApiVersion();
 
     setContext('apiVersion', response?.data?.version);
   };

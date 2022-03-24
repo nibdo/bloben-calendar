@@ -22,6 +22,9 @@ if (process.env.REACT_APP_NODE_ENV === 'development') {
 const getBaseUrl = () => window.env.apiUrl;
 
 const Axios: any = {
+  getRaw: async (path: string) => {
+    return axios.get(path);
+  },
   get: async (path: string) => {
     const URL: string = getBaseUrl() + path;
     return axios.get(URL, config);

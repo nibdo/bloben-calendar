@@ -16,6 +16,7 @@ export interface StoreContext {
   isSyncing: boolean;
   apiVersion: string;
   emailConfig: GetUserEmailConfigResponse;
+  latestVersion: string;
 }
 
 const initialContext: StoreContext = {
@@ -31,6 +32,7 @@ const initialContext: StoreContext = {
   syncSequence: 0,
   isSyncing: false,
   apiVersion: '',
+  latestVersion: '',
   emailConfig: {
     hasCustomConfig: false,
     hasSystemConfig: false,

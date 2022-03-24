@@ -208,6 +208,14 @@ export const formatEventDate = (event: any) => {
   };
 };
 
+export const checkHasNewVersion = (appVersion: string) => {
+  return (
+    appVersion.length > 1 &&
+    process.env.REACT_DOCKER_VERSION !== undefined &&
+    appVersion !== process.env.REACT_DOCKER_VERSION
+  );
+};
+
 export const getArrayStart = (array: any) => array[0];
 export const getArrayEnd = (array: any) => array[array.length - 1];
 

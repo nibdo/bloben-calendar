@@ -36,6 +36,12 @@ const SyncLayer = (props: any) => {
     dispatch(setWebcalCalendars(webcalCalendarsResponse.data));
 
     try {
+      const latestVersionResponse = await GeneralApi.getLatestVersion();
+      setContext('latestVersion', latestVersionResponse.data);
+      // eslint-disable-next-line no-empty
+    } catch (e) {}
+
+    try {
       await GeneralApi.getSync();
       // eslint-disable-next-line no-empty
     } catch (e) {}

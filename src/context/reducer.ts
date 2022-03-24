@@ -11,6 +11,11 @@ const Reducer = (state: any, action: any) => {
         ...state,
         isMobile: action.payload,
       };
+    case 'latestVersion':
+      return {
+        ...state,
+        latestVersion: action.payload,
+      };
     case 'debugging':
       return {
         ...state,
