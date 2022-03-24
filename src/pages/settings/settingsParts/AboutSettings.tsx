@@ -23,7 +23,7 @@ const AboutSettings = () => {
             Documentation
           </Link>{' '}
         </Text>
-        <Separator height={24} />
+        <Separator height={48} />
         <VersionFooter isDark={false} />
       </SettingsCard>
     </>

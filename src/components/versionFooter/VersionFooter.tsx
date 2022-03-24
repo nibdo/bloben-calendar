@@ -18,7 +18,10 @@ const VersionFooter = (props: VersionFooterProps) => {
     <div className={'VersionFooter__container'}>
       <p
         className={parseCssDark('VersionFooter__text', isDark)}
-      >{`Version ${process.env.REACT_APP_VERSION}`}</p>
+      >{`Docker image version ${process.env.APP_VERSION}`}</p>
+      <p
+        className={parseCssDark('VersionFooter__text', isDark)}
+      >{`Calendar version ${process.env.REACT_APP_VERSION}`}</p>
       <p
         className={parseCssDark('VersionFooter__text', isDark)}
       >{`Api version ${apiVersion}`}</p>
