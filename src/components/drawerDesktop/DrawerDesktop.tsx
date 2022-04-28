@@ -86,35 +86,36 @@ const renderWebcalCalendars = (
   isDark: boolean,
   handleClick: any
 ) => {
-  return calendars.map((item) => {
-    const iconStyle: any = {
-      fill: item.color,
-      width: 20,
-      height: 20,
-      filter: isDark ? 'saturate(60%) brightness(120%)' : '',
-    };
-    return (
-      <div key={item.url} className={'DrawerDesktop__container-section'}>
-        <div className={'DrawerDesktop__container'}>
-          <Button
-            variant={'ghost'}
-            onClick={() => handleClick(item)}
-            isFullWidth={true}
-            style={{
-              justifyContent: 'flex-start',
-            }}
-          >
-            {!item.isHidden ? (
-              <EvaIcons.RadioOn style={iconStyle} />
-            ) : (
-              <EvaIcons.RadioOff style={iconStyle} />
-            )}
-            <Text style={{ marginLeft: 8 }}>{item.name}</Text>
-          </Button>
-        </div>
-      </div>
-    );
-  });
+  return calendars
+    .sort((a, b) => {
+      return a.name > b.name ? 1 : -1;
+    })
+    .map((item) => {
+      const iconStyle: any = {
+        fill: item.color,
+        width: 20,
+        height: 20,
+        filter: isDark ? 'saturate(60%) brightness(120%)' : '',
+      };
+      return (
+        <Button
+          key={item.url}
+          variant={'ghost'}
+          onClick={() => handleClick(item)}
+          isFullWidth={true}
+          style={{
+            justifyContent: 'flex-start',
+          }}
+        >
+          {!item.isHidden ? (
+            <EvaIcons.RadioOn style={iconStyle} />
+          ) : (
+            <EvaIcons.RadioOff style={iconStyle} />
+          )}
+          <Text style={{ marginLeft: 8 }}>{item.name}</Text>
+        </Button>
+      );
+    });
 };
 
 const CalDavDrawer = () => {
@@ -170,8 +171,10 @@ const CalDavDrawer = () => {
             Webcal
           </Heading>
         </div>
+        <div className={'DrawerDesktop__container'}>
+          {webcalCalendarsRendered}
+        </div>
       </div>
-      {webcalCalendarsRendered}
     </>
   );
 };
