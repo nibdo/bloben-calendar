@@ -14,7 +14,7 @@ import { getAccountAddressBooks } from '../../../utils/tsdavHelper';
 import { getBaseUrl } from '../../../utils/parser';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { TOAST_STATUS } from '../../../types/enums';
+import { ITEM_SIZE, TOAST_STATUS } from '../../../types/enums';
 import { createToast } from '../../../utils/common';
 
 import { CalendarSettingsResponse } from '../../../bloben-interface/calendarSettings/calendarSettings';
@@ -22,10 +22,12 @@ import { Context } from '../../../context/store';
 import { DAV_ACCOUNT_TYPE } from '../../../bloben-interface/enums';
 import { GetCardDavAddressBooks } from '../../../bloben-interface/cardDavAddressBook/cardDavAddressBook';
 import { filter } from 'lodash';
+import { getSize } from '../../../types/constants';
 import { setCalendarSettings } from '../../../redux/actions';
 import CalendarSettingsApi from '../../../api/CalendarSettingsApi';
 import CardDavAddressBookApi from '../../../api/CardDavAddressBookApi';
 import ContactsModal from '../../../components/contactsModal/ContactsModal';
+import MobilePageHeader from '../../../components/mobilePageHeader/MobilePageHeader';
 import PrimaryButton from '../../../components/chakraCustom/primaryButton/PrimaryButton';
 import React, { useContext, useEffect, useState } from 'react';
 import Separator from '../../../components/separator/Separator';
@@ -36,7 +38,8 @@ const renderAccountAddressBooks = (
   handleMakeDefault: any,
   isDark: boolean,
   settings: CalendarSettingsResponse,
-  openContacts: any
+  openContacts: any,
+  size: ITEM_SIZE
 ) => {
   return addressBooks.map((addressBook) => {
     return (
@@ -53,6 +56,7 @@ const renderAccountAddressBooks = (
         <PrimaryButton
           isSecondary={true}
           onClick={() => openContacts(addressBook)}
+          size={size}
         >
           Contacts
         </PrimaryButton>
@@ -61,11 +65,12 @@ const renderAccountAddressBooks = (
           <PrimaryButton
             isSecondary={true}
             onClick={() => handleMakeDefault(addressBook)}
+            size={size}
           >
             Make default
           </PrimaryButton>
         ) : (
-          <PrimaryButton isSecondary={true} disabled={true}>
+          <PrimaryButton isSecondary={true} disabled={true} size={size}>
             Default
           </PrimaryButton>
         )}
@@ -80,8 +85,10 @@ const renderAddressBooks = (
   handleMakeDefault: any,
   isDark: boolean,
   settings: CalendarSettingsResponse,
-  openContacts: any
+  openContacts: any,
+  isMobile: boolean
 ) => {
+  const size = getSize(isMobile);
   return filter(
     accounts,
     (item) => item.accountType === DAV_ACCOUNT_TYPE.CARDDAV
@@ -99,14 +106,15 @@ const renderAddressBooks = (
       handleMakeDefault,
       isDark,
       settings,
-      openContacts
+      openContacts,
+      size
     );
 
     return (
       <Flex
         direction={'column'}
         key={calDavAccount.id}
-        style={{ marginBottom: 16 }}
+        style={{ marginBottom: 16, padding: isMobile ? 12 : 0 }}
       >
         <Flex direction={'row'} alignItems={'center'}>
           <Heading size={'md'}>
@@ -128,7 +136,7 @@ const ContactsSettings = () => {
   const dispatch = useDispatch();
 
   const [store] = useContext(Context);
-  const { isDark } = store;
+  const { isDark, isMobile } = store;
 
   const settings: CalendarSettingsResponse = useSelector(
     (state: ReduxState) => state.calendarSettings
@@ -198,7 +206,8 @@ const ContactsSettings = () => {
     handleSetDefaultAddressBook,
     isDark,
     settings,
-    openContacts
+    openContacts,
+    isMobile
   );
 
   const loadAddressBooks = async () => {
@@ -224,8 +233,11 @@ const ContactsSettings = () => {
 
   return (
     <>
-      <Separator height={24} />
-
+      {isMobile ? (
+        <MobilePageHeader title={'Contacts'} />
+      ) : (
+        <Separator height={24} />
+      )}
       <Button
         variant={'ghost'}
         onClick={handleSetAutoSaveContacts}

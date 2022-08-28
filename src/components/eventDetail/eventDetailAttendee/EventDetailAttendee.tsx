@@ -392,7 +392,7 @@ const EventDetailAttendee = (props: EventDetailAttendeeProps) => {
           >
             <Button
               _focus={{ boxShadow: 'none' }}
-              style={{ height: 40 }}
+              style={{ height: 40, fontWeight: 'normal', padding: 0 }}
               variant={disabled ? 'ghost' : undefined}
               width={'100%'}
               justifyContent={'flex-start'}

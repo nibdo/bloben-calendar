@@ -23,14 +23,8 @@ interface RepeatSelectedValueProps {
 export const RepeatSelectedValue = (props: RepeatSelectedValueProps) => {
   const { value } = props;
 
-  const [store] = useContext(Context);
-  const { isDark } = store;
-
   return (
     <>
-      <FormIcon isDark={isDark}>
-        <EvaIcons.Refresh />
-      </FormIcon>
       <Text>{value}</Text>
     </>
   );
@@ -92,7 +86,7 @@ const EventDetailRepeat = (props: EventDetailRepeatProps) => {
 
   return disabledRRule ? null : (
     <Stack direction={'row'} align={'center'}>
-      <FormIcon desktopVisible isDark={isDark}>
+      <FormIcon allVisible isDark={isDark}>
         <EvaIcons.Refresh className={'EventDetail-icon'} />
       </FormIcon>
       <Menu>

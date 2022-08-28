@@ -31,16 +31,16 @@ const BottomSheetMobile = (props: BottomSheetMobileProps) => {
     dispatchContext({ type, payload });
   };
 
-  const handleOpenSettings = () => {
-    setContext('settingsOpen', true);
-  };
-
   const handleLogout = async () => {
     await UserApi.logout();
 
     dispatch(replace(initialReduxState));
     navigate('/calendar');
     setContext('isLogged', false);
+  };
+
+  const handleOpenSettings = () => {
+    navigate('/calendar/settings');
   };
 
   const viewButtonStyle: any = {

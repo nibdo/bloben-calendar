@@ -1,15 +1,20 @@
 import { ACCOUNT_TYPE } from 'types/enums';
 import { Button, Center } from '@chakra-ui/react';
 
+import { Context } from '../../../context/store';
 import AccountSelectionModal from 'components/accountSelectionModal/AccountSelectionModal';
 import CalDavAccountModal from '../../../components/accountSelectionModal/calDavAccountModal/CalDavAccountModal';
 import CalDavAccountSettings from './accountSettings/CalDavAccountSettings';
-import React, { useState } from 'react';
+import MobilePageHeader from '../../../components/mobilePageHeader/MobilePageHeader';
+import React, { useContext, useState } from 'react';
 import Separator from '../../../components/separator/Separator';
 import WebcalAccountSettings from './accountSettings/WebcalAccountSettings';
 import WebcalModal from '../../../components/accountSelectionModal/webcalModal/WebcalModal';
 
 const AccountSettings = () => {
+  const [store] = useContext(Context);
+  const { isMobile } = store;
+
   const [newAccountModalOpen, openNewAccountModal] =
     useState<ACCOUNT_TYPE | null>(null);
 
@@ -25,6 +30,7 @@ const AccountSettings = () => {
 
   return (
     <>
+      {isMobile ? <MobilePageHeader title={'Accounts'} /> : null}
       <Center>
         <Button
           _focus={{ boxShadow: 'none' }}

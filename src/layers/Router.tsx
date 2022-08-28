@@ -9,7 +9,7 @@ const RouterProvider = () => {
     <Routes>
       <Route path={'/calendar/public'} element={<Public />} />
       <Route path={'/calendar/404'} element={<NotFoundPage />} />
-      <Route path={'/calendar'} element={<AuthProvider />} />
+      <Route path={'/calendar/*'} element={<AuthProvider />} />
     </Routes>
   );
 };

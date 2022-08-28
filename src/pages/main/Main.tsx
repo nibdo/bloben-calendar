@@ -40,7 +40,7 @@ const Main = () => {
           {calendarSelected ? <Calendar /> : null}
         </div>
       </div>
-      <Settings />
+      {!isMobile ? <Settings /> : null}
     </div>
   );
 };

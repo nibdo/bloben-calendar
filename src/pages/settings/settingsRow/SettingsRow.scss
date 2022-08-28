@@ -18,6 +18,10 @@
   padding:0;
   margin:0;
 
+  @media (max-width: 750px) {
+    font-size: 1rem;
+  }
+
   &-dark {
     @extend .SettingsRow__title;
     color: $GRAY_200;

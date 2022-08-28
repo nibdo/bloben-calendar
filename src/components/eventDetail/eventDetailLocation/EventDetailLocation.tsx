@@ -27,7 +27,8 @@ const LocationButton = (props: LocationButtonProps) => {
   return (
     <Button
       variant={'ghost'}
-      style={{ fontWeight: 'normal' }}
+      style={{ fontWeight: 'normal', padding: 0 }}
+      justifyContent={'flex-start'}
       onClick={() => {
         window.open(
           parseLink(location, serverSettings.locationProvider),

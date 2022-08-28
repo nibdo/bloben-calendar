@@ -23,10 +23,12 @@ import {
 } from '@chakra-ui/react';
 import { Context } from '../../../context/store';
 import { GetSharedCalendarsResponse } from '../../../bloben-interface/calendar/shared/calendarShared';
-import { TOAST_STATUS } from '../../../types/enums';
+import { ITEM_SIZE, TOAST_STATUS } from '../../../types/enums';
 import { createToast } from '../../../utils/common';
+import { getSize } from '../../../types/constants';
 import CalendarSharedApi from '../../../api/CalendarSharedApi';
 import EmailModal from '../../../components/emailModal/EmailModal';
+import MobilePageHeader from '../../../components/mobilePageHeader/MobilePageHeader';
 import React, { useContext, useEffect, useState } from 'react';
 import Separator from '../../../components/separator/Separator';
 import ShareCalendarModal from '../../../components/shareCalendarsModal/ShareCalendarModal';
@@ -47,6 +49,7 @@ const SharedCalendarItem = (props: {
   handleEdit: any;
   handleEnable: any;
   openInviteModal?: any;
+  size: ITEM_SIZE;
 }) => {
   return (
     <Tbody>
@@ -56,6 +59,7 @@ const SharedCalendarItem = (props: {
           <Button
             onClick={() => props.handleEnable(props.item.id)}
             style={{ background: 'transparent' }}
+            size={props.size}
           >
             <Checkbox
               onChange={() => props.handleEnable(props.item.id)}
@@ -68,7 +72,7 @@ const SharedCalendarItem = (props: {
           <Popover>
             {/*// @ts-ignore*/}
             <PopoverTrigger>
-              <Button>Show url</Button>
+              <Button size={props.size}>Show url</Button>
             </PopoverTrigger>
             <PopoverContent>
               <PopoverArrow />
@@ -76,10 +80,14 @@ const SharedCalendarItem = (props: {
             </PopoverContent>
           </Popover>
         </Td>
-        <Td></Td>
+        {props.size === ITEM_SIZE.SMALL ? null : <Td></Td>}
         <Td>
           <Menu closeOnSelect={false}>
-            <MenuButton as={Button} _focus={{ boxShadow: 'none' }}>
+            <MenuButton
+              as={Button}
+              _focus={{ boxShadow: 'none' }}
+              size={props.size}
+            >
               Action
             </MenuButton>
             <MenuList>
@@ -109,6 +117,7 @@ const SharedCalendarItem = (props: {
 
 const SharedCalendarsSettings = () => {
   const [store] = useContext(Context);
+  const { isMobile } = store;
   const toast = useToast();
 
   const [modalOpen, openModal] = useState<boolean>(false);
@@ -196,20 +205,32 @@ const SharedCalendarsSettings = () => {
     }
   };
 
+  const tableSize = getSize(isMobile);
+
   return (
     <>
-      <Heading size={'md'}>Shared calendars</Heading>
+      {isMobile ? <MobilePageHeader title={'Shared calendars'} /> : null}
+      {!isMobile ? (
+        <Heading
+          size={'md'}
+          paddingLeft={tableSize === ITEM_SIZE.SMALL ? 4 : 0}
+        >
+          Shared calendars
+        </Heading>
+      ) : null}
+      <Separator height={6} />
       <Center>
         <Button
           _focus={{ boxShadow: 'none' }}
           onClick={() => openModal(true)}
           fontSize={14}
+          size={tableSize}
         >
           Share
         </Button>
       </Center>
       <Separator height={20} />
-      <Table variant="simple" size={'md'}>
+      <Table variant="simple" size={tableSize}>
         <Thead>
           <Tr>
             <Th>Name</Th>
@@ -226,6 +247,7 @@ const SharedCalendarsSettings = () => {
             handleEdit={openEditModal}
             handleEnable={handleEnable}
             openInviteModal={hasEmailSet ? handleOpenInviteModal : undefined}
+            size={tableSize}
           />
         ))}
       </Table>

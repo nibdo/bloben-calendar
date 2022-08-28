@@ -3,7 +3,6 @@ import React, { useContext } from 'react';
 
 import { Context } from '../../../context/store';
 import { EvaIcons } from 'components/eva-icons';
-import { MARGIN_LEFT_EVENT_VIEW_ITEM } from '../../../types/constants';
 import { Stack, Text } from '@chakra-ui/react';
 import { parseEventString } from '../eventDetailNotes/EventDetailNotes';
 import ChakraInput from '../../chakraCustom/ChakraInput';
@@ -27,11 +26,7 @@ const EventDetailTitle = (props: EventDetailTitleProps) => {
         <EvaIcons.Note color={'transparent'} fill={'transparent'} />
       </FormIcon>
       {disabled ? (
-        <Text
-          size={'md'}
-          fontWeight={'bold'}
-          style={{ marginLeft: MARGIN_LEFT_EVENT_VIEW_ITEM }}
-        >
+        <Text size={'md'} fontWeight={'bold'}>
           {parseEventString(value)}
         </Text>
       ) : (

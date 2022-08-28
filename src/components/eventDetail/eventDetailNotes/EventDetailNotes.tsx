@@ -2,7 +2,6 @@ import React, { useContext } from 'react';
 
 import { Context } from '../../../context/store';
 import { EvaIcons } from 'components/eva-icons';
-import { MARGIN_LEFT_EVENT_VIEW_ITEM } from '../../../types/constants';
 import { Stack } from '@chakra-ui/react';
 import { map } from 'lodash';
 import { parseHtml } from '../../../utils/parserHtml';
@@ -78,7 +77,6 @@ const EventDetailNotes = (props: EventDetailNotesProps) => {
       </FormIcon>
       {disabled ? (
         <p
-          style={{ marginLeft: MARGIN_LEFT_EVENT_VIEW_ITEM }}
           dangerouslySetInnerHTML={{
             __html: parseHtml(parseEventStringToHtml(value)),
           }}

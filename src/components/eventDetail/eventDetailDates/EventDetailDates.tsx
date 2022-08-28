@@ -70,7 +70,7 @@ const EventDetailDates = (props: EventDetailDatesProps) => {
     endDate,
     timezoneStartAt
   );
-  const pickerWidth: number = isMobile ? width - 48 : 250;
+  const pickerWidth: number = isMobile ? width - 60 : 250;
 
   const handleSetAllDay = () => {
     setForm('allDay', !allDay);
@@ -79,16 +79,20 @@ const EventDetailDates = (props: EventDetailDatesProps) => {
   return (
     <>
       <Stack direction={'row'} align={'center'}>
-        <FormIcon desktopVisible isDark={isDark}>
+        <FormIcon allVisible isDark={isDark}>
           <EvaIcons.Clock className={'EventDetail-icon'} />
         </FormIcon>
-        <Stack direction={'row'} align={'center'} spacing={2}>
+        <Stack
+          direction={isMobile ? 'column' : 'row'}
+          align={'center'}
+          spacing={2}
+        >
           <Stack direction={'row'} align={'center'} spacing={2}>
             <Menu isLazy>
               <MenuButton
                 as={Button}
                 _focus={{ boxShadow: 'none' }}
-                style={{ width: 90 }}
+                style={{ width: isMobile ? 120 : 90 }}
               >
                 <Text style={{ fontWeight: 'normal' }}>
                   {startDateFormatted}
@@ -109,7 +113,7 @@ const EventDetailDates = (props: EventDetailDatesProps) => {
                 <MenuButton
                   as={Button}
                   _focus={{ boxShadow: 'none' }}
-                  style={{ width: 65 }}
+                  style={{ width: isMobile ? 80 : 70 }}
                 >
                   <Text style={{ fontWeight: 'normal' }}>
                     {startTimeFormatted}
@@ -126,13 +130,13 @@ const EventDetailDates = (props: EventDetailDatesProps) => {
               </Menu>
             )}
           </Stack>
-          <p>-</p>
+          {!isMobile ? <p>-</p> : null}
           <Stack direction={'row'} align={'center'} spacing={2}>
             <Menu isLazy>
               <MenuButton
                 as={Button}
                 _focus={{ boxShadow: 'none' }}
-                style={{ width: 90 }}
+                style={{ width: isMobile ? 120 : 90 }}
               >
                 <Text style={{ fontWeight: 'normal' }}>{endDateFormatted}</Text>
               </MenuButton>
@@ -151,7 +155,7 @@ const EventDetailDates = (props: EventDetailDatesProps) => {
                 <MenuButton
                   as={Button}
                   _focus={{ boxShadow: 'none' }}
-                  style={{ width: 70 }}
+                  style={{ width: isMobile ? 80 : 70 }}
                 >
                   <Text style={{ fontWeight: 'normal' }}>
                     {endTimeFormatted}

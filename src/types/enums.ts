@@ -5,7 +5,7 @@ export enum REMINDER_TYPE {
 
 export enum APP_PATH {
   HOME = '/calendar',
-  SETTINGS = '/calendar/settings',
+  SETTINGS = '/settings',
 }
 
 export enum ROLE {
@@ -55,16 +55,17 @@ export enum ALARM_DURATION {
 }
 
 export enum SETTINGS_PATHS {
-  GENERAL = 'GENERAL',
-  ACCOUNTS = 'ACCOUNTS',
-  CALENDARS = 'CALENDARS',
-  EMAIL_CONFIG = 'EMAIL_CONFIG',
-  RESET = 'RESET',
-  HELP = 'HELP',
-  ABOUT = 'ABOUT',
-  ACKNOWLEDGMENTS = 'ACKNOWLEDGMENTS',
-  SHARED_CALENDARS = 'SHARED_CALENDARS',
-  CONTACTS = 'CONTACTS',
+  DEFAULT = '/settings',
+  GENERAL = '/settings/general',
+  ACCOUNTS = '/settings/accounts',
+  CALENDARS = '/settings/calendars',
+  EMAIL_CONFIG = '/settings/email-config',
+  RESET = '/settings/reset',
+  HELP = '/settings/help',
+  ABOUT = '/settings/about',
+  ACKNOWLEDGMENTS = '/settings/acknowledgments',
+  SHARED_CALENDARS = '/settings/shared-calendars',
+  CONTACTS = '/settings/contacts',
 }
 
 export enum SYNC_TYPE {
@@ -96,4 +97,10 @@ export enum DRAWER_PATH {
 export enum ACCOUNT_TYPE {
   CAL_DAV = 'CAL_DAV',
   WEBCAL = 'WEBCAL',
+}
+
+export enum ITEM_SIZE {
+  SMALL = 'sm',
+  MEDIUM = 'md',
+  LARGE = 'lg',
 }

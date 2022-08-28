@@ -70,6 +70,11 @@ $PADDING:24px;
 .EditEventModal {
   @extend .ModalNew__wrapper;
   width: 500px;
+
+  @media (max-width: 750px) {
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .SettingsModal {

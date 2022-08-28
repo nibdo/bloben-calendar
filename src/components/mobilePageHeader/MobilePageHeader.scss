@@ -1,0 +1,16 @@
+@import '~styles/colors.scss';
+
+.MobilePageHeaderContainer {
+  width: 100%;
+  padding: 2px 4px 2px 4px;
+  //height: 55px;
+  //border-bottom: solid 0.4px $GRAY_200;
+  justify-content: flex-start;
+  display: flex;
+  align-items: center;
+
+  &-dark {
+    @extend .MobilePageHeaderContainer;
+    background: #1D1F26;
+  }
+}
