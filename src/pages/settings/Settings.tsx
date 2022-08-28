@@ -51,7 +51,6 @@ const Settings = (props: SettingsProps) => {
         <SettingsMenu setSelected={navigateMobile} selected={selected} />
         {/*<SettingsContentRouter />*/}
       </div>
-      ) : (
       <div />
     </Flex>
   ) : store.settingsOpen ? (

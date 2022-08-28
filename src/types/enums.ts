@@ -98,3 +98,9 @@ export enum ACCOUNT_TYPE {
   CAL_DAV = 'CAL_DAV',
   WEBCAL = 'WEBCAL',
 }
+
+export enum ITEM_SIZE {
+  SMALL = 'sm',
+  MEDIUM = 'md',
+  LARGE = 'lg',
+}

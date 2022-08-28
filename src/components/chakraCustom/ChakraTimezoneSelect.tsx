@@ -1,3 +1,4 @@
+import { ITEM_SIZE } from '../../types/enums';
 import { Select } from 'chakra-react-select';
 import { timezones } from '../../utils/timezones';
 import { useEffect, useState } from 'react';
@@ -5,6 +6,7 @@ import { useEffect, useState } from 'react';
 interface ChakraTimezoneSelectProps {
   onSelect: any;
   value: string;
+  size?: ITEM_SIZE;
 }
 const ChakraTimezoneSelect = (props: ChakraTimezoneSelectProps) => {
   const [zones, setZones] = useState<any>([]);
@@ -26,6 +28,7 @@ const ChakraTimezoneSelect = (props: ChakraTimezoneSelectProps) => {
       value={{ label: props.value, value: props.value }}
       closeMenuOnSelect={true}
       onChange={props.onSelect}
+      size={props.size}
     />
   );
 };

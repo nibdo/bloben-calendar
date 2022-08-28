@@ -24,13 +24,15 @@ import {
   Tr,
   useToast,
 } from '@chakra-ui/react';
+import { ITEM_SIZE, TOAST_STATUS } from 'types/enums';
 import { ReduxState } from '../../../../types/interface';
-import { TOAST_STATUS } from 'types/enums';
 import { WebcalCalendar } from '../../../../redux/reducers/webcalCalendars';
 import { createToast } from '../../../../utils/common';
 import { useSelector } from 'react-redux';
 
-import React, { useState } from 'react';
+import { Context } from '../../../../context/store';
+import { getSize, getTableTitlePaddingLeft } from '../../../../types/constants';
+import React, { useContext, useState } from 'react';
 import Separator from '../../../../components/separator/Separator';
 import WebcalCalendarApi from '../../../../api/WebcalCalendarApi';
 import WebcalModal from '../../../../components/accountSelectionModal/webcalModal/WebcalModal';
@@ -39,7 +41,8 @@ const renderWebcalCalendars = (
   webcalCalendars: WebcalCalendar[],
   handleEdit: any,
   handleHide: any,
-  openPreDeleteModal: any
+  openPreDeleteModal: any,
+  size: ITEM_SIZE
 ) => {
   return webcalCalendars.map((item) => {
     return (
@@ -52,7 +55,7 @@ const renderWebcalCalendars = (
             <Popover>
               {/*// @ts-ignore*/}
               <PopoverTrigger>
-                <Button>Show url</Button>
+                <Button size={size}>Show url</Button>
               </PopoverTrigger>
               <PopoverContent>
                 <PopoverArrow />
@@ -62,7 +65,11 @@ const renderWebcalCalendars = (
           </Td>
           <Td>
             <Menu>
-              <MenuButton as={Button} _focus={{ boxShadow: 'none' }}>
+              <MenuButton
+                as={Button}
+                _focus={{ boxShadow: 'none' }}
+                size={size}
+              >
                 Actions
               </MenuButton>
               <MenuList>
@@ -83,6 +90,8 @@ const renderWebcalCalendars = (
 };
 
 const CalDavAccountSettings = () => {
+  const [store] = useContext(Context);
+  const { isMobile } = store;
   const toast = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
@@ -120,11 +129,15 @@ const CalDavAccountSettings = () => {
     setEditModalVisible(true);
   };
 
+  const tableSize = getSize(isMobile);
+  const paddingLeft = getTableTitlePaddingLeft(isMobile);
+
   const webcalCalendarsRendered = renderWebcalCalendars(
     webcalCalendars,
     handleEdit,
     handleHide,
-    openPreDeleteModal
+    openPreDeleteModal,
+    tableSize
   );
 
   const handleDelete = async () => {
@@ -152,12 +165,12 @@ const CalDavAccountSettings = () => {
 
   return webcalCalendars.length ? (
     <>
-      <Heading size={'md'} paddingLeft={6}>
+      <Heading size={'md'} paddingLeft={paddingLeft}>
         Webcal
       </Heading>
       <Separator height={8} />
 
-      <Table variant="simple" size={'md'}>
+      <Table variant="simple" size={tableSize}>
         <Thead>
           <Tr>
             <Th>Name</Th>

@@ -330,14 +330,14 @@ const EventView = (props: EventViewProps) => {
       event &&
       event.id ? (
         <Modal e={currentE} handleClose={handleClose} maxHeight={'42%'}>
-          <>
+          <div style={{ padding: isMobile ? 8 : 0 }}>
             {event.type === EVENT_TYPE.CALDAV && !disabledEdit ? (
               <HeaderModal
                 isMobile={isMobile}
                 isDark={isDark}
                 hasHeaderShadow={false}
                 onClose={handleClose}
-                goBack={handleClose}
+                goBack={isMobile ? undefined : handleClose}
                 handleEdit={
                   event.type === EVENT_TYPE.CALDAV ? handleEdit : null
                 }
@@ -372,7 +372,7 @@ const EventView = (props: EventViewProps) => {
                 handleClose={handleClose}
               />
             ) : null}
-          </>
+          </div>
         </Modal>
       ) : null}
     </>
