@@ -12,6 +12,8 @@ const SettingsCard = (props: SettingsCardProps) => {
 
   const { isMobile } = store;
 
+  const { isMobile } = store;
+
   return (
     <div className={'SettingsCard__container'}>
       {!isMobile ? (

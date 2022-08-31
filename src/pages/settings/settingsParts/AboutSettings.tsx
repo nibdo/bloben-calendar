@@ -13,6 +13,9 @@ const AboutSettings = () => {
   const { isMobile } = store;
   const size = getSize(isMobile);
 
+  const { isMobile } = store;
+  const size = getSize(isMobile);
+
   return (
     <>
       {isMobile ? <MobilePageHeader title={'About'} /> : null}
