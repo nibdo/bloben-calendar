@@ -20,7 +20,7 @@
     "bottom-sheet-react": "0.1.27",
     "browserify-fs": "1.0.0",
     "buffer": "6.0.3",
-    "chakra-react-select": "3.3.8",
+    "chakra-react-select": "4.2.1",
     "events": "3.3.0",
     "framer-motion": "7.2.1",
     "ical-js-parser": "0.6.12",
