@@ -1,4 +1,4 @@
-FROM node:16.16.0-bullseye-slim
+FROM node:18.9.0-bullseye-slim
 
 WORKDIR /usr/app/tmp
 ENV NODE_ENV development
