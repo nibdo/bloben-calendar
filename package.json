@@ -38,7 +38,7 @@
     "qrcode": "1.5.1",
     "react": "18.2.0",
     "react-colorful": "5.6.1",
-    "react-datetime": "2.16.3",
+    "react-datetime": "3.1.1",
     "react-dom": "18.2.0",
     "react-error-boundary": "3.1.4",
     "react-redux": "8.0.4",
