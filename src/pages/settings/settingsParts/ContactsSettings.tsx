@@ -20,7 +20,7 @@ import { createToast } from '../../../utils/common';
 import {
   CalendarSettingsResponse,
   GetCardDavAddressBooks,
-} from 'bloben-interface';
+} from '../../../bloben-interface';
 import { Context, StoreContext } from '../../../context/store';
 import { DAV_ACCOUNT_TYPE } from '../../../enums';
 import { PrimaryButton, Separator } from 'bloben-components';

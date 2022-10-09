@@ -1,5 +1,5 @@
 import { CalDavAccount, CalDavCalendar, CalDavEvent } from '../types/interface';
-import { GetCardDavAddressBooks } from 'bloben-interface';
+import { GetCardDavAddressBooks } from '../bloben-interface';
 import { WebcalCalendar } from '../redux/reducers/webcalCalendars';
 
 export const getAccountByCalendar = (

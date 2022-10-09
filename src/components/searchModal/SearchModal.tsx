@@ -5,7 +5,7 @@ import { Button, Text, useToast } from '@chakra-ui/react';
 import { ChakraInput } from 'bloben-components';
 import { Context, StoreContext } from '../../context/store';
 import { ReduxState } from '../../types/interface';
-import { SearchEventsResponse } from 'bloben-interface';
+import { SearchEventsResponse } from '../../bloben-interface';
 import { TOAST_STATUS } from '../../types/enums';
 import {
   createToast,

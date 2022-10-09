@@ -1,6 +1,6 @@
 import { AxiosResponse } from 'axios';
 
-import { GetCardDavAddressBooks } from 'bloben-interface';
+import { GetCardDavAddressBooks } from '../bloben-interface';
 import Axios from '../lib/Axios';
 
 export default {

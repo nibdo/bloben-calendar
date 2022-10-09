@@ -3,7 +3,7 @@ import {
   GetSessionResponse,
   LoginRequest,
   LoginResponse,
-} from 'bloben-interface';
+} from '../bloben-interface';
 import Axios, { config } from '../lib/Axios';
 import axios, { AxiosResponse } from 'axios';
 

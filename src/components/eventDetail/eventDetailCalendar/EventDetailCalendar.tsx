@@ -9,7 +9,7 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { CALDAV_COMPONENTS, EVENT_TYPE } from 'bloben-interface/enums';
+import { CALDAV_COMPONENTS, EVENT_TYPE } from '../../../bloben-interface/enums';
 import { CalDavCalendar, ReduxState } from '../../../types/interface';
 import { Context, StoreContext } from '../../../context/store';
 import { EvaIcons, Separator } from 'bloben-components';

@@ -1,6 +1,6 @@
 import { Center, useToast } from '@chakra-ui/react';
 import { DateTime } from 'luxon';
-import { EventResult } from 'bloben-interface';
+import { EventResult } from '../../bloben-interface';
 import { PrimaryButton, Separator } from 'bloben-components';
 import { TOAST_STATUS } from '../../types/enums';
 import { createToast } from '../../utils/common';

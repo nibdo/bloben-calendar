@@ -5,7 +5,7 @@ import {
   CreateCardDavContactRequest,
   GetCardDavContactsResponse,
   SearchCardDavContactResponse,
-} from 'bloben-interface';
+} from '../bloben-interface';
 import Axios from '../lib/Axios';
 
 export default {

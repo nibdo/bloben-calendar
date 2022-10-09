@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import { ChakraModal, EvaIcons, Separator } from 'bloben-components';
 import { Context, StoreContext } from '../../context/store';
-import { GetCardDavContactsResponse } from 'bloben-interface';
+import { GetCardDavContactsResponse } from '../../bloben-interface';
 import { TOAST_STATUS } from '../../types/enums';
 import { createToast, parseCssDark } from '../../utils/common';
 import { forEach } from 'lodash';

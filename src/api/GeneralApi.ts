@@ -1,5 +1,5 @@
 import { AxiosResponse } from 'axios';
-import { GetServerSettingsUser, GetVersion } from 'bloben-interface';
+import { GetServerSettingsUser, GetVersion } from '../bloben-interface';
 import Axios from '../lib/Axios';
 
 export default {

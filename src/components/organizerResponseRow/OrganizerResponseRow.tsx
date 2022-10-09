@@ -1,6 +1,6 @@
 import { ATTENDEE_PARTSTAT } from '../../enums';
 import { Button, Stack, useToast } from '@chakra-ui/react';
-import { SOURCE_TYPE } from 'bloben-interface/enums';
+import { SOURCE_TYPE } from '../../bloben-interface/enums';
 import { TOAST_STATUS } from '../../types/enums';
 import { createToast } from '../../utils/common';
 import { find } from 'lodash';

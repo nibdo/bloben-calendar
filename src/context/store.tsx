@@ -1,5 +1,5 @@
 import { BlobenComponentsProvider } from 'bloben-components';
-import { GetServerSettingsUser, GetVersion } from 'bloben-interface';
+import { GetServerSettingsUser, GetVersion } from '../bloben-interface';
 import { LOCATION_PROVIDER } from '../enums';
 import React, { createContext, useEffect, useReducer } from 'react';
 import Reducer from './reducer';

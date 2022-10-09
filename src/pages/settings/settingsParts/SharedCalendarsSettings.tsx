@@ -22,7 +22,7 @@ import {
   useToast,
 } from '@chakra-ui/react';
 import { Context, StoreContext } from '../../../context/store';
-import { GetSharedCalendarsResponse } from 'bloben-interface';
+import { GetSharedCalendarsResponse } from '../../../bloben-interface';
 import { ITEM_SIZE, TOAST_STATUS } from '../../../types/enums';
 import { Separator } from 'bloben-components';
 import { createToast } from '../../../utils/common';

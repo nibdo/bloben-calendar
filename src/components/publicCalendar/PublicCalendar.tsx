@@ -7,7 +7,7 @@ import { Context, StoreContext } from '../../context/store';
 import { DateTime } from 'luxon';
 import { EVENT_TYPE } from '../../enums';
 
-import { SOURCE_TYPE } from 'bloben-interface/enums';
+import { SOURCE_TYPE } from '../../bloben-interface/enums';
 import { SettingsLocal } from '../../redux/reducers/settingsLocal';
 import { TOAST_STATUS } from '../../types/enums';
 import { createToast, getSyncRange, parseCssDark } from '../../utils/common';

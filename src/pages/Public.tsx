@@ -1,6 +1,6 @@
 import { CalDavEvent } from '../types/interface';
 import { Context, StoreContext } from '../context/store';
-import { GetSharedLinkPublicResponse } from 'bloben-interface';
+import { GetSharedLinkPublicResponse } from '../../bloben-interface';
 import { getHostname } from '../utils/common';
 import { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';

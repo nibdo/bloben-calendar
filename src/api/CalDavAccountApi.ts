@@ -4,7 +4,7 @@ import {
   CreateCalDavAccountRequest,
   GetCalDavAccountResponse,
   UpdateCalDavAccountRequest,
-} from 'bloben-interface';
+} from '../bloben-interface';
 import Axios from '../lib/Axios';
 
 export default {

@@ -24,7 +24,7 @@ import {
 } from '@chakra-ui/react';
 import { ChakraInput, EvaIcons } from 'bloben-components';
 import { Context, StoreContext } from '../../../context/store';
-import { SearchCardDavContactResponse } from 'bloben-interface';
+import { SearchCardDavContactResponse } from '../../../bloben-interface';
 import { TOAST_STATUS } from '../../../types/enums';
 import { createToast, parseCssDark } from '../../../utils/common';
 import { filter, map } from 'lodash';

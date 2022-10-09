@@ -6,7 +6,7 @@ import {
   GetTwoFactorSecretResponse,
   LoginWithTwoFactorAdminResponse,
   LoginWithTwoFactorRequest,
-} from 'bloben-interface';
+} from '../bloben-interface';
 
 import { APP_API_VERSION_1 } from '../types/constants';
 import Axios, { config } from '../lib/Axios';

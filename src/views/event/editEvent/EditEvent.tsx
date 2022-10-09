@@ -28,7 +28,7 @@ import { DatetimeParser, parseToDateTime } from '../../../utils/datetimeParser';
 import { Flex, Spacer, useToast } from '@chakra-ui/react';
 import { TOAST_STATUS } from '../../../types/enums';
 
-import { CalendarSettingsResponse } from 'bloben-interface';
+import { CalendarSettingsResponse } from '../../../bloben-interface';
 import {
   checkIfHasRepeatPreAction,
   handleSaveEvent,
@@ -47,7 +47,7 @@ import { REPEATED_EVENT_CHANGE_TYPE } from '../../../enums';
 import { filter, map } from 'lodash';
 import ModalNew from '../../../components/modalNew/ModalNew';
 
-import { CALDAV_COMPONENTS, EVENT_TYPE } from 'bloben-interface/enums';
+import { CALDAV_COMPONENTS, EVENT_TYPE } from '../../../bloben-interface/enums';
 import { handleSaveTask } from './editTaskHelper';
 import ButtonStack, {
   eventTypeItems,

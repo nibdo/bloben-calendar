@@ -20,9 +20,13 @@ import { CalendarEvent } from 'kalend';
 import {
   CommonResponse,
   DeleteRepeatedCalDavEventRequest,
-} from 'bloben-interface';
+} from '../../../bloben-interface';
 import { Context, StoreContext } from '../../../context/store';
-import { EVENT_TYPE, SOURCE_TYPE, TASK_STATUS } from 'bloben-interface/enums';
+import {
+  EVENT_TYPE,
+  SOURCE_TYPE,
+  TASK_STATUS,
+} from '../../../bloben-interface/enums';
 import { EvaIcons, createToastError } from 'bloben-components';
 import { REPEATED_EVENT_CHANGE_TYPE } from '../../../enums';
 import { Stack, Text, useToast } from '@chakra-ui/react';

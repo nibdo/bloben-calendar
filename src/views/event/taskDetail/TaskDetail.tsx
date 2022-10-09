@@ -2,7 +2,7 @@
 import React from 'react';
 
 import { CalDavCalendar } from '../../../types/interface';
-import { EVENT_TYPE } from 'bloben-interface/enums';
+import { EVENT_TYPE } from '../../../bloben-interface/enums';
 import { FLOATING_DATETIME } from 'kalend/layout/constants';
 import { REPEATED_EVENT_CHANGE_TYPE } from '../../../enums';
 import { Stack } from '@chakra-ui/react';

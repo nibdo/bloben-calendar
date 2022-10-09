@@ -18,7 +18,7 @@ import {
 import {
   CalendarSettingsResponse,
   PatchCalendarSettingsRequest,
-} from 'bloben-interface';
+} from '../../../bloben-interface';
 import { CalendarView } from 'kalend';
 import {
   ChakraInput,

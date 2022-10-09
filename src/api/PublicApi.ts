@@ -3,7 +3,7 @@ import { AxiosResponse } from 'axios';
 import {
   GetSharedLinkPublicResponse,
   SearchEventsResponse,
-} from 'bloben-interface';
+} from '../bloben-interface';
 import Axios from '../lib/Axios';
 
 export default {

@@ -26,7 +26,7 @@ import AddCalendarModal from '../../../components/addCalenarModal/AddCalendarMod
 import { TOAST_STATUS } from '../../../types/enums';
 import { createToast } from '../../../utils/common';
 
-import { CalendarSettingsResponse } from 'bloben-interface';
+import { CalendarSettingsResponse } from '../../../bloben-interface';
 import { Context, StoreContext } from '../../../context/store';
 import { DAV_ACCOUNT_TYPE } from '../../../enums';
 import { filter } from 'lodash';

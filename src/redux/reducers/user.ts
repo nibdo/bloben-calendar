@@ -1,4 +1,4 @@
-import { GetProfileResponse } from 'bloben-interface';
+import { GetProfileResponse } from '../../bloben-interface';
 import { ROLE } from '../../enums';
 
 const user = (

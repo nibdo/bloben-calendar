@@ -9,7 +9,7 @@ import { parseToDateTime } from './datetimeParser';
 import { v4 } from 'uuid';
 import LuxonHelper from './LuxonHelper';
 
-import { CalendarSettingsResponse } from 'bloben-interface';
+import { CalendarSettingsResponse } from '../bloben-interface';
 import { THEME_SETTINGS, ThemeSettings } from '../redux/reducers/themeSettings';
 import { parseToAlarmTrigger } from './caldavAlarmHelper';
 import _, { forEach } from 'lodash';

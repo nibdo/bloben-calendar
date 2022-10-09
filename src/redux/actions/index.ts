@@ -7,7 +7,7 @@ import {
   CalendarSettingsResponse,
   GetEventResponse,
   GetProfileResponse,
-} from 'bloben-interface';
+} from '../../bloben-interface';
 
 import { OnPageChangeData } from 'kalend';
 import { SettingsLocal } from '../reducers/settingsLocal';

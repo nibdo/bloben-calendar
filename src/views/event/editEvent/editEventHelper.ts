@@ -1,5 +1,8 @@
 import { CalDavCalendar } from '../../../types/interface';
-import { CalendarSettingsResponse, GetProfileResponse } from 'bloben-interface';
+import {
+  CalendarSettingsResponse,
+  GetProfileResponse,
+} from '../../../bloben-interface';
 import { DateTime } from 'luxon';
 import { DatetimeParser, parseToDateTime } from '../../../utils/datetimeParser';
 import { EVENT_TYPE, REPEATED_EVENT_CHANGE_TYPE } from '../../../enums';

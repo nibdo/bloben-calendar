@@ -1,4 +1,4 @@
-import { GetWebcalCalendarsResponse } from 'bloben-interface';
+import { GetWebcalCalendarsResponse } from '../../bloben-interface';
 
 export type WebcalCalendar = GetWebcalCalendarsResponse;
 
