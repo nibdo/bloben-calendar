@@ -71,11 +71,16 @@ const StoreProvider = ({ children }: any) => {
   }, []);
 
   return (
-    <Context.Provider value={[store, dispatch]}>
-      <BlobenComponentsProvider isDark={store.isDark} isMobile={store.isMobile}>
-        {children}
-      </BlobenComponentsProvider>
-    </Context.Provider>
+    <>
+      <Context.Provider value={[store, dispatch]}>
+        <BlobenComponentsProvider
+          isDark={store.isDark}
+          isMobile={store.isMobile}
+        >
+          {children}
+        </BlobenComponentsProvider>
+      </Context.Provider>
+    </>
   );
 };
 

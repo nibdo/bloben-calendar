@@ -1,3 +1,4 @@
+import { Alert, EvaIcons, Separator } from 'bloben-components';
 import {
   Button,
   Center,
@@ -12,13 +13,14 @@ import {
   Spinner,
 } from '@chakra-ui/react';
 import { Context, StoreContext } from '../../context/store';
-import { EvaIcons, Separator } from 'bloben-components';
 import { checkHasNewVersion, parseCssDark } from '../../utils/common';
 import { initialReduxState } from '../../redux/reducers';
+import { isElectron } from '../../env';
 import { replace } from '../../redux/actions';
 import { useDispatch } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import ButtonStack, { calendarHeaderItems } from '../buttonStack/ButtonStack';
+import ElectronApi from '../../api/ElectronApi';
 import NewVersionModal from '../newVersionModal/NewVersionModal';
 import React, { useContext, useState } from 'react';
 import RedCircle from '../redCircle/RedCircle';
@@ -55,6 +57,7 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
     isPublic,
   } = props;
 
+  const [logoutModalVisible, setLogoutModalVisible] = useState(false);
   const [versionModalOpen, openVersionModal] = useState(false);
 
   const goForward = () => {
@@ -72,10 +75,15 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
   };
 
   const handleLogout = async () => {
-    await UserApi.logout();
+    if (isElectron) {
+      await ElectronApi.deleteUser();
+    } else {
+      await UserApi.logout();
+
+      navigate('/calendar');
+    }
 
     dispatch(replace(initialReduxState));
-    navigate('/calendar');
     setContext('isLogged', false);
   };
 
@@ -240,12 +248,12 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
                         />
                       }
                       variant={'ghost'}
-                      onClick={handleLogout}
+                      onClick={() => setLogoutModalVisible(true)}
                       width={'full'}
                       justifyContent={'flex-start'}
                       fontSize={14}
                     >
-                      Logout
+                      {isElectron ? 'Delete user' : 'Logout'}
                     </MenuItem>
                   </MenuList>
                 </Menu>
@@ -347,6 +355,17 @@ const CalendarHeader = (props: CalendarHeaderProps) => {
       {versionModalOpen ? (
         <NewVersionModal handleClose={() => openVersionModal(false)} />
       ) : null}
+
+      <Alert
+        isOpen={logoutModalVisible}
+        onClose={() => setLogoutModalVisible(false)}
+        header={isElectron ? 'Delete user' : 'Logout'}
+        body={
+          isElectron ? 'Do you want to delete user?' : 'Do you want to logout?'
+        }
+        submitText={'Confirm'}
+        onSubmit={handleLogout}
+      />
     </Flex>
   );
 };

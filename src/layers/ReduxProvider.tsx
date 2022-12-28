@@ -40,9 +40,13 @@ const ReduxProvider = (props: ReduxProviderProps) => {
       });
   }, []);
 
-  return isLoaded ? (
-    <Provider store={reduxStore}>{props.children}</Provider>
-  ) : null;
+  return (
+    <>
+      {isLoaded ? (
+        <Provider store={reduxStore}>{props.children}</Provider>
+      ) : null}
+    </>
+  );
 };
 
 export default ReduxProvider;

@@ -11,6 +11,7 @@ import LuxonHelper from './LuxonHelper';
 
 import { CalendarSettingsResponse } from 'bloben-interface';
 import { THEME_SETTINGS, ThemeSettings } from '../redux/reducers/themeSettings';
+import { isElectron } from '../env';
 import { parseToAlarmTrigger } from './caldavAlarmHelper';
 import Datez from 'datez';
 import _, { forEach } from 'lodash';
@@ -681,7 +682,8 @@ export const checkEventInRange = (
 
 export const getApiBaseUrl = (url: string) => url.slice(0, url.indexOf('/api'));
 
-export const isDev = () => window && window.location?.port === '3001';
+export const isDev = () =>
+  window && window.location?.port === '3001' && !isElectron;
 
 export const getHostname = () => {
   if (isDev()) {

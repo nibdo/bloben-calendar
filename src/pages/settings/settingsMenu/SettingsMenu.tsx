@@ -3,6 +3,7 @@ import { Context, StoreContext } from '../../../context/store';
 import { EvaIcons, SettingsButton } from 'bloben-components';
 import { SETTINGS_PATHS } from '../../../types/enums';
 import { Stack } from '@chakra-ui/react';
+import { isElectron } from '../../../env';
 import { parseCssDark } from '../../../utils/common';
 import { useNavigate } from 'react-router-dom';
 import MobilePageHeader from '../../../components/mobilePageHeader/MobilePageHeader';
@@ -58,19 +59,21 @@ const SettingsMenu = (props: SettingsMenuProps) => {
             />
           }
         />
-        <SettingsButton
-          selected={selected}
-          path={SETTINGS_PATHS.SHARED_CALENDARS}
-          onClick={() => {
-            setSelected(SETTINGS_PATHS.SHARED_CALENDARS);
-          }}
-          text={'Shared Calendars'}
-          icon={
-            <EvaIcons.PersonAddIcon
-              className={parseCssDark('SettingsMenu__icon', store.isDark)}
-            />
-          }
-        />
+        {isElectron ? null : (
+          <SettingsButton
+            selected={selected}
+            path={SETTINGS_PATHS.SHARED_CALENDARS}
+            onClick={() => {
+              setSelected(SETTINGS_PATHS.SHARED_CALENDARS);
+            }}
+            text={'Shared Calendars'}
+            icon={
+              <EvaIcons.PersonAddIcon
+                className={parseCssDark('SettingsMenu__icon', store.isDark)}
+              />
+            }
+          />
+        )}
         <SettingsButton
           selected={selected}
           path={SETTINGS_PATHS.CONTACTS}
@@ -97,19 +100,21 @@ const SettingsMenu = (props: SettingsMenuProps) => {
             />
           }
         />
-        <SettingsButton
-          selected={selected}
-          path={SETTINGS_PATHS.SECURITY}
-          onClick={() => {
-            setSelected(SETTINGS_PATHS.SECURITY);
-          }}
-          text={'Security'}
-          icon={
-            <EvaIcons.Lock
-              className={parseCssDark('SettingsMenu__icon', store.isDark)}
-            />
-          }
-        />
+        {isElectron ? null : (
+          <SettingsButton
+            selected={selected}
+            path={SETTINGS_PATHS.SECURITY}
+            onClick={() => {
+              setSelected(SETTINGS_PATHS.SECURITY);
+            }}
+            text={'Security'}
+            icon={
+              <EvaIcons.Lock
+                className={parseCssDark('SettingsMenu__icon', store.isDark)}
+              />
+            }
+          />
+        )}
         <SettingsButton
           selected={selected}
           path={SETTINGS_PATHS.EMAIL_CONFIG}

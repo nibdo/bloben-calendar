@@ -1,3 +1,4 @@
+import { isElectron } from '../env';
 import localForage from 'localforage';
 
 export const LocalForage = localForage.createInstance({
@@ -6,7 +7,9 @@ export const LocalForage = localForage.createInstance({
   storeName: 'storage',
 });
 
-LocalForage.setDriver(localForage.INDEXEDDB)
+LocalForage.setDriver(
+  isElectron ? localForage.LOCALSTORAGE : localForage.INDEXEDDB
+)
   .then(() => {
     return;
   })

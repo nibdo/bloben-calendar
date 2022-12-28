@@ -61,10 +61,16 @@ const EmailConfigAliases = (props: EmailConfigAliasesProps) => {
       return;
     }
 
-    setLocalState('aliases', [...aliases, newAlias]);
-    if (!aliases.length) {
+    if (!aliases?.length) {
       setDefaultAlias(newAlias);
     }
+
+    if (aliases?.length) {
+      setLocalState('aliases', [...aliases, newAlias]);
+    } else {
+      setLocalState('aliases', [newAlias]);
+    }
+
     setNewAlias('');
   };
 
@@ -93,7 +99,7 @@ const EmailConfigAliases = (props: EmailConfigAliasesProps) => {
         />
         <Separator height={10} />
         <Flex direction={'row'} maxWidth={600} flexWrap={'wrap'}>
-          {aliases.map((alias: string) => (
+          {aliases?.map((alias: string) => (
             <Tag
               key={alias}
               marginRight={4}
@@ -128,7 +134,7 @@ const EmailConfigAliases = (props: EmailConfigAliasesProps) => {
             {defaultAlias}
           </MenuButton>
           <MenuList>
-            {aliases.map((item) => {
+            {aliases?.map((item) => {
               return (
                 <MenuItem key={item} onClick={() => setDefaultAlias(item)}>
                   {item}

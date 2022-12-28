@@ -8,6 +8,7 @@ import {
 } from '@chakra-ui/react';
 import BrowserProvider from './layers/BrowserProvider';
 import ContextProvider from './layers/ContextProvider';
+import ElectronProvider from './layers/electronProvider';
 import ReduxProvider from './layers/ReduxProvider';
 import RouterProvider from './layers/Router';
 import StorageProvider from './layers/StorageProvider';
@@ -54,23 +55,25 @@ const theme = extendTheme({
 
 const App = () => (
   <ChakraProvider theme={theme}>
-    <ThemeWrapper>
-      <StoreProvider>
-        <StorageProvider>
-          <ContextProvider>
-            <ReduxProvider>
-              <ColorModeProvider options={{ initialColorMode: 'light' }}>
-                <ThemeProvider>
-                  <BrowserProvider>
-                    <RouterProvider />
-                  </BrowserProvider>
-                </ThemeProvider>
-              </ColorModeProvider>
-            </ReduxProvider>
-          </ContextProvider>
-        </StorageProvider>
-      </StoreProvider>
-    </ThemeWrapper>
+    <ElectronProvider>
+      <ThemeWrapper>
+        <StoreProvider>
+          <StorageProvider>
+            <ContextProvider>
+              <ReduxProvider>
+                <ColorModeProvider options={{ initialColorMode: 'light' }}>
+                  <ThemeProvider>
+                    <BrowserProvider>
+                      <RouterProvider />
+                    </BrowserProvider>
+                  </ThemeProvider>
+                </ColorModeProvider>
+              </ReduxProvider>
+            </ContextProvider>
+          </StorageProvider>
+        </StoreProvider>
+      </ThemeWrapper>
+    </ElectronProvider>
   </ChakraProvider>
 );
 

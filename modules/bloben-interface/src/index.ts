@@ -20,6 +20,7 @@ export * from './app/webcalCalendar';
 export * from './public/SharedLinkPublic';
 export * from './interface';
 export * from './app/profile';
+export * from './electron/electron';
 
 export enum ROLE {
   ADMIN = 'ADMIN',
