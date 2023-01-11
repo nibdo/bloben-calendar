@@ -8,9 +8,12 @@ import { Context, StoreContext } from '../context/store';
 import { ReduxState } from '../types/interface';
 import { WEBSOCKET_TRANSPORT } from '../types/enums';
 import { getApiBaseUrl } from '../utils/common';
+import { isElectron } from '../env';
 import { processSocketMsg } from '../utils/websocket';
 import { useSelector } from 'react-redux';
 import Axios from '../lib/Axios';
+// @ts-ignore
+const ipcRenderer = window.ipcRenderer;
 
 export let SocketIO: any = null;
 
@@ -89,8 +92,18 @@ const SocketioProvider = (props: any) => {
     }
   };
 
+  const connectToIpc = () => {
+    ipcRenderer.on('sockets', (evt: any, message: any) => {
+      processSocketMsg(message, setContext, settings.showTasks);
+    });
+  };
+
   useEffect(() => {
-    connectToWs();
+    if (isElectron) {
+      connectToIpc();
+    } else {
+      connectToWs();
+    }
   }, []);
 
   return <>{props.children}</>;

@@ -29,4 +29,6 @@ root.render(
   </>
 );
 
-serviceWorker.register();
+if (!import.meta.env.VITE_APP_IS_ELECTRON) {
+  serviceWorker.register();
+}

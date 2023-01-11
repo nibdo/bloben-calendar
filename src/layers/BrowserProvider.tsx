@@ -11,7 +11,11 @@ interface BrowserLayerProps {
 const BrowserProvider = (props: BrowserLayerProps) => {
   const { children } = props;
 
-  return <BrowserRouter>{children}</BrowserRouter>;
+  return (
+    <>
+      <BrowserRouter>{children}</BrowserRouter>
+    </>
+  );
 };
 
 export default BrowserProvider;

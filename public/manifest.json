@@ -45,8 +45,8 @@
       "purpose": "maskable"
     }
   ],
-  "start_url": "/calendar/",
-  "scope": "/calendar/",
+  "start_url": "/calendar",
+  "scope": "/calendar",
   "display": "standalone",
   "background_color": "#f7b85cff"
 }

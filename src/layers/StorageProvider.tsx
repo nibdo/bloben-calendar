@@ -1,4 +1,3 @@
-import LocalForage from '../utils/LocalForage';
 import React, { useEffect } from 'react';
 
 /**
@@ -7,7 +6,7 @@ import React, { useEffect } from 'react';
  */
 const StorageProvider = (props: any) => {
   useEffect(() => {
-    LocalForage.config();
+    // LocalForage.config();
   }, []);
 
   return <>{props.children}</>;
