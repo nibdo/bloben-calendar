@@ -14,13 +14,16 @@ const VersionFooter = () => {
     <div className={'VersionFooter__container'}>
       <p
         className={parseCssDark('VersionFooter__text', isDark)}
-      >{`Docker image version ${version.dockerImageVersion}`}</p>
+        style={{ fontWeight: 'bold' }}
+      >{`Build version ${
+        version.dockerImageVersion || version.lastVersion
+      }`}</p>
       <p
         className={parseCssDark('VersionFooter__text', isDark)}
-      >{`Calendar version ${packageFile.version}`}</p>
+      >{`Client ${packageFile.version}`}</p>
       <p
         className={parseCssDark('VersionFooter__text', isDark)}
-      >{`Api version ${version.apiVersion}`}</p>
+      >{`Api ${version.apiVersion}`}</p>
     </div>
   );
 };

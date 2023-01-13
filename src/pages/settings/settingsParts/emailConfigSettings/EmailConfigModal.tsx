@@ -235,9 +235,9 @@ const EmailConfigModal = (props: EmailConfigModalProps) => {
               </MenuItem>
               {calDavCalendars
                 .filter((item) =>
-                  item.components.includes(CALDAV_COMPONENTS.VEVENT)
+                  item.components?.includes(CALDAV_COMPONENTS.VEVENT)
                 )
-                .map((item) => {
+                ?.map((item) => {
                   return (
                     <MenuItem
                       key={item.id}

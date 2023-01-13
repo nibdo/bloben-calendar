@@ -1,8 +1,10 @@
 import { Context, StoreContext } from '../../context/store';
 import { checkLogin } from './authProviderHelper';
 import { getHostname, parseCssDark } from '../../utils/common';
+import { isElectron } from '../../env';
 import { useDispatch } from 'react-redux';
 import AppRouter from '../../pages/Router';
+import ElectronCreateUser from '../../components/electron/ElectronCreateUser';
 import GeneralApi from '../../api/GeneralApi';
 import Login from '../../pages/login/Login';
 import React, { useContext, useEffect } from 'react';
@@ -60,7 +62,15 @@ const AuthProvider = () => {
 
   return (
     <div className={parseCssDark('Surface', store.isDark)}>
-      {!isLogged ? <Login /> : <AppRouter />}
+      {!isLogged ? (
+        isElectron ? (
+          <ElectronCreateUser />
+        ) : (
+          <Login />
+        )
+      ) : (
+        <AppRouter />
+      )}
     </div>
   );
 };
