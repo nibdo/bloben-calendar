@@ -686,7 +686,9 @@ export const isDev = () =>
   window && window.location?.port === '3001' && !isElectron;
 
 export const getHostname = () => {
-  if (isDev()) {
+  if (isElectron) {
+    return '';
+  } else if (isDev()) {
     return 'http://localhost:8080';
   } else {
     return `${window.location.protocol}//${window.location.hostname}`;
